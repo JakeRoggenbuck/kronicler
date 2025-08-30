@@ -25,12 +25,7 @@ def my_database_function():
 
 The logging functions will be super fast and asynchronously send data to a queue to be written. LogFrog includes its own columnar database to perform this super fast logging.
 
-<aside>
-💡
-
-I could separate the database and the rest of LogFrog to use the database for other stuff too. The database for this was the initial idea. I will build it as a monorepo for now and rebrand later if needed.
-
-</aside>
+💡I could separate the database and the rest of LogFrog to use the database for other stuff too. The database for this was the initial idea. I will build it as a monorepo for now and rebrand later if needed.
 
 ### 3. Simple to view logs
 
