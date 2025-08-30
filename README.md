@@ -1,4 +1,4 @@
-# LogFrog
+# LogFrog :frog:
 
 Automatic performance analysis for production applications.
 
