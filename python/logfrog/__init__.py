@@ -1,4 +1,4 @@
-# from typing import Final
+from typing import Final
 # from .logfrog import LFQueue
 import time
 
@@ -34,6 +34,6 @@ def decorator_example(func):
 
 
 # Use when Rust is added
-# __all__: Final[list[str]] = [
-#     "logfrog"
-# ]
+__all__: Final[list[str]] = [
+    "logfrog"
+]
