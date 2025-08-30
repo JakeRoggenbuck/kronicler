@@ -2,8 +2,6 @@
 
 Automatic performance analysis for production applications.
 
-Automatic performance analysis for production applications.
-
 Zen of LogFrog:
 
 - Writes take as little time as possible
