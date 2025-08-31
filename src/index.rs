@@ -1,48 +1,11 @@
-use once_cell::sync::Lazy;
+use super::row::RID;
+use super::row::{FieldType, Row};
 use std::collections::BTreeMap;
-use std::sync::Mutex;
-
-pub type RID = usize;
-
-#[derive(Debug, Eq, Clone, PartialEq, Ord, PartialOrd)]
-pub enum FieldType {
-    Int(i64),
-    String(String),
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct Row {
-    id: RID,
-    fields: Vec<FieldType>,
-}
-
-// Pretend like this is a bufferpool that can "store" all of the rows.
-// I put store in quotes, because it will keep some rows in memory, and
-// others will be put on disk
-// TODO: Use real bufferpool
-// https://github.com/JakeRoggenbuck/logfrog/issues/19
-static BUFFERPOOL_MOCK: Lazy<Mutex<Vec<Row>>> = Lazy::new(|| Mutex::new(Vec::new()));
-
-pub fn get_row_from_bufferpool(id: usize) -> Row {
-    let bp = BUFFERPOOL_MOCK.lock().unwrap();
-    bp[id].clone()
-}
-
-// TODO: Move this out of index and use real bufferpool
-// https://github.com/JakeRoggenbuck/logfrog/issues/19
-impl Row {
-    pub fn new(id: RID, fields: Vec<FieldType>) -> Self {
-        let row = Row { id, fields };
-        let mut b = BUFFERPOOL_MOCK.lock().unwrap();
-        b.push(row.clone());
-        row
-    }
-}
 
 /// The Index structure
 ///
 /// Use this to create an index on any column of a Row to achieve O(log n)
-/// loopup for any key.
+/// lookup for any key.
 ///
 /// Index { index: {String("Foo"): [1, 2]} }
 #[derive(Debug)]
@@ -85,15 +48,15 @@ impl Index {
         }
     }
 
-    pub fn get(&self, key: FieldType, get_row: &dyn Fn(usize) -> Row) -> Option<Vec<Row>> {
+    // `get` now returns the RID instead of the Row
+    // This separates the concerns better because an index
+    // should not worry about how to read rows, even just by
+    // implementing code from elsewhere.
+    pub fn get(&self, key: FieldType) -> Option<Vec<RID>> {
         let ids_node = self.index.get(&key);
 
-        let mut rows = Vec::<Row>::new();
-
         if let Some(ids_vec) = ids_node {
-            // Collect all of the rows with that key
-            ids_vec.iter().for_each(|id| rows.push(get_row(*id)));
-            return Some(rows);
+            return Some(ids_vec.to_vec());
         }
 
         None
@@ -106,20 +69,17 @@ mod tests {
 
     #[test]
     fn basic_insert_test() {
+        let mut rows = Vec::new();
         let mut index = Index::new();
 
         let row_1 = Row::new(0, vec![FieldType::String(String::from("Jake"))]);
+        rows.push(row_1.clone());
+
         index.insert(row_1, 0);
 
-        let fetched_rows = index.get(
-            FieldType::String(String::from("Jake")),
-            &get_row_from_bufferpool,
-        );
+        let fetched_rows = index.get(FieldType::String(String::from("Jake")));
 
-        assert_eq!(
-            fetched_rows.unwrap()[0].fields[0],
-            FieldType::String(String::from("Jake"))
-        );
+        assert_eq!(fetched_rows.unwrap()[0], 0);
     }
 
     #[test]
@@ -131,22 +91,13 @@ mod tests {
         index.insert(row_2, 0);
         index.insert(row_3, 0);
 
-        let fetched_rows_opt_2 = index.get(
-            FieldType::String(String::from("Foo")),
-            &get_row_from_bufferpool,
-        );
+        let fetched_rows_opt_2 = index.get(FieldType::String(String::from("Foo")));
         let fetched_rows_2 = fetched_rows_opt_2.unwrap();
 
         println!("{:?}", index);
 
-        assert_eq!(
-            fetched_rows_2[0].fields[0],
-            FieldType::String(String::from("Foo"))
-        );
+        assert_eq!(fetched_rows_2[0], 1);
 
-        assert_eq!(
-            fetched_rows_2[1].fields[0],
-            FieldType::String(String::from("Foo"))
-        );
+        assert_eq!(fetched_rows_2[1], 2);
     }
 }
