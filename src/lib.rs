@@ -1,8 +1,10 @@
+use log::info;
 use pyo3::prelude::*;
 use std::collections::VecDeque;
 
-type Epoch = u64;
+type Epoch = u128;
 
+#[derive(Debug, Copy, Clone)]
 struct Capture {
     start: Epoch,
     end: Epoch,
@@ -18,6 +20,8 @@ impl LFQueue {
     pub fn capture(&mut self, start: Epoch, end: Epoch) {
         let c = Capture { start, end };
         self.queue.push_back(c);
+
+        info!("Added {:?} to log", c);
     }
 
     #[new]
@@ -32,9 +36,23 @@ impl LFQueue {
     }
 }
 
+/// Setup env logging
+///
+/// To use the logger, import the debug, error, or info macro from the log crate
+///
+/// Then you can add the macros to code like debug!("Start database!");
+/// When you go to run the code, you can set the env var RUST_LOG=debug
+/// Docs: https://docs.rs/env_logger/latest/env_logger/
+#[inline]
+fn init_logging() {
+    let _ = env_logger::try_init();
+}
+
 /// A Python module implemented in Rust.
 #[pymodule]
 fn logfrog(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    init_logging();
+
     m.add_class::<LFQueue>()?;
     Ok(())
 }
@@ -51,7 +69,7 @@ mod tests {
         let t1 = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .expect("Not outatime.")
-            .as_secs();
+            .as_nanos();
 
         let t2 = t1 + 100;
 
