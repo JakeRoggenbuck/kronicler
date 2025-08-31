@@ -1,7 +1,9 @@
-use queue::LFQueue;
 use pyo3::prelude::*;
+use queue::LFQueue;
 
+pub mod bufferpool;
 pub mod queue;
+pub mod index;
 
 /// Setup env logging
 ///

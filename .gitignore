@@ -85,3 +85,5 @@ venv/
 # Added by cargo
 
 /target
+
+*.data
