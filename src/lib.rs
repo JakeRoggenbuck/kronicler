@@ -5,6 +5,9 @@ use std::sync::mpsc::{self, Sender};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
+// How many logs need to be in the queue before we write to the database
+const DB_WRITE_BUFFER_SIZE: usize = 100;
+
 type Epoch = u128;
 
 #[derive(Debug)]
@@ -31,8 +34,17 @@ impl LFQueue {
     }
 
     fn consume_capture(queue: Arc<Mutex<VecDeque<Capture>>>) {
-        let a = queue.lock().unwrap().pop_front();
-        println!("{:?}", a);
+        let mut q = queue.lock().unwrap();
+
+        if q.len() > DB_WRITE_BUFFER_SIZE {
+            info!("Starting bulk write!");
+            while !q.is_empty() {
+                let a = q.pop_front();
+                // TODO: Add capture to database
+                // Use a bulk_write function
+                info!("Writing {:?}", a);
+            }
+        }
     }
 }
 
@@ -48,6 +60,7 @@ impl LFQueue {
 
         info!("Added {:?} to log", &c);
 
+        // Concurrently add the capture to the queue to be consumed later
         {
             let mut q = self.queue.lock().unwrap();
             q.push_back(c);
@@ -55,6 +68,7 @@ impl LFQueue {
 
         let queue_clone = Arc::clone(&self.queue);
 
+        // Invoke the concurrent consumer
         self.execute(move || {
             LFQueue::consume_capture(queue_clone);
         });
