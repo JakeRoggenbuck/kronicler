@@ -4,8 +4,9 @@ use std::collections::VecDeque;
 
 type Epoch = u128;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 struct Capture {
+    name: String,
     start: Epoch,
     end: Epoch,
 }
@@ -17,11 +18,10 @@ struct LFQueue {
 
 #[pymethods]
 impl LFQueue {
-    pub fn capture(&mut self, start: Epoch, end: Epoch) {
-        let c = Capture { start, end };
+    pub fn capture(&mut self, name: String, start: Epoch, end: Epoch) {
+        let c = Capture { name, start, end };
+        info!("Added {:?} to log", &c);
         self.queue.push_back(c);
-
-        info!("Added {:?} to log", c);
     }
 
     #[new]
@@ -76,7 +76,7 @@ mod tests {
         // Check that it's empty before we add
         assert!(lfq.empty());
 
-        lfq.capture(t1, t2);
+        lfq.capture("foo".to_string(), t1, t2);
 
         // Check that it's not empty after we add
         assert!(!lfq.empty());

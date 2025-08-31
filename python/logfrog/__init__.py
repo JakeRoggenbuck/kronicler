@@ -10,14 +10,14 @@ LFQ = LFQueue()
 def capture(func):
     def wrapper():
         # Use nano seconds because it's an int
+        # def time_ns() -> int: ...
         start: int = time.time_ns()
-        print(start)
 
         func()
 
         end: int = time.time_ns()
 
-        LFQ.capture(start, end)
+        LFQ.capture(func.__name__, start, end)
 
     return wrapper
 
