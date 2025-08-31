@@ -19,6 +19,8 @@ pub struct Row {
 // Pretend like this is a bufferpool that can "store" all of the rows.
 // I put store in quotes, because it will keep some rows in memory, and
 // others will be put on disk
+// TODO: Use real bufferpool
+// https://github.com/JakeRoggenbuck/logfrog/issues/19
 static BUFFERPOOL_MOCK: Lazy<Mutex<Vec<Row>>> = Lazy::new(|| Mutex::new(Vec::new()));
 
 pub fn get_row_from_bufferpool(id: usize) -> Row {
@@ -26,6 +28,8 @@ pub fn get_row_from_bufferpool(id: usize) -> Row {
     bp[id].clone()
 }
 
+// TODO: Move this out of index and use real bufferpool
+// https://github.com/JakeRoggenbuck/logfrog/issues/19
 impl Row {
     pub fn new(id: RID, fields: Vec<FieldType>) -> Self {
         let row = Row { id, fields };
