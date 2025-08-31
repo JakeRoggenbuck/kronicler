@@ -8,16 +8,16 @@ LFQ = LFQueue()
 
 
 def capture(func):
-    def wrapper():
+    def wrapper(*args, **krawgs):
         # Use nano seconds because it's an int
         # def time_ns() -> int: ...
         start: int = time.time_ns()
 
-        func()
+        func(*args, **krawgs)
 
         end: int = time.time_ns()
 
-        LFQ.capture(func.__name__, start, end)
+        LFQ.capture(func.__name__, args, start, end)
 
     return wrapper
 
