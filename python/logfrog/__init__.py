@@ -1,11 +1,10 @@
+from .logfrog import LFQueue
+
 from typing import Final
-# from .logfrog import LFQueue
-from .logfrog import sum_as_string
 import time
 
-# TODO: Define
 # LFQueue will be a singleton
-# LFQ = LFQueue()
+LFQ = LFQueue()
 
 
 def capture(func):
@@ -16,8 +15,7 @@ def capture(func):
 
         end = time.time()
 
-        # TODO: Internally add start and end to LogFrog queue
-        # LFQ.add(start, end)
+        LFQ.capture(start, end)
 
     return wrapper
 
