@@ -6,7 +6,7 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 
 // How many logs need to be in the queue before we write to the database
-const DB_WRITE_BUFFER_SIZE: usize = 100;
+const DB_WRITE_BUFFER_SIZE: usize = 20;
 
 type Epoch = u128;
 

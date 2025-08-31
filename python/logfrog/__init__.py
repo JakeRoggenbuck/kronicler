@@ -13,6 +13,13 @@ def capture(func):
         # def time_ns() -> int: ...
         start: int = time.time_ns()
 
+        # TODO: Should I go through args manually here and only share ones that
+        # are string, float, and int? This way I can actually store them
+        # without having to do GIL in Rust, which would be very slow
+        #
+        # for a in args:
+        #   if isinstance(a, str):
+        #       strings.append(a)
         func(*args, **krawgs)
 
         end: int = time.time_ns()
