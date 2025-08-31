@@ -1,6 +1,9 @@
 use log::info;
 use pyo3::prelude::*;
 use std::collections::VecDeque;
+use std::sync::mpsc::{self, Sender};
+use std::sync::{Arc, Mutex};
+use std::thread;
 
 type Epoch = u128;
 
@@ -14,31 +17,67 @@ struct Capture {
 
 #[pyclass]
 struct LFQueue {
-    queue: VecDeque<Capture>,
+    queue: Arc<Mutex<VecDeque<Capture>>>,
+    tx: Sender<Box<dyn FnOnce() + Send + 'static>>,
+}
+
+// Internal Rust methods
+impl LFQueue {
+    fn execute<F>(&self, f: F)
+    where
+        F: FnOnce() + Send + 'static,
+    {
+        self.tx.send(Box::new(f)).unwrap();
+    }
+
+    fn consume_capture(queue: Arc<Mutex<VecDeque<Capture>>>) {
+        let a = queue.lock().unwrap().pop_front();
+        println!("{:?}", a);
+    }
 }
 
 #[pymethods]
 impl LFQueue {
-    pub fn capture(&mut self, name: String, args: Vec<PyObject>, start: Epoch, end: Epoch) {
+    pub fn capture(&self, name: String, args: Vec<PyObject>, start: Epoch, end: Epoch) {
         let c = Capture {
             name,
             args,
             start,
             end,
         };
+
         info!("Added {:?} to log", &c);
-        self.queue.push_back(c);
+
+        {
+            let mut q = self.queue.lock().unwrap();
+            q.push_back(c);
+        }
+
+        let queue_clone = Arc::clone(&self.queue);
+
+        self.execute(move || {
+            LFQueue::consume_capture(queue_clone);
+        });
     }
 
     #[new]
     pub fn new() -> Self {
+        let (tx, rx) = mpsc::channel::<Box<dyn FnOnce() + Send>>();
+
+        thread::spawn(move || {
+            while let Ok(task) = rx.recv() {
+                task();
+            }
+        });
+
         LFQueue {
-            queue: VecDeque::new(),
+            queue: Arc::new(Mutex::new(VecDeque::new())),
+            tx,
         }
     }
 
     pub fn empty(&self) -> bool {
-        self.queue.is_empty()
+        self.queue.lock().unwrap().is_empty()
     }
 }
 
@@ -70,7 +109,7 @@ mod tests {
 
     #[test]
     fn add_to_lfq_test() {
-        let mut lfq = LFQueue::new();
+        let lfq = LFQueue::new();
 
         let t1 = SystemTime::now()
             .duration_since(UNIX_EPOCH)
