@@ -37,3 +37,5 @@ You can view your analytics from a web dashboard, so you don’t need to log in 
 #### Web Portal
 
 You can view tables and graphs of the data and look at averages, anomalies, p90, p99, etc.
+
+<!-- :frog: -->
