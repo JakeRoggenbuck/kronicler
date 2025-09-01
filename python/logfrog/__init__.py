@@ -1,10 +1,10 @@
-from .logfrog import LFQueue
+from .kronicler import KQueue
 
 from typing import Final
 import time
 
-# LFQueue will be a singleton
-LFQ = LFQueue()
+# KQueue will be a singleton
+KQ = KQueue()
 
 
 def capture(func):
@@ -16,7 +16,7 @@ def capture(func):
         # TODO: Should I go through args manually here and only share ones that
         # are string, float, and int? This way I can actually store them
         # without having to do GIL in Rust, which would be very slow
-        # https://github.com/JakeRoggenbuck/logfrog/issues/15
+        # https://github.com/JakeRoggenbuck/kronicler/issues/15
         #
         # for a in args:
         #   if isinstance(a, str):
@@ -25,7 +25,7 @@ def capture(func):
 
         end: int = time.time_ns()
 
-        LFQ.capture(func.__name__, args, start, end)
+        KQ.capture(func.__name__, args, start, end)
 
     return wrapper
 
@@ -33,16 +33,15 @@ def capture(func):
 def decorator_example(func):
     def wrapper():
 
-        print("LogFrog start...")
+        print("Kronicler start...")
 
         func()
 
-        print("LogFrog end...")
+        print("Kronicler end...")
 
     return wrapper
 
 
-# Use when Rust is added
 __all__: Final[list[str]] = [
-    "logfrog"
+    "kronicler"
 ]
