@@ -9,7 +9,7 @@ use std::thread;
 // Make configurable: https://github.com/JakeRoggenbuck/kronicler/issues/18
 const DB_WRITE_BUFFER_SIZE: usize = 20;
 
-type Epoch = u128;
+pub type Epoch = u128;
 
 #[derive(Debug)]
 struct Capture {
