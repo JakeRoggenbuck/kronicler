@@ -2,6 +2,7 @@ use database::Database;
 use pyo3::prelude::*;
 
 pub mod bufferpool;
+pub mod capture;
 pub mod database;
 pub mod index;
 pub mod queue;
