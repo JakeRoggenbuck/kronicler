@@ -64,6 +64,7 @@ impl Database {
                 let a = q.pop_front();
                 // TODO: Add capture to database
                 // Use a bulk_write function
+                // TODO: Now we can use self.<db_method> to write to database!
                 info!("Writing {:?}", a);
             }
         }
