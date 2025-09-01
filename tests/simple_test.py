@@ -1,6 +1,6 @@
-import logfrog
+import kronicler
 
-@logfrog.capture
+@kronicler.capture
 def foo():
     pass
 

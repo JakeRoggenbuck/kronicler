@@ -1,12 +1,12 @@
 from fastapi import FastAPI
 import uvicorn
-import logfrog
+import kronicler
 
 app = FastAPI()
 
 
 # You need to wrap helper functions
-@logfrog.capture
+@kronicler.capture
 def foo():
     return {"Hello": "World"}
 

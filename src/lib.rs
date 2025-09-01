@@ -1,5 +1,5 @@
 use pyo3::prelude::*;
-use queue::LFQueue;
+use queue::KQueue;
 
 pub mod bufferpool;
 pub mod index;
@@ -20,9 +20,9 @@ fn init_logging() {
 
 /// A Python module implemented in Rust.
 #[pymodule]
-fn logfrog(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn kronicler(m: &Bound<'_, PyModule>) -> PyResult<()> {
     init_logging();
 
-    m.add_class::<LFQueue>()?;
+    m.add_class::<KQueue>()?;
     Ok(())
 }

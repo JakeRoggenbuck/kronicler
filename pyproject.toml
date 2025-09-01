@@ -3,7 +3,7 @@ requires = ["maturin>=1.9,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "logfrog"
+name = "kronicler"
 requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Rust",
@@ -14,4 +14,4 @@ dynamic = ["version"]
 [tool.maturin]
 features = ["pyo3/extension-module"]
 python-source = "python"
-module-name = "logfrog.logfrog"
+module-name = "kronicler.kronicler"

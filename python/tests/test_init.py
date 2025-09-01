@@ -3,7 +3,7 @@ def test_hello():
 
 
 def test_wrapper(capsys):
-    from logfrog import decorator_example
+    from kronicler import decorator_example
 
     @decorator_example
     def foo(): pass
@@ -12,22 +12,22 @@ def test_wrapper(capsys):
 
     stdout = capsys.readouterr()
 
-    assert stdout.out == "LogFrog start...\nLogFrog end...\n"
+    assert stdout.out == "Kronicler start...\nKronicler end...\n"
 
 
 def test_capture():
-    from logfrog import capture
+    from kronicler import capture
 
-    # from .logfrog import LFQueue
-    # LFQ = LFQueue()
+    # from .kronicler import KQueue
+    # KQ = KQueue()
 
     @capture
     def foo(): pass
 
-    # LFQ.drop()
+    # KQ.drop()
 
-    # assert LFQ.empty()
+    # assert KQ.empty()
 
     foo()
 
-    # assert not LFQ.empty()
+    # assert not KQ.empty()

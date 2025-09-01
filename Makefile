@@ -1,6 +1,6 @@
 all:
 	maturin build
-	pip install --force-reinstall target/wheels/logfrog-*
+	pip install --force-reinstall target/wheels/kronicler-*
 
 test: all
 	RUST_LOG=info python3 tests/simple_test.py

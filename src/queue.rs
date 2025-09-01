@@ -6,7 +6,7 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 
 // How many logs need to be in the queue before we write to the database
-// Make configurable: https://github.com/JakeRoggenbuck/logfrog/issues/18
+// Make configurable: https://github.com/JakeRoggenbuck/kronicler/issues/18
 const DB_WRITE_BUFFER_SIZE: usize = 20;
 
 type Epoch = u128;
@@ -20,13 +20,13 @@ struct Capture {
 }
 
 #[pyclass]
-pub struct LFQueue {
+pub struct KQueue {
     queue: Arc<Mutex<VecDeque<Capture>>>,
     tx: Sender<Box<dyn FnOnce() + Send + 'static>>,
 }
 
 // Internal Rust methods
-impl LFQueue {
+impl KQueue {
     fn execute<F>(&self, f: F)
     where
         F: FnOnce() + Send + 'static,
@@ -50,7 +50,7 @@ impl LFQueue {
 }
 
 #[pymethods]
-impl LFQueue {
+impl KQueue {
     pub fn capture(&self, name: String, args: Vec<PyObject>, start: Epoch, end: Epoch) {
         let c = Capture {
             name,
@@ -71,7 +71,7 @@ impl LFQueue {
 
         // Invoke the concurrent consumer
         self.execute(move || {
-            LFQueue::consume_capture(queue_clone);
+            KQueue::consume_capture(queue_clone);
         });
     }
 
@@ -85,7 +85,7 @@ impl LFQueue {
             }
         });
 
-        LFQueue {
+        KQueue {
             queue: Arc::new(Mutex::new(VecDeque::new())),
             tx,
         }
@@ -103,7 +103,7 @@ mod tests {
 
     #[test]
     fn add_to_lfq_test() {
-        let lfq = LFQueue::new();
+        let lfq = KQueue::new();
 
         let t1 = SystemTime::now()
             .duration_since(UNIX_EPOCH)

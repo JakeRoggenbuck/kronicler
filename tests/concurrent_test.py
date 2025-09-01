@@ -1,11 +1,11 @@
 import threading
-import logfrog
+import kronicler
 import time
 
-@logfrog.capture
+@kronicler.capture
 def worker(name):
     print(f"{name} starting...")
-    time.sleep(2)  # wait for 1 second
+    time.sleep(2)
     print(f"{name} finished!")
 
 threads = []

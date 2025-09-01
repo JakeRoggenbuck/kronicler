@@ -1,8 +1,8 @@
 import time
-import logfrog
+import kronicler
 
 
-@logfrog.capture
+@kronicler.capture
 def first_function():
     print("Hello world")
 
