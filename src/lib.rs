@@ -1,7 +1,9 @@
+use database::Database;
 use pyo3::prelude::*;
-use queue::KQueue;
 
 pub mod bufferpool;
+pub mod capture;
+pub mod database;
 pub mod index;
 pub mod queue;
 pub mod row;
@@ -23,6 +25,6 @@ fn init_logging() {
 fn kronicler(m: &Bound<'_, PyModule>) -> PyResult<()> {
     init_logging();
 
-    m.add_class::<KQueue>()?;
+    m.add_class::<Database>()?;
     Ok(())
 }

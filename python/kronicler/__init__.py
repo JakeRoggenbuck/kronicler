@@ -1,10 +1,9 @@
-from .kronicler import KQueue
+from .kronicler import Database
 
 from typing import Final
 import time
 
-# KQueue will be a singleton
-KQ = KQueue()
+DB = Database()
 
 
 def capture(func):
@@ -25,7 +24,7 @@ def capture(func):
 
         end: int = time.time_ns()
 
-        KQ.capture(func.__name__, args, start, end)
+        DB.capture(func.__name__, args, start, end)
 
     return wrapper
 
