@@ -1,9 +1,8 @@
-///! Use bufferpool from https://github.com/JakeRoggenbuck/bufferpool
+use super::constants::{DATA_DIRECTORY, PAGE_SIZE};
 use std::fs::File;
 use std::io::prelude::*;
+use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
-
-const PAGE_SIZE: usize = 4096;
 
 // I had planned to test many different hashmap implementations
 type BHashMap<K, V> = std::collections::HashMap<K, V>;
@@ -47,8 +46,10 @@ impl Page {
         }
     }
 
-    pub fn get_page_path(&self) -> String {
-        format!("page_{}.data", self.pid)
+    pub fn get_page_path(&self) -> PathBuf {
+        Path::new("./")
+            .join(DATA_DIRECTORY)
+            .join(format!("page_{}.data", self.pid))
     }
 
     /// Write a whole page to disk
@@ -210,8 +211,6 @@ impl Bufferpool {
     pub fn insert(&mut self, index: usize, value: i64) {
         let pid: usize = index / 512;
         let index_in_page = index % 512;
-
-        println!("{:?}", self.pages);
 
         if self.pages.contains_key(&pid) {
             // Get the page because it was opened

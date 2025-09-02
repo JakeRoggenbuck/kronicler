@@ -1,15 +1,13 @@
 use super::capture::{Capture, Epoch};
+use super::constants::{DATA_DIRECTORY, DB_WRITE_BUFFER_SIZE};
 use super::queue::KQueue;
 use log::info;
 use pyo3::prelude::*;
 use std::collections::VecDeque;
+use std::fs;
 use std::sync::mpsc::{self, Sender};
 use std::sync::{Arc, Mutex};
 use std::thread;
-
-// How many logs need to be in the queue before we write to the database
-// Make configurable: https://github.com/JakeRoggenbuck/kronicler/issues/18
-const DB_WRITE_BUFFER_SIZE: usize = 20;
 
 #[pyclass]
 pub struct Database {
@@ -28,6 +26,8 @@ impl Database {
                 task();
             }
         });
+
+        Database::create_data_dir();
 
         Database {
             queue: KQueue::new(),
@@ -68,5 +68,12 @@ impl Database {
                 info!("Writing {:?}", a);
             }
         }
+    }
+
+    fn create_data_dir() {
+        fs::create_dir_all(DATA_DIRECTORY)
+            .expect(&format!("Could not create directory '{}'.", DATA_DIRECTORY));
+
+        info!("Created data directory at '{}'!", DATA_DIRECTORY);
     }
 }
