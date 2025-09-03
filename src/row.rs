@@ -32,6 +32,13 @@ impl FieldType {
             }
         }
     }
+
+    pub fn get_size(&self) -> usize {
+        match self {
+            FieldType::Name(_) => 64,
+            FieldType::Epoch(_) => 16,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]

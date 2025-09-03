@@ -97,10 +97,7 @@ impl Bufferpool {
     }
 
     pub fn insert(&mut self, index: usize, column_index: usize, value: &FieldType) {
-        let field_type_size = match value {
-            FieldType::Name(_) => 64,
-            FieldType::Epoch(_) => 16,
-        };
+        let field_type_size = value.get_size();
 
         let pid: usize = (index * field_type_size) / 512;
         let index_in_page = (index * field_type_size) % 512;

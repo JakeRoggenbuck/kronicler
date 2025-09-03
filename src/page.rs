@@ -31,10 +31,7 @@ impl Page {
     }
 
     pub fn new(pid: PageID, column_index: usize, field_type: FieldType) -> Self {
-        let field_type_size = match field_type {
-            FieldType::Name(_) => 64,
-            FieldType::Epoch(_) => 16,
-        };
+        let field_type_size = field_type.get_size();
 
         Page {
             pid,
