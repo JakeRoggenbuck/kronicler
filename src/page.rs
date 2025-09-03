@@ -1,7 +1,7 @@
-use std::path::{Path, PathBuf};
 use super::constants::{DATA_DIRECTORY, PAGE_SIZE};
 use std::fs::File;
 use std::io::prelude::*;
+use std::path::{Path, PathBuf};
 
 pub type PageID = usize;
 
@@ -131,4 +131,3 @@ impl Page {
         PAGE_SIZE
     }
 }
-

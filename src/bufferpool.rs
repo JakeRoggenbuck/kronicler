@@ -1,4 +1,5 @@
 use super::page::{Page, PageID};
+use super::value::Value;
 use std::sync::{Arc, Mutex};
 
 // I had planned to test many different hashmap implementations
@@ -76,7 +77,7 @@ impl Bufferpool {
         None
     }
 
-    pub fn insert(&mut self, index: usize, value: i64) {
+    pub fn insert(&mut self, index: usize, value: Value) {
         let pid: usize = index / 512;
         let index_in_page = index % 512;
 
@@ -85,7 +86,9 @@ impl Bufferpool {
             let poption = self.pages.get(&pid);
 
             let mut b = poption.unwrap().lock().unwrap();
-            b.set_value(index_in_page, value);
+            // TODO: Fix this set
+            // b.set_value(index_in_page, value);
+
             // TODO: Should this always write?
             // If so, it should do so async
             b.write_page();
@@ -93,7 +96,9 @@ impl Bufferpool {
             // Open the page cause it was not opened
             let mut new_page = Page::new(pid);
             new_page.open();
-            new_page.set_value(index_in_page, value);
+            // TODO: Fix this set
+            // new_page.set_value(index_in_page, value);
+
             // TODO: Should this always write?
             // If so, it should do so async
             new_page.write_page();
@@ -179,7 +184,7 @@ mod tests {
         //assert_eq!(bpool.size(), 4);
         assert!(bpool.full());
 
-        bpool.insert(0, 100);
+        bpool.insert(0, Value::Epoch(100));
 
         // Read the 0th value
         let val = bpool.fetch(0);
@@ -188,7 +193,7 @@ mod tests {
         assert_eq!(val, Some(100));
 
         for x in 0..600 {
-            bpool.insert(x + 1, 2 * (x + 1) as i64);
+            bpool.insert(x + 1, Value::Epoch(2 * (x + 1) as u128));
         }
 
         assert_eq!(bpool.fetch(1), Some(2));

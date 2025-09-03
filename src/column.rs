@@ -1,10 +1,7 @@
-use super::capture::Epoch;
+use super::bufferpool::Bufferpool;
 use super::metadata::Metadata;
-
-enum Value {
-    Epoch(Epoch),
-    Name([u8; 64]),
-}
+use super::value::Value;
+use std::sync::{Arc, RwLock};
 
 /// Used to safe the state of the Column struct
 pub struct ColumnMetadata {
@@ -24,6 +21,7 @@ impl ColumnMetadata {
 
 pub struct Column {
     metadata: ColumnMetadata,
+    bufferpool: Arc<RwLock<Bufferpool>>,
 }
 
 /// Implement common traits from Metadata
@@ -40,13 +38,21 @@ impl Metadata for Column {
 }
 
 impl Column {
-    pub fn insert(value: Value) {}
+    pub fn insert(&mut self, value: Value) {
+        let i = self.metadata.current_index;
+
+        let mut bp = self.bufferpool.write().expect("Could write");
+        bp.insert(i, value);
+
+        self.metadata.current_index += 1;
+    }
 
     pub fn fetch() {}
 
-    pub fn new(name: String) -> Self {
+    pub fn new(name: String, bufferpool: Arc<RwLock<Bufferpool>>) -> Self {
         Column {
             metadata: ColumnMetadata::new(name),
+            bufferpool,
         }
     }
 }
