@@ -36,6 +36,12 @@ impl Bufferpool {
         }
     }
 
+    pub fn create_column() {
+        // TODO: Create an internal column
+        // self.columns[0].pages ...
+        todo!()
+    }
+
     pub fn set_page_limit(&mut self, limit: usize) {
         self.page_limit = limit;
     }

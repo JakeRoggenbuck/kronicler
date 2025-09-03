@@ -5,14 +5,17 @@ use std::sync::{Arc, RwLock};
 
 /// Used to safe the state of the Column struct
 pub struct ColumnMetadata {
+    // Which column it is
+    pub column_number: usize,
     pub current_index: usize,
     pub name: String,
 }
 
 /// Implement column specific traits
 impl ColumnMetadata {
-    fn new(name: String) -> Self {
+    fn new(name: String, column_number: usize) -> Self {
         ColumnMetadata {
+            column_number: usize,
             current_index: 0,
             name,
         }
@@ -28,12 +31,12 @@ pub struct Column {
 impl Metadata for Column {
     fn save() {
         // Write self.metadata to a file
-        todo!();
+        todo!()
     }
 
     fn load() {
         // Load self.metadata from a file if it exists
-        todo!();
+        todo!()
     }
 }
 
@@ -53,9 +56,12 @@ impl Column {
         bp.fetch(index)
     }
 
-    pub fn new(name: String, bufferpool: Arc<RwLock<Bufferpool>>) -> Self {
+    pub fn new(name: String, column_number: usize, bufferpool: Arc<RwLock<Bufferpool>>) -> Self {
+        let mut bp = bufferpool.write().expect("Should write.");
+        bp.create_column(column_number);
+
         Column {
-            metadata: ColumnMetadata::new(name),
+            metadata: ColumnMetadata::new(name, column_number),
             bufferpool,
         }
     }
