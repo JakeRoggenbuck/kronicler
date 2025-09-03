@@ -1,14 +1,16 @@
+use super::bufferpool::Bufferpool;
 use super::capture::Capture;
 use super::column::Column;
 use super::constants::{DATA_DIRECTORY, DB_WRITE_BUFFER_SIZE};
 use super::queue::KQueue;
 use super::row::Epoch;
+use super::row::FieldType;
 use log::info;
 use pyo3::prelude::*;
 use std::collections::VecDeque;
 use std::fs;
 use std::sync::mpsc::{self, Sender};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, RwLock};
 use std::thread;
 
 #[pyclass]
@@ -16,6 +18,7 @@ pub struct Database {
     queue: KQueue,
     tx: Sender<Box<dyn FnOnce() + Send + 'static>>,
     columns: Vec<Column>,
+    bufferpool: Arc<RwLock<Bufferpool>>,
 }
 
 #[pymethods]
@@ -32,10 +35,35 @@ impl Database {
 
         Database::create_data_dir();
 
+        let bp = Bufferpool::new();
+        let bufferpool = Arc::new(RwLock::new(bp));
+
+        let name_col = Column::new(
+            "name".to_string(),
+            0,
+            bufferpool.clone(),
+            FieldType::Name([0u8; 64]),
+        );
+
+        let start_col = Column::new(
+            "start".to_string(),
+            1,
+            bufferpool.clone(),
+            FieldType::Epoch(0),
+        );
+
+        let end_col = Column::new(
+            "end".to_string(),
+            1,
+            bufferpool.clone(),
+            FieldType::Epoch(0),
+        );
+
         Database {
             queue: KQueue::new(),
+            bufferpool: bufferpool.clone(),
             tx,
-            columns: vec![],
+            columns: vec![name_col, start_col, end_col],
         }
     }
 

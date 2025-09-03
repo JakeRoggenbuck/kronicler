@@ -9,15 +9,17 @@ pub struct ColumnMetadata {
     pub column_number: usize,
     pub current_index: usize,
     pub name: String,
+    pub field_type: FieldType,
 }
 
 /// Implement column specific traits
 impl ColumnMetadata {
-    fn new(name: String, column_number: usize) -> Self {
+    fn new(name: String, column_number: usize, field_type: FieldType) -> Self {
         ColumnMetadata {
             column_number,
             current_index: 0,
             name,
+            field_type
         }
     }
 }
@@ -56,14 +58,14 @@ impl Column {
         bp.fetch(index)
     }
 
-    pub fn new(name: String, column_number: usize, bufferpool: Arc<RwLock<Bufferpool>>) -> Self {
+    pub fn new(name: String, column_number: usize, bufferpool: Arc<RwLock<Bufferpool>>, field_type: FieldType) -> Self {
         {
             let mut bp = bufferpool.write().expect("Should write.");
             bp.create_column(column_number);
         }
 
         Column {
-            metadata: ColumnMetadata::new(name, column_number),
+            metadata: ColumnMetadata::new(name, column_number, field_type),
             bufferpool,
         }
     }
