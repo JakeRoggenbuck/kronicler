@@ -7,6 +7,7 @@ pub mod column;
 pub mod constants;
 pub mod database;
 pub mod index;
+pub mod metadata;
 pub mod page;
 pub mod queue;
 pub mod row;
