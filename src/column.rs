@@ -54,8 +54,13 @@ impl Column {
     }
 
     pub fn fetch(&self, index: usize) -> Option<FieldType> {
+        let field_type_size = match self.metadata.field_type {
+            FieldType::Name(_) => 64,
+            FieldType::Epoch(_) => 16,
+        };
+
         let bp = self.bufferpool.read().ok()?;
-        bp.fetch(index, self.metadata.column_number)
+        bp.fetch(index, self.metadata.column_number, field_type_size)
     }
 
     pub fn new(

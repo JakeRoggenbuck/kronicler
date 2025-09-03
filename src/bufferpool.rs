@@ -73,9 +73,14 @@ impl Bufferpool {
         self.page_index >= self.page_limit
     }
 
-    pub fn fetch(&self, index: usize, column_index: usize) -> Option<FieldType> {
-        let pid: usize = index / 512;
-        let index_in_page = index % 512;
+    pub fn fetch(
+        &self,
+        index: usize,
+        column_index: usize,
+        field_type_size: usize,
+    ) -> Option<FieldType> {
+        let pid: usize = (index * field_type_size) / 512;
+        let index_in_page = (index * field_type_size) % 512;
 
         if self.pages_collections[column_index].contains_key(&pid) {
             let page = self.pages_collections[column_index].get(&pid);
@@ -207,8 +212,10 @@ mod tests {
 
         bpool.insert(0, 0, &FieldType::Epoch(100));
 
+        let field_type_size = 16;
+
         // Read the 0th value
-        let val = bpool.fetch(0, 0);
+        let val = bpool.fetch(0, 0, field_type_size);
 
         // Read the first value
         assert_eq!(val.unwrap(), FieldType::Epoch(100));
@@ -217,13 +224,28 @@ mod tests {
             bpool.insert(x + 1, 0, &FieldType::Epoch(2 * (x + 1) as u128));
         }
 
-        assert_eq!(bpool.fetch(1, 0), Some(FieldType::Epoch(2)));
-        assert_eq!(bpool.fetch(2, 0), Some(FieldType::Epoch(4)));
-        assert_eq!(bpool.fetch(100, 0), Some(FieldType::Epoch(200)));
+        assert_eq!(
+            bpool.fetch(1, 0, field_type_size),
+            Some(FieldType::Epoch(2))
+        );
+        assert_eq!(
+            bpool.fetch(2, 0, field_type_size),
+            Some(FieldType::Epoch(4))
+        );
+        assert_eq!(
+            bpool.fetch(100, 0, field_type_size),
+            Some(FieldType::Epoch(200))
+        );
 
-        assert_eq!(bpool.fetch(500, 0), Some(FieldType::Epoch(1000)));
+        assert_eq!(
+            bpool.fetch(500, 0, field_type_size),
+            Some(FieldType::Epoch(1000))
+        );
 
         // Read after first page!
-        assert_eq!(bpool.fetch(550, 0), Some(FieldType::Epoch(1100)));
+        assert_eq!(
+            bpool.fetch(550, 0, field_type_size),
+            Some(FieldType::Epoch(1100))
+        );
     }
 }
