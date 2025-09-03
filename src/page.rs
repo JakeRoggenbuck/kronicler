@@ -162,7 +162,6 @@ impl Page {
             let mut vals = [0u8; 64];
 
             for i in 0..self.field_type_size {
-                info!("Reading {} + {}", index, i);
                 vals[i] = d[index + i];
             }
 
