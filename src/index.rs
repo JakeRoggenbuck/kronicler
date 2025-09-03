@@ -72,12 +72,16 @@ mod tests {
         let mut rows = Vec::new();
         let mut index = Index::new();
 
-        let row_1 = Row::new(0, vec![FieldType::String(String::from("Jake"))]);
+        let mut name_bytes = [0u8; 64];
+        let name_str = "Jake".as_bytes();
+        name_bytes[..name_str.len()].copy_from_slice(name_str);
+
+        let row_1 = Row::new(0, vec![FieldType::Name(name_bytes)]);
         rows.push(row_1.clone());
 
         index.insert(row_1, 0);
 
-        let fetched_rows = index.get(FieldType::String(String::from("Jake")));
+        let fetched_rows = index.get(FieldType::Name(name_bytes));
 
         assert_eq!(fetched_rows.unwrap()[0], 0);
     }
@@ -86,12 +90,16 @@ mod tests {
     fn duplicate_insert_test() {
         let mut index = Index::new();
 
-        let row_2 = Row::new(1, vec![FieldType::String(String::from("Foo"))]);
-        let row_3 = Row::new(2, vec![FieldType::String(String::from("Foo"))]);
+        let mut name_bytes = [0u8; 64];
+        let name_str = "Foo".as_bytes();
+        name_bytes[..name_str.len()].copy_from_slice(name_str);
+
+        let row_2 = Row::new(1, vec![FieldType::Name(name_bytes)]);
+        let row_3 = Row::new(2, vec![FieldType::Name(name_bytes)]);
         index.insert(row_2, 0);
         index.insert(row_3, 0);
 
-        let fetched_rows_opt_2 = index.get(FieldType::String(String::from("Foo")));
+        let fetched_rows_opt_2 = index.get(FieldType::Name(name_bytes));
         let fetched_rows_2 = fetched_rows_opt_2.unwrap();
 
         println!("{:?}", index);

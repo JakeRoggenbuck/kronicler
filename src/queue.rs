@@ -1,4 +1,5 @@
-use super::capture::{Capture, Epoch};
+use super::capture::Capture;
+use super::row::Epoch;
 use log::info;
 use pyo3::prelude::*;
 use std::collections::VecDeque;

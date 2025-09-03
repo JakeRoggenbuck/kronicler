@@ -1,9 +1,10 @@
 pub type RID = usize;
+pub type Epoch = u128;
 
 #[derive(Debug, Eq, Clone, PartialEq, Ord, PartialOrd)]
 pub enum FieldType {
-    Int(i64),
-    String(String),
+    Name([u8; 64]),
+    Epoch(Epoch),
 }
 
 #[derive(Debug, Clone, PartialEq)]

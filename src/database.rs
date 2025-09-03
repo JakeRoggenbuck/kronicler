@@ -1,6 +1,8 @@
-use super::capture::{Capture, Epoch};
+use super::capture::Capture;
+use super::column::Column;
 use super::constants::{DATA_DIRECTORY, DB_WRITE_BUFFER_SIZE};
 use super::queue::KQueue;
+use super::row::Epoch;
 use log::info;
 use pyo3::prelude::*;
 use std::collections::VecDeque;
@@ -13,6 +15,7 @@ use std::thread;
 pub struct Database {
     queue: KQueue,
     tx: Sender<Box<dyn FnOnce() + Send + 'static>>,
+    columns: Vec<Column>,
 }
 
 #[pymethods]
@@ -32,18 +35,23 @@ impl Database {
         Database {
             queue: KQueue::new(),
             tx,
+            columns: vec![],
         }
     }
 
     pub fn capture(&self, name: String, args: Vec<PyObject>, start: Epoch, end: Epoch) {
         self.queue.capture(name, args, start, end);
 
-        let queue_clone = Arc::clone(&self.queue.queue);
+        // let queue_clone = Arc::clone(&self.queue.queue);
 
-        // Invoke the concurrent consumer
-        self.execute(move || {
-            Database::consume_capture(queue_clone);
-        });
+        // // Invoke the concurrent consumer
+        // self.execute(move || {
+        //     Database::consume_capture(queue_clone);
+        // });
+        //
+        // TODO: Figure out how to call consume_capture
+        // Maybe it makes sense to run it infinitely in the main loop
+        // to check for captures added to the queue
     }
 }
 
@@ -55,17 +63,32 @@ impl Database {
         self.tx.send(Box::new(f)).unwrap();
     }
 
-    fn consume_capture(queue: Arc<Mutex<VecDeque<Capture>>>) {
+    fn consume_capture(&mut self, queue: Arc<Mutex<VecDeque<Capture>>>) {
         let mut q = queue.lock().unwrap();
 
         if q.len() > DB_WRITE_BUFFER_SIZE {
             info!("Starting bulk write!");
             while !q.is_empty() {
-                let a = q.pop_front();
-                // TODO: Add capture to database
-                // Use a bulk_write function
-                // TODO: Now we can use self.<db_method> to write to database!
-                info!("Writing {:?}", a);
+                let capture = q.pop_front();
+
+                let index = 0;
+
+                if let Some(c) = capture {
+                    // TODO: Replace for real ID
+                    let row = c.to_row(index);
+
+                    let mut col_index = 0;
+                    for field in &row.fields {
+                        self.columns[col_index].insert(field);
+
+                        col_index += 1;
+                    }
+
+                    // TODO: Add capture to database
+                    // Use a bulk_write function
+                    // TODO: Now we can use self.<db_method> to write to database!
+                    info!("Writing {:?}", &row);
+                }
             }
         }
     }

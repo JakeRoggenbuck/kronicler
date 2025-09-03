@@ -1,6 +1,6 @@
 use super::bufferpool::Bufferpool;
 use super::metadata::Metadata;
-use super::value::Value;
+use super::row::FieldType;
 use std::sync::{Arc, RwLock};
 
 /// Used to safe the state of the Column struct
@@ -41,7 +41,7 @@ impl Metadata for Column {
 }
 
 impl Column {
-    pub fn insert(&mut self, value: Value) {
+    pub fn insert(&mut self, value: &FieldType) {
         let i = self.metadata.current_index;
 
         let mut bp = self.bufferpool.write().expect("Could write.");
@@ -51,7 +51,7 @@ impl Column {
         self.metadata.current_index += 1;
     }
 
-    pub fn fetch(&self, index: usize) -> Option<Value> {
+    pub fn fetch(&self, index: usize) -> Option<FieldType> {
         let bp = self.bufferpool.read().ok()?;
         bp.fetch(index)
     }

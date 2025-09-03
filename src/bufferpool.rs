@@ -1,5 +1,5 @@
 use super::page::{Page, PageID};
-use super::value::Value;
+use super::row::FieldType;
 use std::sync::{Arc, Mutex};
 
 // I had planned to test many different hashmap implementations
@@ -67,7 +67,7 @@ impl Bufferpool {
         self.page_index >= self.page_limit
     }
 
-    pub fn fetch(&self, index: usize) -> Option<Value> {
+    pub fn fetch(&self, index: usize) -> Option<FieldType> {
         let pid: usize = index / 512;
         let index_in_page = index % 512;
 
@@ -84,7 +84,7 @@ impl Bufferpool {
         None
     }
 
-    pub fn insert(&mut self, index: usize, value: Value) {
+    pub fn insert(&mut self, index: usize, value: &FieldType) {
         let pid: usize = index / 512;
         let index_in_page = index % 512;
 
@@ -191,25 +191,25 @@ mod tests {
         //assert_eq!(bpool.size(), 4);
         assert!(bpool.full());
 
-        bpool.insert(0, Value::Epoch(100));
+        bpool.insert(0, &FieldType::Epoch(100));
 
         // Read the 0th value
         let val = bpool.fetch(0);
 
         // Read the first value
-        assert_eq!(val.unwrap(), Value::Epoch(100));
+        assert_eq!(val.unwrap(), FieldType::Epoch(100));
 
         for x in 0..600 {
-            bpool.insert(x + 1, Value::Epoch(2 * (x + 1) as u128));
+            bpool.insert(x + 1, &FieldType::Epoch(2 * (x + 1) as u128));
         }
 
-        assert_eq!(bpool.fetch(1), Some(Value::Epoch(2)));
-        assert_eq!(bpool.fetch(2), Some(Value::Epoch(4)));
-        assert_eq!(bpool.fetch(100), Some(Value::Epoch(200)));
+        assert_eq!(bpool.fetch(1), Some(FieldType::Epoch(2)));
+        assert_eq!(bpool.fetch(2), Some(FieldType::Epoch(4)));
+        assert_eq!(bpool.fetch(100), Some(FieldType::Epoch(200)));
 
-        assert_eq!(bpool.fetch(500), Some(Value::Epoch(1000)));
+        assert_eq!(bpool.fetch(500), Some(FieldType::Epoch(1000)));
 
         // Read after first page!
-        assert_eq!(bpool.fetch(550), Some(Value::Epoch(1100)));
+        assert_eq!(bpool.fetch(550), Some(FieldType::Epoch(1100)));
     }
 }
