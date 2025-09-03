@@ -99,6 +99,8 @@ impl Database {
                     for field in &row.fields {
                         self.columns[col_index].insert(field);
 
+                        let a = self.columns[col_index].fetch(0);
+                        info!("Fetched {:?}", a.unwrap().to_string());
                         col_index += 1;
                     }
                 }

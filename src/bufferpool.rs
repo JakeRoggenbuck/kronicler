@@ -86,6 +86,8 @@ impl Bufferpool {
             let page = self.pages_collections[column_index].get(&pid);
 
             if let Some(p) = page {
+                info!("Fetching value {} in page {}", index_in_page, pid);
+
                 let b = p.lock().unwrap();
                 return b.get_value(index_in_page);
             }

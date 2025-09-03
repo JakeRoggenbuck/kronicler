@@ -60,6 +60,7 @@ impl Column {
         };
 
         let bp = self.bufferpool.read().ok()?;
+
         bp.fetch(index, self.metadata.column_number, field_type_size)
     }
 

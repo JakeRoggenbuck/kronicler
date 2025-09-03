@@ -162,10 +162,20 @@ impl Page {
     /// Get functions are for getting internal state of a Page
     pub fn get_value(&self, index: usize) -> Option<FieldType> {
         if let Some(d) = self.data {
-            let mut vals = vec![];
+            let mut vals = [0u8; 64];
 
             for i in 0..self.field_type_size {
-                vals.push(d[index + i]);
+                vals[i] = d[index + i];
+            }
+
+            if self.field_type_size == 16 {
+                let b = &vals[0..16];
+                let a: u128 = unsafe { std::mem::transmute(b) };
+                return Some(FieldType::Epoch(a));
+            }
+
+            if self.field_type_size == 64 {
+                return Some(FieldType::Name(vals));
             }
         }
 
