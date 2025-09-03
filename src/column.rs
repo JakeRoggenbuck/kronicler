@@ -25,7 +25,7 @@ impl ColumnMetadata {
 }
 
 pub struct Column {
-    metadata: ColumnMetadata,
+    pub metadata: ColumnMetadata,
     bufferpool: Arc<RwLock<Bufferpool>>,
 }
 

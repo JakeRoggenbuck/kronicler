@@ -162,11 +162,19 @@ impl Page {
             let mut vals = [0u8; 64];
 
             for i in 0..self.field_type_size {
+                info!("Reading {} + {}", index, i);
                 vals[i] = d[index + i];
             }
 
             if self.field_type_size == 16 {
-                let b = &vals[0..16];
+                let mut b: [u8; 16] = [0; 16];
+
+                let mut i = 0;
+                for v in &vals[0..16] {
+                    b[i] = *v;
+                    i += 1;
+                }
+
                 let a: u128 = unsafe { std::mem::transmute(b) };
                 return Some(FieldType::Epoch(a));
             }
