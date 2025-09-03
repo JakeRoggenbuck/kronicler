@@ -96,6 +96,7 @@ impl Database {
 
         if q.len() > DB_WRITE_BUFFER_SIZE {
             info!("Starting bulk write!");
+
             while !q.is_empty() {
                 let capture = q.pop_front();
 
@@ -103,8 +104,11 @@ impl Database {
 
                 if let Some(c) = capture {
                     // TODO: Replace for real ID
+                    // Maybe it does not need an ID?
+                    // Because the columns keep track of that
                     let row = c.to_row(index);
 
+                    // Insert each field into its respective column
                     let mut col_index = 0;
                     for field in &row.fields {
                         self.columns[col_index].insert(field);

@@ -19,7 +19,7 @@ impl ColumnMetadata {
             column_number,
             current_index: 0,
             name,
-            field_type
+            field_type,
         }
     }
 }
@@ -48,17 +48,22 @@ impl Column {
 
         let mut bp = self.bufferpool.write().expect("Could write.");
         // Index is auto-incremented
-        bp.insert(i, value);
+        bp.insert(i, self.metadata.column_number, value);
 
         self.metadata.current_index += 1;
     }
 
     pub fn fetch(&self, index: usize) -> Option<FieldType> {
         let bp = self.bufferpool.read().ok()?;
-        bp.fetch(index)
+        bp.fetch(index, self.metadata.column_number)
     }
 
-    pub fn new(name: String, column_number: usize, bufferpool: Arc<RwLock<Bufferpool>>, field_type: FieldType) -> Self {
+    pub fn new(
+        name: String,
+        column_number: usize,
+        bufferpool: Arc<RwLock<Bufferpool>>,
+        field_type: FieldType,
+    ) -> Self {
         {
             let mut bp = bufferpool.write().expect("Should write.");
             bp.create_column(column_number);

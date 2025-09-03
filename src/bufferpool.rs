@@ -22,7 +22,7 @@ type BHashMap<K, V> = std::collections::HashMap<K, V>;
 
 pub struct Bufferpool {
     // Right now, there is no removal strategy
-    pages: BHashMap<PageID, Arc<Mutex<Page>>>,
+    pages_collections: Vec<BHashMap<PageID, Arc<Mutex<Page>>>>,
     page_index: PageID,
     page_limit: usize,
 }
@@ -30,7 +30,7 @@ pub struct Bufferpool {
 impl Bufferpool {
     pub fn new() -> Self {
         Bufferpool {
-            pages: BHashMap::new(),
+            pages_collections: vec![BHashMap::new()],
             page_index: 0,
             page_limit: 0,
         }
@@ -46,11 +46,11 @@ impl Bufferpool {
         self.page_limit = limit;
     }
 
-    pub fn create_page(&mut self) -> Arc<Mutex<Page>> {
+    pub fn create_page(&mut self, column_index: usize) -> Arc<Mutex<Page>> {
         let p = Page::new(self.page_index);
         let page = Arc::new(Mutex::new(p));
 
-        self.pages.insert(self.page_index, page.clone());
+        self.pages_collections[column_index].insert(self.page_index, page.clone());
         self.page_index += 1;
         return page.clone();
     }
@@ -67,12 +67,12 @@ impl Bufferpool {
         self.page_index >= self.page_limit
     }
 
-    pub fn fetch(&self, index: usize) -> Option<FieldType> {
+    pub fn fetch(&self, index: usize, column_index: usize) -> Option<FieldType> {
         let pid: usize = index / 512;
         let index_in_page = index % 512;
 
-        if self.pages.contains_key(&pid) {
-            let page = self.pages.get(&pid);
+        if self.pages_collections[column_index].contains_key(&pid) {
+            let page = self.pages_collections[column_index].get(&pid);
 
             if let Some(p) = page {
                 let b = p.lock().unwrap();
@@ -84,13 +84,13 @@ impl Bufferpool {
         None
     }
 
-    pub fn insert(&mut self, index: usize, value: &FieldType) {
+    pub fn insert(&mut self, index: usize, column_index: usize, value: &FieldType) {
         let pid: usize = index / 512;
         let index_in_page = index % 512;
 
-        if self.pages.contains_key(&pid) {
+        if self.pages_collections[column_index].contains_key(&pid) {
             // Get the page because it was opened
-            let poption = self.pages.get(&pid);
+            let poption = self.pages_collections[column_index].get(&pid);
 
             let mut b = poption.unwrap().lock().unwrap();
             // TODO: Fix this set
@@ -112,7 +112,7 @@ impl Bufferpool {
 
             // Make an Arc
             let page = Some(Arc::new(Mutex::new(new_page)));
-            self.pages.insert(pid, page.clone().unwrap());
+            self.pages_collections[column_index].insert(pid, page.clone().unwrap());
         }
     }
 }
@@ -139,7 +139,7 @@ mod tests {
         assert!(bpool.empty());
 
         // Create a page of data
-        let page_1_arc = bpool.create_page();
+        let page_1_arc = bpool.create_page(0);
         {
             let mut page_1 = page_1_arc.lock().unwrap();
             page_1.set_all_values(four_k_of_data);
@@ -154,21 +154,21 @@ mod tests {
         assert!(!bpool.full());
 
         // Insert 3 more pages to fill the bufferpool
-        let page_2_arc = bpool.create_page();
+        let page_2_arc = bpool.create_page(0);
         {
             let mut page_2 = page_2_arc.lock().unwrap();
             page_2.set_all_values(four_k_of_data);
             page_2.write_page();
         }
 
-        let page_3_arc = bpool.create_page();
+        let page_3_arc = bpool.create_page(0);
         {
             let mut page_3 = page_3_arc.lock().unwrap();
             page_3.set_all_values(four_k_of_data);
             page_3.write_page();
         }
 
-        let page_4_arc = bpool.create_page();
+        let page_4_arc = bpool.create_page(0);
         {
             let mut page_4 = page_4_arc.lock().unwrap();
             page_4.set_all_values(four_k_of_data);
@@ -179,7 +179,7 @@ mod tests {
         assert!(bpool.full());
 
         // Add another page after it's full
-        let page_5_arc = bpool.create_page();
+        let page_5_arc = bpool.create_page(0);
         {
             let mut page_5 = page_5_arc.lock().unwrap();
             page_5.set_all_values(four_k_of_data);
@@ -191,25 +191,25 @@ mod tests {
         //assert_eq!(bpool.size(), 4);
         assert!(bpool.full());
 
-        bpool.insert(0, &FieldType::Epoch(100));
+        bpool.insert(0, 0, &FieldType::Epoch(100));
 
         // Read the 0th value
-        let val = bpool.fetch(0);
+        let val = bpool.fetch(0, 0);
 
         // Read the first value
         assert_eq!(val.unwrap(), FieldType::Epoch(100));
 
         for x in 0..600 {
-            bpool.insert(x + 1, &FieldType::Epoch(2 * (x + 1) as u128));
+            bpool.insert(x + 1, 0, &FieldType::Epoch(2 * (x + 1) as u128));
         }
 
-        assert_eq!(bpool.fetch(1), Some(FieldType::Epoch(2)));
-        assert_eq!(bpool.fetch(2), Some(FieldType::Epoch(4)));
-        assert_eq!(bpool.fetch(100), Some(FieldType::Epoch(200)));
+        assert_eq!(bpool.fetch(1, 0), Some(FieldType::Epoch(2)));
+        assert_eq!(bpool.fetch(2, 0), Some(FieldType::Epoch(4)));
+        assert_eq!(bpool.fetch(100, 0), Some(FieldType::Epoch(200)));
 
-        assert_eq!(bpool.fetch(500), Some(FieldType::Epoch(1000)));
+        assert_eq!(bpool.fetch(500, 0), Some(FieldType::Epoch(1000)));
 
         // Read after first page!
-        assert_eq!(bpool.fetch(550), Some(FieldType::Epoch(1100)));
+        assert_eq!(bpool.fetch(550, 0), Some(FieldType::Epoch(1100)));
     }
 }
