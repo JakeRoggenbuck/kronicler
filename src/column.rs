@@ -15,7 +15,7 @@ pub struct ColumnMetadata {
 impl ColumnMetadata {
     fn new(name: String, column_number: usize) -> Self {
         ColumnMetadata {
-            column_number: 0,
+            column_number,
             current_index: 0,
             name,
         }
