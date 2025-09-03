@@ -1,4 +1,5 @@
 use super::constants::{DATA_DIRECTORY, PAGE_SIZE};
+use super::row::FieldType;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
@@ -8,8 +9,10 @@ pub type PageID = usize;
 #[derive(Debug)]
 pub struct Page {
     pid: PageID,
-    data: Option<[i64; 512]>,
+    data: Option<[u8; PAGE_SIZE]>,
     index: usize,
+    // Either 16 or 64
+    field_type_size: usize,
 }
 
 impl Page {
@@ -19,11 +22,17 @@ impl Page {
         self.data = Some(data);
     }
 
-    pub fn new(pid: PageID) -> Self {
+    pub fn new(pid: PageID, field_type: FieldType) -> Self {
+        let field_type_size = match field_type {
+            FieldType::Name(_) => 64,
+            FieldType::Epoch(_) => 16,
+        };
+
         Page {
             pid,
             data: None,
             index: 0,
+            field_type_size,
         }
     }
 
@@ -88,36 +97,61 @@ impl Page {
     /// ```
     ///
     /// Read functions are for pulling a Page from disk and does not mutate the state of the Page
-    pub fn read_page(&self) -> [i64; 512] {
+    pub fn read_page(&self) -> [u8; PAGE_SIZE] {
         let filename = self.get_page_path();
         let mut file = File::open(filename).expect("Should open file.");
-        let mut buf: [u8; 4096] = [0; PAGE_SIZE];
+        let mut buf: [u8; PAGE_SIZE] = [0; PAGE_SIZE];
 
         let _ = file.read(&mut buf[..]).expect("Should read.");
 
         // TODO: Make sure this works as expected always
-        let values: [i64; 512] = unsafe { std::mem::transmute(buf) };
+        // TODO: Maybe this is not needed if input and output is the same type
+        // This changed later, so maybe I can remove this now
+        let values: [u8; PAGE_SIZE] = unsafe { std::mem::transmute(buf) };
         return values;
     }
 
     /// Set functions are for changing internal state of a Page
-    pub fn set_value(&mut self, index: usize, value: i64) {
+    pub fn set_value(&mut self, index: usize, value: FieldType) {
         if let Some(d) = &mut self.data {
-            d[index] = value;
+            match value {
+                FieldType::Name(a) => {
+                    let mut i = 0;
+
+                    for v in a {
+                        d[index + i] = v;
+                        i += 1;
+                    }
+                }
+                FieldType::Epoch(a) => {
+                    let mut i = 0;
+
+                    let bytes = a.to_le_bytes();
+
+                    for v in bytes {
+                        d[index + i] = v;
+                        i += 1;
+                    }
+                }
+            }
         }
 
         self.index += 1;
     }
 
     /// Set functions are for changing internal state of a Page
-    pub fn set_all_values(&mut self, input: [i64; 512]) {
+    pub fn set_all_values(&mut self, input: [u8; PAGE_SIZE]) {
         self.data = Some(input);
     }
 
     /// Get functions are for getting internal state of a Page
-    pub fn get_value(&self, index: usize) -> Option<i64> {
+    pub fn get_value(&self, index: usize) -> Option<FieldType> {
         if let Some(d) = self.data {
-            return Some(d[index]);
+            let mut vals = vec![];
+
+            for i in 0..self.field_type_size {
+                vals.push(d[index + i]);
+            }
         }
 
         None

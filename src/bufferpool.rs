@@ -46,8 +46,8 @@ impl Bufferpool {
         self.page_limit = limit;
     }
 
-    pub fn create_page(&mut self, column_index: usize) -> Arc<Mutex<Page>> {
-        let p = Page::new(self.page_index);
+    pub fn create_page(&mut self, column_index: usize, field_type: FieldType) -> Arc<Mutex<Page>> {
+        let p = Page::new(self.page_index, field_type);
         let page = Arc::new(Mutex::new(p));
 
         self.pages_collections[column_index].insert(self.page_index, page.clone());
@@ -77,7 +77,7 @@ impl Bufferpool {
             if let Some(p) = page {
                 let b = p.lock().unwrap();
                 // TODO: Fix to use Value instead
-                // return b.get_value(index_in_page);
+                return b.get_value(index_in_page);
             }
         }
 
@@ -93,18 +93,18 @@ impl Bufferpool {
             let poption = self.pages_collections[column_index].get(&pid);
 
             let mut b = poption.unwrap().lock().unwrap();
-            // TODO: Fix this set
-            // b.set_value(index_in_page, value);
+            // TODO: Remove clone if possible
+            b.set_value(index_in_page, value.clone());
 
             // TODO: Should this always write?
             // If so, it should do so async
             b.write_page();
         } else {
             // Open the page cause it was not opened
-            let mut new_page = Page::new(pid);
+            let mut new_page = Page::new(pid, value.clone());
             new_page.open();
             // TODO: Fix this set
-            // new_page.set_value(index_in_page, value);
+            new_page.set_value(index_in_page, value.clone());
 
             // TODO: Should this always write?
             // If so, it should do so async
@@ -132,14 +132,14 @@ mod tests {
         assert_eq!(bpool.page_limit, 4);
 
         // Create 4KB of data
-        let four_k_of_data: [i64; 512] = [0; 512];
+        let four_k_of_data: [u8; PAGE_SIZE] = [0; PAGE_SIZE];
         assert_eq!(std::mem::size_of_val(&four_k_of_data), 512 * 8);
 
         assert_eq!(bpool.size(), 0);
         assert!(bpool.empty());
 
         // Create a page of data
-        let page_1_arc = bpool.create_page(0);
+        let page_1_arc = bpool.create_page(0, FieldType::Epoch(0));
         {
             let mut page_1 = page_1_arc.lock().unwrap();
             page_1.set_all_values(four_k_of_data);
@@ -154,21 +154,21 @@ mod tests {
         assert!(!bpool.full());
 
         // Insert 3 more pages to fill the bufferpool
-        let page_2_arc = bpool.create_page(0);
+        let page_2_arc = bpool.create_page(0, FieldType::Epoch(0));
         {
             let mut page_2 = page_2_arc.lock().unwrap();
             page_2.set_all_values(four_k_of_data);
             page_2.write_page();
         }
 
-        let page_3_arc = bpool.create_page(0);
+        let page_3_arc = bpool.create_page(0, FieldType::Epoch(0));
         {
             let mut page_3 = page_3_arc.lock().unwrap();
             page_3.set_all_values(four_k_of_data);
             page_3.write_page();
         }
 
-        let page_4_arc = bpool.create_page(0);
+        let page_4_arc = bpool.create_page(0, FieldType::Epoch(0));
         {
             let mut page_4 = page_4_arc.lock().unwrap();
             page_4.set_all_values(four_k_of_data);
@@ -179,7 +179,7 @@ mod tests {
         assert!(bpool.full());
 
         // Add another page after it's full
-        let page_5_arc = bpool.create_page(0);
+        let page_5_arc = bpool.create_page(0, FieldType::Epoch(0));
         {
             let mut page_5 = page_5_arc.lock().unwrap();
             page_5.set_all_values(four_k_of_data);

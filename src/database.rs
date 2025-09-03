@@ -116,9 +116,6 @@ impl Database {
                         col_index += 1;
                     }
 
-                    // TODO: Add capture to database
-                    // Use a bulk_write function
-                    // TODO: Now we can use self.<db_method> to write to database!
                     info!("Writing {:?}", &row);
                 }
             }
