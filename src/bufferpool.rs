@@ -61,7 +61,7 @@ impl Bufferpool {
         self.page_index >= self.page_limit
     }
 
-    pub fn fetch(&self, index: usize) -> Option<i64> {
+    pub fn fetch(&self, index: usize) -> Option<Value> {
         let pid: usize = index / 512;
         let index_in_page = index % 512;
 
@@ -70,7 +70,8 @@ impl Bufferpool {
 
             if let Some(p) = page {
                 let b = p.lock().unwrap();
-                return b.get_value(index_in_page);
+                // TODO: Fix to use Value instead
+                // return b.get_value(index_in_page);
             }
         }
 
@@ -190,19 +191,19 @@ mod tests {
         let val = bpool.fetch(0);
 
         // Read the first value
-        assert_eq!(val, Some(100));
+        assert_eq!(val.unwrap(), Value::Epoch(100));
 
         for x in 0..600 {
             bpool.insert(x + 1, Value::Epoch(2 * (x + 1) as u128));
         }
 
-        assert_eq!(bpool.fetch(1), Some(2));
-        assert_eq!(bpool.fetch(2), Some(4));
-        assert_eq!(bpool.fetch(100), Some(200));
+        assert_eq!(bpool.fetch(1), Some(Value::Epoch(2)));
+        assert_eq!(bpool.fetch(2), Some(Value::Epoch(4)));
+        assert_eq!(bpool.fetch(100), Some(Value::Epoch(200)));
 
-        assert_eq!(bpool.fetch(500), Some(1000));
+        assert_eq!(bpool.fetch(500), Some(Value::Epoch(1000)));
 
         // Read after first page!
-        assert_eq!(bpool.fetch(550), Some(1100));
+        assert_eq!(bpool.fetch(550), Some(Value::Epoch(1100)));
     }
 }
