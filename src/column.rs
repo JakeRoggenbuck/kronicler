@@ -15,7 +15,7 @@ pub struct ColumnMetadata {
 impl ColumnMetadata {
     fn new(name: String, column_number: usize) -> Self {
         ColumnMetadata {
-            column_number: usize,
+            column_number: 0,
             current_index: 0,
             name,
         }
@@ -57,8 +57,10 @@ impl Column {
     }
 
     pub fn new(name: String, column_number: usize, bufferpool: Arc<RwLock<Bufferpool>>) -> Self {
-        let mut bp = bufferpool.write().expect("Should write.");
-        bp.create_column(column_number);
+        {
+            let mut bp = bufferpool.write().expect("Should write.");
+            bp.create_column(column_number);
+        }
 
         Column {
             metadata: ColumnMetadata::new(name, column_number),

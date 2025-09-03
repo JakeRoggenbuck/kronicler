@@ -36,7 +36,7 @@ impl Bufferpool {
         }
     }
 
-    pub fn create_column() {
+    pub fn create_column(&mut self, column_number: usize) {
         // TODO: Create an internal column
         // self.columns[0].pages ...
         todo!()
