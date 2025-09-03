@@ -36,11 +36,11 @@ impl Bufferpool {
         }
     }
 
-    pub fn create_column(&mut self, column_number: usize) {
-        // TODO: Create an internal column
-        // self.columns[0].pages ...
-        todo!()
-    }
+    // pub fn create_column(&mut self, column_number: usize) {
+    //     // TODO: Create an internal column
+    //     // self.columns[0].pages ...
+    //     todo!()
+    // }
 
     pub fn set_page_limit(&mut self, limit: usize) {
         self.page_limit = limit;
@@ -76,7 +76,6 @@ impl Bufferpool {
 
             if let Some(p) = page {
                 let b = p.lock().unwrap();
-                // TODO: Fix to use Value instead
                 return b.get_value(index_in_page);
             }
         }
@@ -103,7 +102,7 @@ impl Bufferpool {
             // Open the page cause it was not opened
             let mut new_page = Page::new(pid, value.clone());
             new_page.open();
-            // TODO: Fix this set
+            // TODO: Remove clone if possible
             new_page.set_value(index_in_page, value.clone());
 
             // TODO: Should this always write?

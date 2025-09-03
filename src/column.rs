@@ -65,8 +65,8 @@ impl Column {
         field_type: FieldType,
     ) -> Self {
         {
-            let mut bp = bufferpool.write().expect("Should write.");
-            bp.create_column(column_number);
+            // let mut bp = bufferpool.write().expect("Should write.");
+            // bp.create_column(column_number);
         }
 
         Column {
