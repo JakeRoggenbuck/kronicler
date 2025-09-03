@@ -11,7 +11,6 @@ pub mod metadata;
 pub mod page;
 pub mod queue;
 pub mod row;
-pub mod value;
 
 /// Setup env logging
 ///
