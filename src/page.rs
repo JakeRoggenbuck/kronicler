@@ -165,6 +165,7 @@ impl Page {
                 vals[i] = d[index + i];
             }
 
+            // TODO: Don't hardcode sizes of data like this
             if self.field_type_size == 16 {
                 let mut b: [u8; 16] = [0; 16];
 
@@ -178,6 +179,7 @@ impl Page {
                 return Some(FieldType::Epoch(a));
             }
 
+            // TODO: Don't hardcode sizes of data like this
             if self.field_type_size == 64 {
                 return Some(FieldType::Name(vals));
             }

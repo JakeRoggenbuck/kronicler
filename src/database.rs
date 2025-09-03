@@ -98,13 +98,6 @@ impl Database {
                     let mut col_index = 0;
                     for field in &row.fields {
                         self.columns[col_index].insert(field);
-
-                        let a = &self.columns[col_index];
-                        let i = a.metadata.current_index;
-
-                        let b = a.fetch(i - 1);
-
-                        info!("Fetched {:?}", b.unwrap().to_string());
                         col_index += 1;
                     }
                 }
