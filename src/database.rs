@@ -9,14 +9,11 @@ use log::info;
 use pyo3::prelude::*;
 use std::collections::VecDeque;
 use std::fs;
-use std::sync::mpsc::{self, Sender};
 use std::sync::{Arc, Mutex, RwLock};
-use std::thread;
 
 #[pyclass]
 pub struct Database {
     queue: KQueue,
-    tx: Sender<Box<dyn FnOnce() + Send + 'static>>,
     columns: Vec<Column>,
     bufferpool: Arc<RwLock<Bufferpool>>,
 }
@@ -25,17 +22,9 @@ pub struct Database {
 impl Database {
     #[new]
     pub fn new() -> Self {
-        let (tx, rx) = mpsc::channel::<Box<dyn FnOnce() + Send>>();
-
-        thread::spawn(move || {
-            while let Ok(task) = rx.recv() {
-                task();
-            }
-        });
-
         Database::create_data_dir();
 
-        let bp = Bufferpool::new();
+        let bp = Bufferpool::new(3);
         let bufferpool = Arc::new(RwLock::new(bp));
 
         let name_col = Column::new(
@@ -54,7 +43,7 @@ impl Database {
 
         let end_col = Column::new(
             "end".to_string(),
-            1,
+            2,
             bufferpool.clone(),
             FieldType::Epoch(0),
         );
@@ -62,15 +51,14 @@ impl Database {
         Database {
             queue: KQueue::new(),
             bufferpool: bufferpool.clone(),
-            tx,
             columns: vec![name_col, start_col, end_col],
         }
     }
 
-    pub fn capture(&self, name: String, args: Vec<PyObject>, start: Epoch, end: Epoch) {
+    pub fn capture(&mut self, name: String, args: Vec<PyObject>, start: Epoch, end: Epoch) {
         self.queue.capture(name, args, start, end);
 
-        // let queue_clone = Arc::clone(&self.queue.queue);
+        let queue_clone = Arc::clone(&self.queue.queue);
 
         // // Invoke the concurrent consumer
         // self.execute(move || {
@@ -80,17 +68,13 @@ impl Database {
         // TODO: Figure out how to call consume_capture
         // Maybe it makes sense to run it infinitely in the main loop
         // to check for captures added to the queue
+
+        // Doing this single threaded right now
+        self.consume_capture(queue_clone);
     }
 }
 
 impl Database {
-    fn execute<F>(&self, f: F)
-    where
-        F: FnOnce() + Send + 'static,
-    {
-        self.tx.send(Box::new(f)).unwrap();
-    }
-
     fn consume_capture(&mut self, queue: Arc<Mutex<VecDeque<Capture>>>) {
         let mut q = queue.lock().unwrap();
 
@@ -108,6 +92,8 @@ impl Database {
                     // Because the columns keep track of that
                     let row = c.to_row(index);
 
+                    info!("Writing {:?}...", &row);
+
                     // Insert each field into its respective column
                     let mut col_index = 0;
                     for field in &row.fields {
@@ -115,8 +101,6 @@ impl Database {
 
                         col_index += 1;
                     }
-
-                    info!("Writing {:?}", &row);
                 }
             }
         }

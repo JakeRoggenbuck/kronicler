@@ -1,5 +1,6 @@
 use super::constants::{DATA_DIRECTORY, PAGE_SIZE};
 use super::row::FieldType;
+use log::info;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
@@ -13,16 +14,23 @@ pub struct Page {
     index: usize,
     // Either 16 or 64
     field_type_size: usize,
+    column_index: usize,
 }
 
 impl Page {
     pub fn open(&mut self) {
+        let path = self.get_page_path();
+
+        if !path.exists() {
+            self.write_page();
+        }
+
         let data = self.read_page();
 
         self.data = Some(data);
     }
 
-    pub fn new(pid: PageID, field_type: FieldType) -> Self {
+    pub fn new(pid: PageID, column_index: usize, field_type: FieldType) -> Self {
         let field_type_size = match field_type {
             FieldType::Name(_) => 64,
             FieldType::Epoch(_) => 16,
@@ -33,13 +41,14 @@ impl Page {
             data: None,
             index: 0,
             field_type_size,
+            column_index,
         }
     }
 
     pub fn get_page_path(&self) -> PathBuf {
         Path::new("./")
             .join(DATA_DIRECTORY)
-            .join(format!("page_{}.data", self.pid))
+            .join(format!("page_{}_{}.data", self.column_index, self.pid))
     }
 
     /// Write a whole page to disk
@@ -60,7 +69,9 @@ impl Page {
     /// Write functions are for writing a Page from disk and not changing any state
     pub fn write_page(&self) {
         let filename = self.get_page_path();
-        let file = File::create(filename);
+
+        // TODO: It should not create a new file each time right?
+        let file = File::create(&filename);
 
         match file {
             Ok(mut fp) => {
@@ -69,6 +80,8 @@ impl Page {
                 // TODO: Prove that this works always
                 if let Some(d) = self.data {
                     let bytes: [u8; PAGE_SIZE] = unsafe { std::mem::transmute(d) };
+
+                    info!("Writing data to {:?}.", filename);
                     // TODO: Use this result
                     fp.write_all(&bytes).expect("Should be able to write.");
                 }
@@ -99,6 +112,8 @@ impl Page {
     /// Read functions are for pulling a Page from disk and does not mutate the state of the Page
     pub fn read_page(&self) -> [u8; PAGE_SIZE] {
         let filename = self.get_page_path();
+
+        info!("Trying to open {:?}", filename);
         let mut file = File::open(filename).expect("Should open file.");
         let mut buf: [u8; PAGE_SIZE] = [0; PAGE_SIZE];
 

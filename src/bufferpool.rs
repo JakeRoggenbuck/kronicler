@@ -1,5 +1,6 @@
 use super::page::{Page, PageID};
 use super::row::FieldType;
+use log::info;
 use std::sync::{Arc, Mutex};
 
 // I had planned to test many different hashmap implementations
@@ -28,9 +29,14 @@ pub struct Bufferpool {
 }
 
 impl Bufferpool {
-    pub fn new() -> Self {
+    pub fn new(column_count: usize) -> Self {
+        let mut page_maps = vec![];
+        for _ in 0..column_count {
+            page_maps.push(BHashMap::new())
+        }
+
         Bufferpool {
-            pages_collections: vec![BHashMap::new()],
+            pages_collections: page_maps,
             page_index: 0,
             page_limit: 0,
         }
@@ -47,7 +53,7 @@ impl Bufferpool {
     }
 
     pub fn create_page(&mut self, column_index: usize, field_type: FieldType) -> Arc<Mutex<Page>> {
-        let p = Page::new(self.page_index, field_type);
+        let p = Page::new(self.page_index, column_index, field_type);
         let page = Arc::new(Mutex::new(p));
 
         self.pages_collections[column_index].insert(self.page_index, page.clone());
@@ -87,9 +93,13 @@ impl Bufferpool {
         let pid: usize = index / 512;
         let index_in_page = index % 512;
 
-        if self.pages_collections[column_index].contains_key(&pid) {
+        info!("Getting collection {}", column_index);
+        let collection = &self.pages_collections[column_index];
+
+        // Check if page is opened in bufferpool
+        if collection.contains_key(&pid) {
             // Get the page because it was opened
-            let poption = self.pages_collections[column_index].get(&pid);
+            let poption = collection.get(&pid);
 
             let mut b = poption.unwrap().lock().unwrap();
             // TODO: Remove clone if possible
@@ -100,7 +110,7 @@ impl Bufferpool {
             b.write_page();
         } else {
             // Open the page cause it was not opened
-            let mut new_page = Page::new(pid, value.clone());
+            let mut new_page = Page::new(pid, column_index, value.clone());
             new_page.open();
             // TODO: Remove clone if possible
             new_page.set_value(index_in_page, value.clone());
@@ -123,7 +133,7 @@ mod tests {
 
     #[test]
     fn basic_integration_test() {
-        let mut bpool = Bufferpool::new();
+        let mut bpool = Bufferpool::new(3);
 
         // Each page is 4KB on an x86-64 machine
         // Adding 4 pages, is 16KB or 16384 bytes
