@@ -128,8 +128,6 @@ impl Page {
 
     /// Set functions are for changing internal state of a Page
     pub fn set_value(&mut self, index: usize, value: FieldType) {
-        let index = index * self.field_type_size;
-
         if let Some(d) = &mut self.data {
             match value {
                 FieldType::Name(a) => {

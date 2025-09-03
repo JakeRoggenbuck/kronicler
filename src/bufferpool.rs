@@ -90,8 +90,13 @@ impl Bufferpool {
     }
 
     pub fn insert(&mut self, index: usize, column_index: usize, value: &FieldType) {
-        let pid: usize = index / 512;
-        let index_in_page = index % 512;
+        let field_type_size = match value {
+            FieldType::Name(_) => 64,
+            FieldType::Epoch(_) => 16,
+        };
+
+        let pid: usize = (index * field_type_size) / 512;
+        let index_in_page = (index * field_type_size) % 512;
 
         info!("Getting collection {}", column_index);
         let collection = &self.pages_collections[column_index];
