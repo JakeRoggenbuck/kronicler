@@ -41,16 +41,16 @@ impl Column {
     pub fn insert(&mut self, value: Value) {
         let i = self.metadata.current_index;
 
-        let mut bp = self.bufferpool.write().expect("Could write");
+        let mut bp = self.bufferpool.write().expect("Could write.");
         // Index is auto-incremented
         bp.insert(i, value);
 
         self.metadata.current_index += 1;
     }
 
-    pub fn fetch(&self, index: usize) {
-        let bp = self.bufferpool.read().expect("Could write");
-        let out = bp.fetch(index);
+    pub fn fetch(&self, index: usize) -> Option<Value> {
+        let bp = self.bufferpool.read().ok()?;
+        bp.fetch(index)
     }
 
     pub fn new(name: String, bufferpool: Arc<RwLock<Bufferpool>>) -> Self {
