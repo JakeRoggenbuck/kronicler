@@ -3,12 +3,13 @@ use pyo3::prelude::*;
 
 pub mod bufferpool;
 pub mod capture;
+pub mod column;
+pub mod constants;
 pub mod database;
 pub mod index;
+pub mod page;
 pub mod queue;
 pub mod row;
-pub mod constants;
-pub mod page;
 
 /// Setup env logging
 ///
