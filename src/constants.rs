@@ -1,6 +1,6 @@
 // How many logs need to be in the queue before we write to the database
 // Make configurable: https://github.com/JakeRoggenbuck/kronicler/issues/18
-pub const DB_WRITE_BUFFER_SIZE: usize = 20;
+pub const DB_WRITE_BUFFER_SIZE: usize = 0;
 
 pub const DATA_DIRECTORY: &str = ".kronicler_data";
 

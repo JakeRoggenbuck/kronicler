@@ -8,6 +8,7 @@ pub mod index;
 pub mod queue;
 pub mod row;
 pub mod constants;
+pub mod page;
 
 /// Setup env logging
 ///
