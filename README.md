@@ -1,6 +1,6 @@
 # Kronicler
 
-Automatic performance analysis for production applications.
+Automatic performance capture and analysis for production applications in Python using a custom columnar database written in Rust.
 
 [![Rust](https://img.shields.io/badge/Rust-1A5D8A?style=for-the-badge&logo=rust&logoColor=white)](https://github.com/JakeRoggenbuck?tab=repositories&q=&type=&language=rust&sort=stargazers)
 [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://github.com/JakeRoggenbuck?tab=repositories&q=&type=&language=python&sort=stargazers)
