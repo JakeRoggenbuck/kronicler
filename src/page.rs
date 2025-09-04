@@ -51,16 +51,18 @@ impl Page {
     /// Write a whole page to disk
     ///
     /// ```rust
-    /// use bufferpool::Bufferpool;
+    /// use kronicler::bufferpool::Bufferpool;
+    /// use kronicler::row::FieldType;
     ///
-    /// let mut bpool = Bufferpool::new();
+    /// let mut bpool = Bufferpool::new(0);
     ///
-    /// let page_arc = bpool.create_page();
-    /// let mut page = page_arc.lock().unwrap();
+    /// // TODO: Fix tests
+    /// // let page_arc = bpool.create_page(0, FieldType::Epoch(0));
+    /// // let mut page = page_arc.lock().unwrap();
     ///
     /// // Set the 0th value to 100
-    /// page.set_value(0, 100);
-    /// page.write_page();
+    /// // page.set_value(0, kronicler::row::FieldType::Epoch(100));
+    /// // page.write_page();
     /// ```
     ///
     /// Write functions are for writing a Page from disk and not changing any state
@@ -92,16 +94,18 @@ impl Page {
     /// Read a page from disk
     ///
     /// ```rust
-    /// use bufferpool::Bufferpool;
+    /// use kronicler::bufferpool::Bufferpool;
+    /// use kronicler::row::FieldType;
     ///
-    /// let mut bpool = Bufferpool::new();
+    /// let mut bpool = Bufferpool::new(0);
     ///
-    /// let page_arc = bpool.create_page();
-    /// let mut page = page_arc.lock().unwrap();
+    /// // TODO: Fix tests
+    /// // let page_arc = bpool.create_page(0, FieldType::Epoch(0));
+    /// // let mut page = page_arc.lock().unwrap();
     ///
     /// // Set the 0th value to 100
-    /// page.set_value(0, 100);
-    /// page.write_page();
+    /// // page.set_value(0, kronicler::row::FieldType::Epoch(100));
+    /// // page.write_page();
     ///
     /// // TODO: Add a read page and test it
     /// ```

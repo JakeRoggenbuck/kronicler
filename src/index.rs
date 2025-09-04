@@ -21,18 +21,24 @@ impl Index {
     }
 
     /// ```rust
-    /// use indexrs::*;
+    /// use kronicler::index::*;
+    /// use kronicler::row::FieldType;
+    /// use kronicler::row::Row;
+    ///
+    /// let mut name_bytes = [0u8; 64];
+    /// let name_str = "Jake";
+    /// let bytes = name_str.as_bytes();
+    /// name_bytes[..bytes.len()].copy_from_slice(bytes);
     ///
     /// let mut index = Index::new();
-    /// let row1 = Row::new(0, vec![FieldType::String("Jake".to_string())]);
-    /// let row2 = Row::new(1, vec![FieldType::String("Jake".to_string())]);
+    /// let row1 = Row::new(0, vec![FieldType::Name(name_bytes)]);
+    /// let row2 = Row::new(1, vec![FieldType::Name(name_bytes)]);
     ///
     /// index.insert(row1, 0);
     /// index.insert(row2, 0);
     ///
     /// let results = index.get(
-    ///     FieldType::String("Jake".to_string()),
-    ///     &get_row_from_bufferpool
+    ///     FieldType::Name(name_bytes),
     /// );
     ///
     /// assert_eq!(results.unwrap().len(), 2);
