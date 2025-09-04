@@ -5,6 +5,49 @@ Automatic performance analysis for production applications.
 [![Rust](https://img.shields.io/badge/Rust-1A5D8A?style=for-the-badge&logo=rust&logoColor=white)](https://github.com/JakeRoggenbuck?tab=repositories&q=&type=&language=rust&sort=stargazers)
 [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://github.com/JakeRoggenbuck?tab=repositories&q=&type=&language=python&sort=stargazers)
 
+## Install
+
+#### Install with Pip for Python
+
+```sh
+pip install kronicler
+```
+
+#### Install with Cargo for Rust
+
+```
+cargo install kronicler
+```
+
+Add as a dependency in your `Cargo.toml`.
+
+```toml
+[dependencies]
+kronicler = "0.1.0"
+```
+
+## Usage in Python
+
+```python
+import kronicler
+
+@kronicler.capture()
+def my_function():
+	pass
+```
+
+<!-- COMING SOON
+## Usage in Rust
+
+```rs
+use kronicler;
+```
+-->
+
+
+
+<!--
+
 Zen of Kronicler:
 
 - Writes take as little time as possible
@@ -40,5 +83,7 @@ You can view your analytics from a web dashboard, so you don’t need to log in 
 #### Web Portal
 
 You can view tables and graphs of the data and look at averages, anomalies, p90, p99, etc.
+
+-->
 
 <!-- :frog: -->
