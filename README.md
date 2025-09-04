@@ -20,7 +20,7 @@ Automatic performance capture and analysis for production applications in Python
 - One Python dependency
 - Works out-of-the-box without configuration 
 
-\* concurrency is in development but not fully implemented as of version 0.1.0
+\* concurrency is in development but not fully implemented as of version 0.1.0. Track concurrency in [issue #41](https://github.com/JakeRoggenbuck/kronicler/issues/41).
 
 ## Why use Kronicler?
 
@@ -152,7 +152,7 @@ Kronicler is designed to be as light-weight as possible. By adding logs to a que
 
 For accessing logs and running calculations, Kronicler uses a columnar database design to optimize file operations when looking at lots of data from only a few columns typical of analytics tasks.
 
-\* concurrency is in development but not fully implemented as of version 0.1.0
+\* concurrency is in development but not fully implemented as of version 0.1.0. Track concurrency in [issue #41](https://github.com/JakeRoggenbuck/kronicler/issues/41).
 
 ## Analysis Web Dashboard
 
