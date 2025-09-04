@@ -7,6 +7,12 @@ Automatic performance capture and analysis for production applications in Python
 
 ## Why use Kronicler?
 
+If you want to monitor the performance of a production application, kronicler offers efficient and lightweight logging with a single library.
+
+Kronicler lets you view runtime statistics for functions like mean and median as well as statistics for different percentiles.
+
+A use-case for these statistics is to find functions that occasionally operate much slower than they do on average. By looking at the "slowest" speed, the standard error, and the mean, you can find functions that occasionally run much slower than expected. Sometimes it's hard to find and replicate these issues in a test environment, so keeping logs in your production application can improve your ability to find these issues.
+
 ## Install (Python)
 
 #### Install with Pip for Python
