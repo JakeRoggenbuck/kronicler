@@ -46,8 +46,8 @@ use kronicler;
 
 ## Architecture
 
-![System Architecture Dark Mode](./images/systems diagram dark mode.svg#gh-dark-mode-only)
-![System Architecture Light Mode](./images/systems diagram light mode.svg#gh-light-mode-only)
+![System Architecture Dark Mode](./images/system-arch-dark-mode.svg #gh-dark-mode-only)
+![System Architecture Light Mode](./images/system-arch-light-mode.svg#gh-light-mode-only)
 
 <!--
 
