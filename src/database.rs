@@ -15,7 +15,6 @@ use std::sync::{Arc, Mutex, RwLock};
 pub struct Database {
     queue: KQueue,
     columns: Vec<Column>,
-    bufferpool: Arc<RwLock<Bufferpool>>,
 }
 
 #[pymethods]
@@ -50,7 +49,6 @@ impl Database {
 
         Database {
             queue: KQueue::new(),
-            bufferpool: bufferpool.clone(),
             columns: vec![name_col, start_col, end_col],
         }
     }
