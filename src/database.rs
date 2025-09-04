@@ -3,8 +3,7 @@ use super::capture::Capture;
 use super::column::Column;
 use super::constants::{DATA_DIRECTORY, DB_WRITE_BUFFER_SIZE};
 use super::queue::KQueue;
-use super::row::Epoch;
-use super::row::FieldType;
+use super::row::{Epoch, FieldType, Row};
 use log::info;
 use pyo3::prelude::*;
 use std::collections::VecDeque;
@@ -101,6 +100,25 @@ impl Database {
                 }
             }
         }
+    }
+
+    pub fn fetch(&self, index: usize) -> Vec<Row> {
+        info!("Starting fetch on index {}", index);
+
+        let mut data = vec![];
+
+        for col in &self.columns {
+            let field = col.fetch(index);
+
+            if let Some(f) = field {
+                data.push(f);
+            }
+        }
+
+        vec![Row {
+            id: 0,
+            fields: data,
+        }]
     }
 
     fn create_data_dir() {

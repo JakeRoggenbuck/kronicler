@@ -82,6 +82,8 @@ impl Bufferpool {
         let pid: usize = (index * field_type_size) / 512;
         let index_in_page = (index * field_type_size) % 512;
 
+        info!("Fetching index {} from page {}", index_in_page, pid);
+
         if self.pages_collections[column_index].contains_key(&pid) {
             let page = self.pages_collections[column_index].get(&pid);
 
@@ -91,6 +93,10 @@ impl Bufferpool {
                 let b = p.lock().unwrap();
                 return b.get_value(index_in_page);
             }
+        } else {
+            // TODO: Check if the page exists
+            //
+            // If it exists, open it and save it to the self.pages_collections
         }
 
         None

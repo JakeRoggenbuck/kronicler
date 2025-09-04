@@ -1,6 +1,7 @@
 use super::bufferpool::Bufferpool;
 use super::metadata::Metadata;
 use super::row::FieldType;
+use log::info;
 use std::sync::{Arc, RwLock};
 
 /// Used to safe the state of the Column struct
@@ -54,11 +55,18 @@ impl Column {
     }
 
     pub fn fetch(&self, index: usize) -> Option<FieldType> {
+        info!("Fetching {}", index);
         let field_type_size = self.metadata.field_type.get_size();
 
-        let bp = self.bufferpool.read().ok()?;
+        let bufferpool = self.bufferpool.read();
 
-        bp.fetch(index, self.metadata.column_number, field_type_size)
+        match bufferpool {
+            Ok(bp) => return bp.fetch(index, self.metadata.column_number, field_type_size),
+            Err(e) => {
+                info!("{}", e);
+                return None;
+            }
+        }
     }
 
     pub fn new(
