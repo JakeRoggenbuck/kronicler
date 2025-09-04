@@ -5,6 +5,8 @@ Automatic performance capture and analysis for production applications in Python
 [![Rust](https://img.shields.io/badge/Rust-1A5D8A?style=for-the-badge&logo=rust&logoColor=white)](https://github.com/JakeRoggenbuck?tab=repositories&q=&type=&language=rust&sort=stargazers)
 [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://github.com/JakeRoggenbuck?tab=repositories&q=&type=&language=python&sort=stargazers)
 
+## Why use Kronicler?
+
 ## Install (Python)
 
 #### Install with Pip for Python
@@ -14,6 +16,8 @@ pip install kronicler
 ```
 
 ## Usage (Python)
+
+Kronicler provides a Python decorator called `capture` that will calculate the time it takes to run the function.
 
 ```python
 import kronicler
@@ -50,6 +54,8 @@ use kronicler;
 ```
 -->
 
+## Future Languages
+
 Install and Usage for Rust is coming soon...
 
 ## Architecture
@@ -63,6 +69,16 @@ This does not include details on:
 - How the [`bufferpool`](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/bufferpool.rs) manages [`pages`](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/page.rs).
 - How [`pages`](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/page.rs) operate.
 - [`capture`](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/capture.rs), [`index`](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/index.rs), [`row`](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/row.rs), or saving and loading with [`metadata`](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/metadata.rs).
+
+#### The Database
+
+#### The Bufferpool
+
+#### The Columns
+
+## Performance
+
+## Analysis
 
 <!--
 
