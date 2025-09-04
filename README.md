@@ -44,6 +44,8 @@ use kronicler;
 ```
 -->
 
+## Architecture
+
 
 
 <!--
