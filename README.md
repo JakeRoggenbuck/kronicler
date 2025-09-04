@@ -91,8 +91,6 @@ The columnar database is somewhat inspired by my previous database called [Redox
 
 The bufferpool is based on my [bufferpool](https://github.com/JakeRoggenbuck/bufferpool) project. I had to modify it to work with the rest of this database.
 
-#### The Columns
-
 ## Performance
 
 ## Analysis
