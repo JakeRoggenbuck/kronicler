@@ -78,7 +78,11 @@ This does not include details on:
 
 #### The Database
 
+The columnar database is somewhat inspired by my previous database called [RedoxQL](https://github.com/JakeRoggenbuck/RedoxQL). A lot of the structure and architecture is different as well as how data is stored.
+
 #### The Bufferpool
+
+The bufferpool is based on my [bufferpool](https://github.com/JakeRoggenbuck/bufferpool) project. I had to modify it to work with the rest of this database.
 
 #### The Columns
 
