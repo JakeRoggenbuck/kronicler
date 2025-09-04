@@ -5,6 +5,15 @@ Automatic performance capture and analysis for production applications in Python
 [![Rust](https://img.shields.io/badge/Rust-1A5D8A?style=for-the-badge&logo=rust&logoColor=white)](https://github.com/JakeRoggenbuck?tab=repositories&q=&type=&language=rust&sort=stargazers)
 [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://github.com/JakeRoggenbuck?tab=repositories&q=&type=&language=python&sort=stargazers)
 
+## Benefits of using Kronicler
+
+- Automatic performance capturing
+- Light-weight and concurrent\*
+- One Python dependency
+- Works out-of-the-box without configuration 
+
+\* concurrency is planned but not fully implemented as of version 0.1.0
+
 ## Why use Kronicler?
 
 If you want to monitor the performance of a production application, kronicler offers efficient and lightweight logging with a single library. Kronicler lets you view runtime statistics for functions like mean and median as well as statistics for different percentiles.
