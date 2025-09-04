@@ -178,6 +178,20 @@ def my_function():
 	pass
 ```
 
+## Development
+
+#### Testing
+
+You can run the testing suite with the following command:
+
+```
+cargo test
+```
+
+The tests should all succeed
+
+<img width="1157" height="377" alt="image" src="https://github.com/user-attachments/assets/aae0fb07-f9d5-4482-a06e-1e2e5e6eb320" />
+
 <!--
 
 Zen of Kronicler:
