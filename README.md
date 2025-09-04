@@ -75,10 +75,6 @@ use kronicler;
 ```
 -->
 
-## Future Languages
-
-Install and Usage for Rust is coming soon...
-
 ## Architecture
 
 Simplified version of the package and database architecture. The data is passed from the Python decorator called [`capture`](https://github.com/JakeRoggenbuck/kronicler/blob/main/python/kronicler/__init__.py) to the [`database`](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/database.rs)'s [`queue`](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/queue.rs). It then consumes that [`queue`](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/queue.rs) to insert each field into its respective [`column`](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/column.rs). The [`column`](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/column.rs) uses the [`bufferpool`](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/bufferpool.rs) to operate on pages.
@@ -98,6 +94,19 @@ The columnar database is somewhat inspired by my previous database called [Redox
 #### The Bufferpool
 
 The bufferpool is based on my [bufferpool](https://github.com/JakeRoggenbuck/bufferpool) project. I had to modify it to work with the rest of this database.
+
+## Future Languages
+
+Install and Usage for Rust is coming soon...
+
+I plan to implement the Rust version as an `attribute` to be used like the following:
+
+```rust
+#[capture]
+fn foo() {
+	todo!()
+}
+```
 
 ## Examples
 
