@@ -96,6 +96,53 @@ The columnar database is somewhat inspired by my previous database called [Redox
 
 The bufferpool is based on my [bufferpool](https://github.com/JakeRoggenbuck/bufferpool) project. I had to modify it to work with the rest of this database.
 
+## Examples
+
+#### Using Kronicler with FastAPI
+
+With just two lines of code, you can add Kronicler to your [FastAPI](https://fastapi.tiangolo.com) server.
+
+```python
+from fastapi import FastAPI
+import uvicorn
+import kronicler
+
+app = FastAPI()
+
+
+# You need to wrap helper functions
+@kronicler.capture
+def foo():
+    return {"Hello": "World"}
+
+# You cannot wrap routes right now
+@app.get("/")
+def read_root():
+    return foo()
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+```
+
+Code from [tests/fastapi-test/main.py](https://github.com/JakeRoggenbuck/kronicler/blob/main/tests/fastapi-test/main.py).
+
+## Using Kronicler's database directly
+
+If you're interested in using Kronicler's database directly to add custom logging functions (or just to use a columnar database), the library is published to <!--[crates.io](https://crates.io/crates/kronicler).-->.
+
+#### Install with Cargo for Rust
+
+```
+cargo install kronicler
+```
+
+Add as a dependency in your `Cargo.toml`.
+
+```toml
+[dependencies]
+kronicler = "0.1.0"
+```
+
 ## Performance
 
 ## Analysis
