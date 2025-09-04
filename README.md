@@ -5,13 +5,27 @@ Automatic performance analysis for production applications.
 [![Rust](https://img.shields.io/badge/Rust-1A5D8A?style=for-the-badge&logo=rust&logoColor=white)](https://github.com/JakeRoggenbuck?tab=repositories&q=&type=&language=rust&sort=stargazers)
 [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://github.com/JakeRoggenbuck?tab=repositories&q=&type=&language=python&sort=stargazers)
 
-## Install
+## Install (Python)
 
 #### Install with Pip for Python
 
 ```sh
 pip install kronicler
 ```
+
+## Usage in Python
+
+```python
+import kronicler
+
+@kronicler.capture()
+def my_function():
+	pass
+```
+
+<!-- COMING SOON
+
+## Install (Rust)
 
 #### Install with Cargo for Rust
 
@@ -26,15 +40,7 @@ Add as a dependency in your `Cargo.toml`.
 kronicler = "0.1.0"
 ```
 
-## Usage in Python
-
-```python
-import kronicler
-
-@kronicler.capture()
-def my_function():
-	pass
-```
+-->
 
 <!-- COMING SOON
 ## Usage in Rust
