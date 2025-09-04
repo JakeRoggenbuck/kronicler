@@ -20,7 +20,7 @@ Automatic performance capture and analysis for production applications in Python
 - One Python dependency
 - Works out-of-the-box without configuration 
 
-\* concurrency is planned but not fully implemented as of version 0.1.0
+\* concurrency is in development but not fully implemented as of version 0.1.0
 
 ## Why use Kronicler?
 
@@ -148,7 +148,35 @@ kronicler = "0.1.0"
 
 ## Performance
 
-## Analysis
+Kronicler is designed to be as light-weight as possible. By adding logs to a queue concurrently\*, Kronicler doesn't affect performance by much \[citation needed\].
+
+For accessing logs and running calculations, Kronicler uses a columnar database design to optimize file operations when looking at lots of data from only a few columns typical of analytics tasks.
+
+\* concurrency is in development but not fully implemented as of version 0.1.0
+
+## Analysis Web Dashboard
+
+The Analysis Web Dashboard is still under construction. This feature will let you remotely view the logs collected from Kronicler.
+
+#### Mock-up
+
+The Web Dashboard may look something like this. It will show important information about all of the functions at the top. It will also include a graph of the functions performance over time.
+
+<img width="1442" height="885" alt="image" src="https://github.com/user-attachments/assets/69f03f71-9e94-473a-b309-9a13dae94ff5" />
+
+This mock-up was created with Claude and the future dashboard my vary substantially. 
+
+## Logging
+
+By adding the `capture` decorator to your code (as seen below), Kronicler will automatically test the runtime of your function when it gets called. The results of the test get added to the database. This data can later be viewed in the [Analysis Web Dashboard](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#analysis-web-dashboard).
+
+```python
+import kronicler
+
+@kronicler.capture()
+def my_function():
+	pass
+```
 
 <!--
 
