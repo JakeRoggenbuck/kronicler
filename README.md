@@ -13,7 +13,7 @@ Automatic performance analysis for production applications.
 pip install kronicler
 ```
 
-## Usage in Python
+## Usage (Python)
 
 ```python
 import kronicler
@@ -49,6 +49,8 @@ kronicler = "0.1.0"
 use kronicler;
 ```
 -->
+
+Install and Usage for Rust is coming soon...
 
 ## Architecture
 
