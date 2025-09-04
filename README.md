@@ -11,7 +11,7 @@ Automatic performance capture and analysis for production applications in Python
 <!--[![Downloads](https://img.shields.io/crates/d/kronicler?style=for-the-badge)](https://crates.io/crates/kronicler)-->
 
 > [!IMPORTANT]
-> Kronicler is still early in development! Currently you can install and try out the [logging](https://github.com/JakeRoggenbuck/kronicler/edit/main/README.md#logging)! [Analysis](https://github.com/JakeRoggenbuck/kronicler/edit/main/README.md#analysis) features are coming soon.
+> Kronicler is still early in development! Currently you can install and try out the [logging](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#logging). [Analysis](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#analysis) features are coming soon.
 
 ## Benefits of using Kronicler
 
