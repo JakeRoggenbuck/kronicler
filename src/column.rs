@@ -54,14 +54,14 @@ impl Column {
         self.metadata.current_index += 1;
     }
 
-    pub fn fetch(&self, index: usize) -> Option<FieldType> {
+    pub fn fetch(&mut self, index: usize) -> Option<FieldType> {
         info!("Fetching {}", index);
         let field_type_size = self.metadata.field_type.get_size();
 
-        let bufferpool = self.bufferpool.read();
+        let bufferpool = self.bufferpool.write();
 
         match bufferpool {
-            Ok(bp) => return bp.fetch(index, self.metadata.column_number, field_type_size),
+            Ok(mut bp) => return bp.fetch(index, self.metadata.column_number, field_type_size),
             Err(e) => {
                 info!("{}", e);
                 return None;

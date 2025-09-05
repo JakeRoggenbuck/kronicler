@@ -53,7 +53,7 @@ impl Bufferpool {
     }
 
     pub fn create_page(&mut self, column_index: usize, field_type: FieldType) -> Arc<Mutex<Page>> {
-        let p = Page::new(self.page_index, column_index, field_type);
+        let p = Page::new(self.page_index, column_index, field_type.get_size());
         let page = Arc::new(Mutex::new(p));
 
         self.pages_collections[column_index].insert(self.page_index, page.clone());
@@ -74,7 +74,7 @@ impl Bufferpool {
     }
 
     pub fn fetch(
-        &self,
+        &mut self,
         index: usize,
         column_index: usize,
         field_type_size: usize,
@@ -94,9 +94,15 @@ impl Bufferpool {
                 return b.get_value(index_in_page);
             }
         } else {
-            // TODO: Check if the page exists
-            //
-            // If it exists, open it and save it to the self.pages_collections
+            // The page was not loading in yet, so open the page
+            let mut page = Page::new(pid, column_index, field_type_size);
+            page.open();
+
+            // Then load the page into the pages_collections
+            self.pages_collections[column_index].insert(pid, Arc::new(Mutex::new(page)));
+
+            // Excellent use of recursion. Call this function again now that the page is loaded
+            return self.fetch(index, column_index, field_type_size);
         }
 
         None
@@ -125,7 +131,7 @@ impl Bufferpool {
             b.write_page();
         } else {
             // Open the page cause it was not opened
-            let mut new_page = Page::new(pid, column_index, value.clone());
+            let mut new_page = Page::new(pid, column_index, value.get_size());
             new_page.open();
             // TODO: Remove clone if possible
             new_page.set_value(index_in_page, value.clone());

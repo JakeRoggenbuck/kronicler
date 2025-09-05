@@ -8,6 +8,7 @@ pub enum FieldType {
 }
 
 impl FieldType {
+    // TODO: Use to_string trait
     pub fn to_string(&self) -> String {
         match self {
             FieldType::Name(a) => {
@@ -50,5 +51,17 @@ pub struct Row {
 impl Row {
     pub fn new(id: RID, fields: Vec<FieldType>) -> Self {
         Row { id, fields }
+    }
+
+    // TODO: Use to_string trait
+    pub fn to_string(&self) -> String {
+        let strs: Vec<String> = self
+            .fields
+            .clone()
+            .into_iter()
+            .map(|x| x.to_string())
+            .collect::<Vec<String>>();
+
+        format!("Row {{ id: {}, fields: {:?}}}", self.id, strs)
     }
 }

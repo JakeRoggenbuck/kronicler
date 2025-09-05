@@ -102,12 +102,12 @@ impl Database {
         }
     }
 
-    pub fn fetch(&self, index: usize) -> Vec<Row> {
+    pub fn fetch(&mut self, index: usize) -> Row {
         info!("Starting fetch on index {}", index);
 
         let mut data = vec![];
 
-        for col in &self.columns {
+        for col in &mut self.columns {
             let field = col.fetch(index);
 
             if let Some(f) = field {
@@ -115,10 +115,10 @@ impl Database {
             }
         }
 
-        vec![Row {
+        Row {
             id: 0,
             fields: data,
-        }]
+        }
     }
 
     fn create_data_dir() {

@@ -28,11 +28,11 @@ impl Page {
         let data = self.read_page();
 
         self.data = Some(data);
+
+        info!("Wrote page data.");
     }
 
-    pub fn new(pid: PageID, column_index: usize, field_type: FieldType) -> Self {
-        let field_type_size = field_type.get_size();
-
+    pub fn new(pid: PageID, column_index: usize, field_type_size: usize) -> Self {
         Page {
             pid,
             data: None,
