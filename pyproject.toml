@@ -11,6 +11,19 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dynamic = ["version"]
+authors = [
+  {name = "Jake Roggenbuck", email = "jakeroggenbuck2@gmail.com"},
+]
+maintainers = [
+  {name = "Jake Roggenbuck", email = "jakeroggenbuck2@gmail.com"},
+]
+description = "Automatic performance capture and analysis for production applications in Python using a custom columnar database written in Rust."
+readme = "README.md"
+license = "MIT"
+keywords = ["analytics", "metrics", "database", "columnar"]
+[project.urls]
+Repository = "https://github.com/JakeRoggenbuck/kronicler"
+Homepage = "https://github.com/JakeRoggenbuck/kronicler"
 [tool.maturin]
 features = ["pyo3/extension-module"]
 python-source = "python"
