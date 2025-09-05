@@ -55,13 +55,13 @@ impl Row {
 
     // TODO: Use to_string trait
     pub fn to_string(&self) -> String {
-        let strs: Vec<String> = self
-            .fields
-            .clone()
-            .into_iter()
-            .map(|x| x.to_string())
-            .collect::<Vec<String>>();
+        let name = self.fields[0].to_string();
+        let start = self.fields[1].clone();
+        let end = self.fields[2].clone();
 
-        format!("Row {{ id: {}, fields: {:?}}}", self.id, strs)
+        format!(
+            "Row {{ id: {}, fields: [\"{}\", {:?}, {:?}]}}",
+            self.id, name, start, end
+        )
     }
 }
