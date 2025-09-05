@@ -17,7 +17,7 @@ Automatic performance capture and analysis for production applications in Python
 ## Benefits of using Kronicler
 
 - Automatic performance capturing
-- Light-weight and concurrent\*
+- Lightweight and concurrent\*
 - One Python dependency
 - Works out-of-the-box without configuration 
 
@@ -131,7 +131,7 @@ kronicler = "0.1.0"
 
 ## Performance
 
-Kronicler is designed to be as light-weight as possible. By adding logs to a queue concurrently\*, Kronicler doesn't affect performance by much \[citation needed\].
+Kronicler is designed to be as lightweight as possible. By adding logs to a queue concurrently\*, Kronicler doesn't affect performance by much \[citation needed\].
 
 For accessing logs and running calculations, Kronicler uses a columnar database design to optimize file operations when looking at lots of data from only a few columns typical of analytics tasks.
 
