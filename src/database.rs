@@ -102,7 +102,7 @@ impl Database {
         }
     }
 
-    pub fn fetch(&mut self, index: usize) -> Row {
+    pub fn fetch(&mut self, index: usize) -> Option<Row> {
         info!("Starting fetch on index {}", index);
 
         let mut data = vec![];
@@ -115,10 +115,15 @@ impl Database {
             }
         }
 
-        Row {
-            id: 0,
-            fields: data,
+        // TODO: Fix this to make it a better check for unwritten data
+        if data[1] == FieldType::Epoch(0) {
+            return None;
         }
+
+        Some(Row {
+            id: index,
+            fields: data,
+        })
     }
 
     fn create_data_dir() {
