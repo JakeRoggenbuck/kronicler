@@ -160,7 +160,11 @@ cargo install kronicler
 You can view all of your data by running `kr` in the directory of your data:
 
 ```
-kr
+kr --fetch all
+```
+
+```
+kr --fetch <index>
 ```
 
 You should see the data collected:
