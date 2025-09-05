@@ -2,12 +2,20 @@
 name = "kronicler"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
 exclude = [
     "tests/*",
     "python/*",
     "images/*",
     "Makefile"
 ]
+description = "Automatic performance capture and analysis for production applications in Python using a custom columnar database written in Rust."
+homepage = "https://github.com/JakeRoggenbuck/kronicler"
+repository = "https://github.com/JakeRoggenbuck/kronicler"
+readme = "README.md"
+categories = ["database", "development-tools"]
+keywords = ["analytics", "metrics", "database", "columnar"]
+authors = ["jakeroggenbuck <jakeroggenbuck2@gmail.com"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
