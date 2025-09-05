@@ -147,7 +147,7 @@ The Web Dashboard may look something like this. It will show important informati
 
 <img width="1442" height="885" alt="image" src="https://github.com/user-attachments/assets/69f03f71-9e94-473a-b309-9a13dae94ff5" />
 
-This mock-up was created with Claude and the future dashboard my vary substantially. 
+This mock-up was created with Claude and the future dashboard may vary substantially.
 
 ## Analytics CLI
 
@@ -189,7 +189,7 @@ def my_function():
 
 #### Building
 
-Build the packagekronicler
+Build the package
 
 ```sh
 maturin build
