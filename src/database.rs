@@ -8,6 +8,7 @@ use log::info;
 use pyo3::prelude::*;
 use std::collections::VecDeque;
 use std::fs;
+use std::path::Path;
 use std::sync::{Arc, Mutex, RwLock};
 
 #[pyclass]
@@ -20,7 +21,28 @@ pub struct Database {
 impl Database {
     #[new]
     pub fn new() -> Self {
+        Database::check_for_data();
         Database::create_data_dir();
+
+        Database::new_reader()
+    }
+
+    #[staticmethod]
+    pub fn exists() -> bool {
+        Path::new(&DATA_DIRECTORY).exists()
+    }
+
+    #[staticmethod]
+    pub fn check_for_data() {
+        if !Database::exists() {
+            eprintln!("Database does not exist at \"{}\".", &DATA_DIRECTORY);
+            std::process::exit(0);
+        }
+    }
+
+    #[staticmethod]
+    pub fn new_reader() -> Self {
+        Database::check_for_data();
 
         let bp = Bufferpool::new(3);
         let bufferpool = Arc::new(RwLock::new(bp));
