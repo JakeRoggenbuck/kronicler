@@ -169,7 +169,7 @@ kr --fetch <index>
 
 You should see the data collected:
 
-<img width="1172" height="337" alt="image" src="https://github.com/user-attachments/assets/671ba1de-dce5-4700-9298-172dcce944f7" />
+<img width="1177" height="531" alt="image" src="https://github.com/user-attachments/assets/bd1d3867-b201-4d6d-9c00-9734536be7e4" />
 
 In the future, there will be many options for sorting, filtering, and viewing specific statistics.
 
