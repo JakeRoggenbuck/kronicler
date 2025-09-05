@@ -148,6 +148,26 @@ The Web Dashboard may look something like this. It will show important informati
 
 This mock-up was created with Claude and the future dashboard my vary substantially. 
 
+## Analytics CLI
+
+#### Install the Analytics CLI
+
+```
+cargo install kronicler
+```
+
+You can view all of your data by running `kr` in the directory of your data:
+
+```
+kr
+```
+
+You should see the data collected:
+
+<img width="1172" height="337" alt="image" src="https://github.com/user-attachments/assets/671ba1de-dce5-4700-9298-172dcce944f7" />
+
+In the future, there will be many options for sorting, filtering, and viewing specific statistics.
+
 ## Logging
 
 By adding the `capture` decorator to your code (as seen below), Kronicler will automatically test the runtime of your function when it gets called. The results of the test get added to the database. This data can later be viewed in the [Analysis Web Dashboard](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#analysis-web-dashboard).
@@ -164,7 +184,7 @@ def my_function():
 
 #### Building
 
-Build the package
+Build the packagekronicler
 
 ```sh
 maturin build
