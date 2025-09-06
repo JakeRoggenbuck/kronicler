@@ -1,5 +1,6 @@
 use database::Database;
 use pyo3::prelude::*;
+use row::Row;
 
 pub mod bufferpool;
 pub mod capture;
@@ -30,5 +31,6 @@ fn kronicler(m: &Bound<'_, PyModule>) -> PyResult<()> {
     init_logging();
 
     m.add_class::<Database>()?;
+    m.add_class::<Row>()?;
     Ok(())
 }

@@ -3,10 +3,41 @@ use pyo3::prelude::*;
 pub type RID = usize;
 pub type Epoch = u128;
 
+#[pyclass]
 #[derive(Debug, Eq, Clone, PartialEq, Ord, PartialOrd)]
 pub enum FieldType {
     Name([u8; 64]),
     Epoch(Epoch),
+}
+
+#[pymethods]
+impl FieldType {
+    fn __repr__(&self) -> String {
+        match self {
+            FieldType::Name(arr) => {
+                let name = arr
+                    .iter()
+                    .take_while(|&&c| c != 0)
+                    .map(|&c| c as char)
+                    .collect::<String>();
+
+                format!("FieldType::Name(\"{}\")", name)
+            }
+            FieldType::Epoch(e) => format!("FieldType::Epoch({})", e),
+        }
+    }
+
+    fn __str__(&self) -> String {
+        match self {
+            FieldType::Name(arr) => arr
+                .iter()
+                .take_while(|&&c| c != 0)
+                .map(|&c| c as char)
+                .collect::<String>(),
+
+            FieldType::Epoch(e) => e.to_string(),
+        }
+    }
 }
 
 impl FieldType {
@@ -44,10 +75,12 @@ impl FieldType {
     }
 }
 
-#[pyclass]
 #[derive(Debug, Clone, PartialEq)]
+#[pyclass]
 pub struct Row {
+    #[pyo3(get)]
     pub id: RID,
+    #[pyo3(get)]
     pub fields: Vec<FieldType>,
 }
 
@@ -66,5 +99,23 @@ impl Row {
             "Row {{ id: {}, fields: [\"{}\", {:?}, {:?}]}}",
             self.id, name, start, end
         )
+    }
+}
+
+#[pymethods]
+impl Row {
+    fn __str__(&self) -> String {
+        let name = self.fields[0].to_string();
+        let start = self.fields[1].clone();
+        let end = self.fields[2].clone();
+
+        format!(
+            "Row(id={}, fields=[\"{}\", {:?}, {:?}])",
+            self.id, name, start, end
+        )
+    }
+
+    fn __repr__(&self) -> String {
+        self.__str__()
     }
 }
