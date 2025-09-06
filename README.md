@@ -1,5 +1,4 @@
-![Kronicler](./images/Kronicler-light-mode.svg#gh-light-mode-only)
-![Kronicler](./images/Kronicler-dark-mode.svg#gh-dark-mode-only)
+![Kronicler](./images/Kronicler-logo.svg)
 
 Automatic performance capture and analysis for production applications in Python using a custom columnar database written in Rust.
 
