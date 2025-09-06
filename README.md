@@ -6,9 +6,9 @@ Automatic performance capture and analysis for production applications in Python
 [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://github.com/JakeRoggenbuck?tab=repositories&q=&type=&language=python&sort=stargazers)
 [![Rust](https://img.shields.io/github/actions/workflow/status/jakeroggenbuck/kronicler/CI.yml?branch=main&style=for-the-badge)](https://github.com/JakeRoggenbuck/kronicler/actions)
 [![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/jakeroggenbuck/kronicler?style=for-the-badge)](https://github.com/JakeRoggenbuck/kronicler)
-<!--[![Version](https://img.shields.io/pypi/v/kronicler?style=for-the-badge)](https://pypi.org/project/kronicler)-->
-<!--[![Crates Version](https://img.shields.io/crates/v/kronicler?style=for-the-badge)](https://crates.io/crates/kronicler)-->
-<!--[![Downloads](https://img.shields.io/crates/d/kronicler?style=for-the-badge)](https://crates.io/crates/kronicler)-->
+[![Version](https://img.shields.io/pypi/v/kronicler?style=for-the-badge)](https://pypi.org/project/kronicler)
+[![Crates Version](https://img.shields.io/crates/v/kronicler?style=for-the-badge)](https://crates.io/crates/kronicler)
+[![Downloads](https://img.shields.io/crates/d/kronicler?style=for-the-badge)](https://crates.io/crates/kronicler)
 
 > [!IMPORTANT]
 > Kronicler is still early in development! Currently you can install and try out the [logging](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#logging). [Analysis](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#analysis) features are coming soon.
