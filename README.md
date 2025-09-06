@@ -175,7 +175,7 @@ In the future, there will be many options for sorting, filtering, and viewing sp
 
 ## Logging
 
-By adding the `capture` decorator to your code (as seen below), Kronicler will automatically test the runtime of your function when it gets called. The results of the test get added to the database. This data can later be viewed in the [Analysis Web Dashboard](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#analysis-web-dashboard).
+By adding the `capture` decorator to your code (as seen below), Kronicler will automatically test the runtime of your function when it gets called. The results of the test get added to the database. This data can later be viewed in the [Analysis Web Dashboard](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#analysis-web-dashboard) or the [Analytics CLI](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#analytics-cli).
 
 ```python
 import kronicler
