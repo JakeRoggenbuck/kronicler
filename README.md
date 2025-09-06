@@ -114,7 +114,7 @@ Code from [tests/fastapi-test/main.py](https://github.com/JakeRoggenbuck/kronicl
 
 ## Using Kronicler's database directly
 
-If you're interested in using Kronicler's database directly to add custom logging functions (or just to use a columnar database), the library is published to <!--[crates.io](https://crates.io/crates/kronicler).-->.
+If you're interested in using Kronicler's database directly to add custom logging functions (or just to use a columnar database), the library is published to [crates.io](https://crates.io/crates/kronicler).
 
 #### Install with Cargo for Rust
 
