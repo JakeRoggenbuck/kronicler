@@ -91,6 +91,30 @@ impl Database {
         // Doing this single threaded right now
         self.consume_capture(queue_clone);
     }
+
+    pub fn fetch(&mut self, index: usize) -> Option<Row> {
+        info!("Starting fetch on index {}", index);
+
+        let mut data = vec![];
+
+        for col in &mut self.columns {
+            let field = col.fetch(index);
+
+            if let Some(f) = field {
+                data.push(f);
+            }
+        }
+
+        // TODO: Fix this to make it a better check for unwritten data
+        if data[1] == FieldType::Epoch(0) {
+            return None;
+        }
+
+        Some(Row {
+            id: index,
+            fields: data,
+        })
+    }
 }
 
 impl Database {
@@ -122,30 +146,6 @@ impl Database {
                 }
             }
         }
-    }
-
-    pub fn fetch(&mut self, index: usize) -> Option<Row> {
-        info!("Starting fetch on index {}", index);
-
-        let mut data = vec![];
-
-        for col in &mut self.columns {
-            let field = col.fetch(index);
-
-            if let Some(f) = field {
-                data.push(f);
-            }
-        }
-
-        // TODO: Fix this to make it a better check for unwritten data
-        if data[1] == FieldType::Epoch(0) {
-            return None;
-        }
-
-        Some(Row {
-            id: index,
-            fields: data,
-        })
     }
 
     fn create_data_dir() {

@@ -1,3 +1,5 @@
+use pyo3::prelude::*;
+
 pub type RID = usize;
 pub type Epoch = u128;
 
@@ -42,6 +44,7 @@ impl FieldType {
     }
 }
 
+#[pyclass]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Row {
     pub id: RID,
