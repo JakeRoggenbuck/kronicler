@@ -187,7 +187,7 @@ def my_function():
 
 ## Development
 
-#### Building
+#### Building the Python package
 
 Build the package
 
