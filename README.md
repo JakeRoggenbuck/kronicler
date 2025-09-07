@@ -29,6 +29,16 @@ If you want to monitor the performance of a production application, kronicler of
 
 A use-case for these statistics is to find functions that occasionally operate much slower than they do on average. By looking at the "slowest" speed, the standard error, and the mean, you can find functions that occasionally run much slower than expected. Sometimes it's hard to find and replicate these issues in a test environment, so keeping logs in your production application can improve your ability to find these issues.
 
+## What really is Kronicler
+
+| Name                     | Description                                                                                                                                        | Link                                                                                                                           |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| **Kronicler (Python)**   | A [Python library](https://pypi.org/project/kronicler/) that provides the `@kronicler.capture` decorator to save performance logs to a database.   | [More about Python](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#install-python)                   |
+| **Kronicler (Database)** | Custom columnar database designed for log capturing and performance analysis.                                                                      | [More about Database](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#architecture)                   |
+| **Kronicler (Rust)**     | A [Rust library](https://crates.io/crates/kronicler) for accessing the columnar database and capture functions for Rust-based log capturing tasks. | [More about Rust](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#using-kroniclers-database-directly) |
+| **Kronicler (CLI)**      | Rust-based CLI tool for analyzing performance logs captured with the capture methods.                                                              | [More about CLI](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#analytics-cli)                       |
+| **Kronicler (Web)**      | Prototype web portal for remotely viewing performance logs.                                                                                        | [More about Web](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#analysis-web-dashboard)              |
+
 ## Install (Python)
 
 #### Install with Pip for Python
