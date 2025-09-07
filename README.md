@@ -88,9 +88,7 @@ I plan to implement the Rust version as an `attribute` to be used like the follo
 
 ```rust
 #[capture]
-fn foo() {
-	todo!()
-}
+fn foo() { todo!() }
 ```
 
 ## Examples
