@@ -21,7 +21,6 @@ pub struct Database {
 impl Database {
     #[new]
     pub fn new() -> Self {
-        Database::check_for_data();
         Database::create_data_dir();
 
         Database::new_reader()

@@ -83,6 +83,18 @@ fn foo() {
 
 ## Examples
 
+#### Using Kronicler (Basic Example)
+
+Here is the most basic usage of Kronicler. Use it to capture the runtime of functions by adding the `@kronicler.capture` decorator.
+
+```python
+import kronicler
+
+@kronicler.capture
+def foo():
+    print("Foo")
+```
+
 #### Using Kronicler with FastAPI
 
 With just two lines of code, you can add Kronicler to your [FastAPI](https://fastapi.tiangolo.com) server.
@@ -111,9 +123,27 @@ if __name__ == "__main__":
 
 Code from [tests/fastapi-test/main.py](https://github.com/JakeRoggenbuck/kronicler/blob/main/tests/fastapi-test/main.py).
 
+## Using Kronicler manually
+
+It's recommended to first use Kronicler's build-in `capture` decorator. However, if you want to write your own capture statements and fetch data yourself, you can use the functions in that come with the Python library.
+
+```python
+import kronicler
+
+DB = kronicler.Database()
+
+def foo():
+    DB.capture("String Value", [], 100, 200)
+
+fetched = DB.fetch(0)
+print(fetched)
+```
+
+More functionality will be added to the Python library in future releases.
+
 ## Using Kronicler's database directly
 
-If you're interested in using Kronicler's database directly to add custom logging functions (or just to use a columnar database), the library is published to [crates.io](https://crates.io/crates/kronicler).
+If you're interested in using Kronicler's database directly in Rust to add custom logging functions (or just to use a columnar database), the library is published to [crates.io](https://crates.io/crates/kronicler).
 
 #### Install with Cargo for Rust
 
@@ -126,6 +156,41 @@ Add as a dependency in your `Cargo.toml`.
 ```toml
 [dependencies]
 kronicler = "0.1.0"
+```
+
+To get a good idea of how to use Kronicler's internal Rust database, I'd recommended looking at some of the tests in the Rust files. You can also look at the source code for the `kr` binary in [main.rs](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/bin/main.rs).
+
+Here is an example of a function that fetches data based on index. It creates a `Database` from the `new_reader` trait.
+
+```rs
+use kronicler::database::Database;
+
+fn fetch_one(index: usize) {
+    let mut db = Database::new_reader();
+
+    let row = db.fetch(index);
+
+    if let Some(r) = row {
+        println!("{}", r.to_string());
+    }
+}
+
+fn main() {
+    fetch_one(0);
+    fetch_one(1);
+}
+```
+
+You can also make a database that writes new capture data with the `new` trait.
+
+```rs
+use kronicler::database::Database;
+
+fn main() {
+    let mut db = Database::new();
+
+    db.capture("Name".to_string(), vec![], 100, 200);
+}
 ```
 
 ## Performance
