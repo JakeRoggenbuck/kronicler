@@ -1,6 +1,6 @@
 ![Kronicler](./images/Kronicler-logo.svg)
 
-Automatic performance capture and analysis for production applications in Python using a custom columnar database written in Rust.
+Automatic performance capture and analytics for production applications in Python using a custom columnar database written in Rust.
 
 [![Rust](https://img.shields.io/badge/Rust-1A5D8A?style=for-the-badge&logo=rust&logoColor=white)](https://github.com/JakeRoggenbuck?tab=repositories&q=&type=&language=rust&sort=stargazers)
 [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://github.com/JakeRoggenbuck?tab=repositories&q=&type=&language=python&sort=stargazers)
@@ -12,7 +12,7 @@ Automatic performance capture and analysis for production applications in Python
 View Kronicler on [PyPi.org](https://pypi.org/project/kronicler), [Crates.io](https://crates.io/crates/kronicler) and [GitHub](https://github.com/JakeRoggenbuck/kronicler).
 
 > [!IMPORTANT]
-> Kronicler is still early in development! Currently you can install and try out the [logging](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#logging). [Analysis](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#analysis) features are coming soon.
+> Kronicler is still early in development! Currently you can install and try out the [logging](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#logging). [Analytics](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#analytics) features are coming soon.
 
 ## Benefits of using Kronicler
 
@@ -35,10 +35,10 @@ A use-case for these statistics is to find functions that occasionally operate m
 | Name                     | Description                                                                                                                                        | Link                                                                                                                           |
 | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | **Kronicler (Python)**   | A [Python library](https://pypi.org/project/kronicler/) that provides the `@kronicler.capture` decorator to save performance logs to a database.   | [More about Python](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#install-python)                             |
-| **Kronicler (Database)** | Custom columnar database designed for log capturing and performance analysis.                                                                      | [More about Database](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#architecture)                             |
+| **Kronicler (Database)** | Custom columnar database designed for log capturing and performance analytics.                                                                     | [More about Database](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#architecture)                             |
 | **Kronicler (Rust)**     | A [Rust library](https://crates.io/crates/kronicler) for accessing the columnar database and capture functions for Rust-based log capturing tasks. | [More about Rust](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#using-kroniclers-database-directly)           |
 | **Kronicler (CLI)**      | Rust-based CLI tool for analyzing performance logs captured with the capture methods.                                                              | [More about CLI](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#analytics-cli)                                 |
-| **Kronicler (Web)**      | Prototype web portal for remotely viewing performance logs.                                                                                        | [More about Web](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#analysis-web-dashboard)                        |
+| **Kronicler (Web)**      | Prototype web portal for remotely viewing performance logs.                                                                                        | [More about Web](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#analytics-web-dashboard)                       |
 
 ## Install (Python)
 
@@ -211,9 +211,9 @@ For accessing logs and running calculations, Kronicler uses a columnar database 
 
 \* concurrency is in development but not fully implemented as of version 0.1.0. Track concurrency in [issue #41](https://github.com/JakeRoggenbuck/kronicler/issues/41).
 
-## Analysis Web Dashboard
+## Analytics Web Dashboard
 
-The Analysis Web Dashboard is still under construction. This feature will let you remotely view the logs collected from Kronicler.
+The Analytics Web Dashboard is still under construction. This feature will let you remotely view the logs collected from Kronicler.
 
 #### Mock-up
 
@@ -249,7 +249,7 @@ In the future, there will be many options for sorting, filtering, and viewing sp
 
 ## Logging
 
-By adding the `capture` decorator to your code (as seen below), Kronicler will automatically test the runtime of your function when it gets called. The results of the test get added to the database. This data can later be viewed in the [Analysis Web Dashboard](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#analysis-web-dashboard) or the [Analytics CLI](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#analytics-cli).
+By adding the `capture` decorator to your code (as seen below), Kronicler will automatically test the runtime of your function when it gets called. The results of the test get added to the database. This data can later be viewed in the [Analytics Web Dashboard](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#analytics-web-dashboard) or the [Analytics CLI](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#analytics-cli).
 
 ```python
 import kronicler
