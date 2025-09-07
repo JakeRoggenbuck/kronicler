@@ -277,7 +277,15 @@ Install the package
 pip install --force-reinstall target/wheels/kronicler-*
 ```
 
-#### Testing
+#### Testing Python scrips
+
+You can run the scripts in [tests/](https://github.com/JakeRoggenbuck/kronicler/tree/main/tests) to test out the functionality of Kronicler.
+
+```sh
+python3 tests/many_test.py
+```
+
+#### Testing Rust
 
 You can run the testing suite with the following command:
 
