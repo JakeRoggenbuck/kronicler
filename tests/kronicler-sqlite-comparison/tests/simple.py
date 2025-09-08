@@ -1,6 +1,8 @@
 import kronicler_sqlite
 import kronicler
 import time
+import json
+
 
 WARMUP_COUNT = 10
 CAPTURE_COUNT = 1000
@@ -52,14 +54,21 @@ def test_columnar():
 
 
 if __name__ == "__main__":
+    data = []
+
     for x in range(REPEATS):
 
         start = time.time_ns()
         test_sqlite()
         end = time.time_ns()
         print(f"{test_sqlite.__name__} took {end - start}ns")
+        data.append((test_sqlite.__name__, end - start))
 
         start = time.time_ns()
         test_columnar()
         end = time.time_ns()
         print(f"{test_columnar.__name__} took {end - start}ns")
+        data.append((test_columnar.__name__, end - start))
+
+    with open("data.json", "w") as file:
+        json.dump(data, file)
