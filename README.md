@@ -293,11 +293,11 @@ if __name__ == "__main__":
         json.dump(avg_times_data, file)
 ```
 
-The inserts were significantly faster:
+##### Inserts: The inserts were significantly faster:
 
 <img width="800" height="500" alt="inserts 1000" src="https://github.com/user-attachments/assets/56f8b224-0064-4d1a-b5b9-a1555b87243b" />
 
-So where the tests to get the average time delta:
+##### Averages: So where the tests to get the average time delta:
 
 <img width="800" height="500" alt="avg 1000" src="https://github.com/user-attachments/assets/fd7270f6-3651-4a01-a19b-655247e2559d" />
 
