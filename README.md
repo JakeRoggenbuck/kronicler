@@ -48,6 +48,8 @@ A use-case for these statistics is to find functions that occasionally operate m
 pip install kronicler
 ```
 
+You may need to use a [virtual environment](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#python-virtual-environment).
+
 ## Usage (Python)
 
 Kronicler provides a Python decorator called `capture` that will calculate the time it takes to run the function.
