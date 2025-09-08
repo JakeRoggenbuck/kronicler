@@ -2,6 +2,10 @@ import kronicler_sqlite
 import kronicler
 import time
 
+WARMUP_COUNT = 10
+CAPTURE_COUNT = 1000
+REPEATS = 5
+
 
 @kronicler_sqlite.capture
 def foo_1():
@@ -27,11 +31,11 @@ def test_sqlite():
     ## Test for kronicler_sqlite
 
     # Warmup
-    for _ in range(10):
+    for _ in range(WARMUP_COUNT):
         foo_1()
 
     # Test
-    for _ in range(10_000):
+    for _ in range(CAPTURE_COUNT):
         foo_1()
 
 
@@ -39,16 +43,16 @@ def test_columnar():
     ## Test for kronicler
 
     # Warmup
-    for _ in range(10):
+    for _ in range(WARMUP_COUNT):
         foo_2()
 
     # Test
-    for _ in range(10_000):
+    for _ in range(CAPTURE_COUNT):
         foo_2()
 
 
 if __name__ == "__main__":
-    for x in range(5):
+    for x in range(REPEATS):
 
         start = time.time_ns()
         test_sqlite()
