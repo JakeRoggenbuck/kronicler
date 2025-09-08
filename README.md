@@ -299,6 +299,42 @@ The tests should all succeed
 
 <img width="1157" height="377" alt="image" src="https://github.com/user-attachments/assets/aae0fb07-f9d5-4482-a06e-1e2e5e6eb320" />
 
+## Publishing
+
+#### Publishing to Crates.io
+
+##### 1. Increment the version everywhere
+
+##### 2. Run the publish dry-run
+
+```
+cargo publish --dry-run
+```
+
+##### 3. Check package list
+
+```
+cargo package --list
+```
+
+Check that only the needed Rust files are included.
+
+##### 4. Publish!
+
+```
+cargo publish
+```
+
+#### Publishing to PyPi.org
+
+Use maturin to publish the package
+
+```
+maturin publish --username __token__ --password <API Token>
+```
+
+You may need to get a new API token from [PyPi.org](https://pypi.org/manage/account/token/).
+
 ## Misc Docs
 
 #### Python Virtual Environment
