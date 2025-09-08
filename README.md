@@ -263,13 +263,15 @@ def my_function():
 
 #### Building the Python package
 
-Build the package
+##### 1. Build the package
 
 ```sh
 maturin build
 ```
 
-Install the package
+You will need maturin installed, see [Install Maturin](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#install-maturin).
+
+##### 2. Install the package
 
 ```sh
 pip install --force-reinstall target/wheels/kronicler-*
@@ -312,5 +314,13 @@ source .venv/bin/activate
 ```
 
 I usually call my virtual environment either `.venv` or more frequently just `venv`
+
+#### Install Maturin
+
+```sh
+pip install maturin
+```
+
+For more info, see the [maturin docs](https://github.com/PyO3/maturin).
 
 <!-- :frog: -->
