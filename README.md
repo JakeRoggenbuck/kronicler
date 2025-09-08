@@ -29,7 +29,7 @@ If you want to monitor the performance of a production application, kronicler of
 
 A use-case for these statistics is to find functions that occasionally operate much slower than they do on average. By looking at the "slowest" speed, the standard error, and the mean, you can find functions that occasionally run much slower than expected. Sometimes it's hard to find and replicate these issues in a test environment, so keeping logs in your production application can improve your ability to find these issues.
 
-## What really is Kronicler
+## What really is Kronicler?
 
 
 | Name                     | Description                                                                                                                                        | Link                                                                                                                           |
