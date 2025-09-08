@@ -213,6 +213,94 @@ For accessing logs and running calculations, Kronicler uses a columnar database 
 
 \* concurrency is in development but not fully implemented as of version 0.1.0. Track concurrency in [issue #41](https://github.com/JakeRoggenbuck/kronicler/issues/41).
 
+### Kronicler DB vs. SQLite
+
+I implemented a [test version of Kronicler](https://github.com/JakeRoggenbuck/kronicler/tree/main/tests/kronicler-sqlite-comparison) logging that uses SQLite under the hood to benchmark against.
+
+#### Experiment 1. Insert 1000 captures
+
+Here is the function that we capture with `kronicler_sqlite.capture` defined by our test package that uses SQLite.
+
+```python
+@kronicler_sqlite.capture
+def foo_1():
+    val = 9
+
+    for x in range(4):
+        val += val + x
+
+    return val
+```
+
+Here is where we call the function `CAPTURE_COUNT` times. Which in this case is 1000.
+
+```python
+def test_sqlite():
+    ## Test for kronicler_sqlite
+
+    # Warmup
+    for _ in range(WARMUP_COUNT):
+        foo_1()
+
+    # Test
+    for _ in range(CAPTURE_COUNT):
+        foo_1()
+```
+
+We do the same for the Kronicler DB version with `kronicler.capture`.
+
+We then run each of those functions a few times and log the results:
+
+```python
+if __name__ == "__main__":
+    insert_times_data = []
+    avg_times_data = []
+
+    for x in range(REPEATS):
+
+        # TEST sqlite inserts
+        start = time.time_ns()
+        test_sqlite()
+        end = time.time_ns()
+        print(f"{test_sqlite.__name__} took {end - start}ns")
+        insert_times_data.append((test_sqlite.__name__, end - start))
+
+        # TEST sqlite avg
+        start = time.time_ns()
+        avg_sqlite()
+        end = time.time_ns()
+        print(f"{avg_sqlite.__name__} took {end - start}ns")
+        avg_times_data.append((avg_sqlite.__name__, end - start))
+
+        # TEST columnar inserts
+        start = time.time_ns()
+        test_columnar()
+        end = time.time_ns()
+        print(f"{test_columnar.__name__} took {end - start}ns")
+        insert_times_data.append((test_columnar.__name__, end - start))
+
+        # TEST columnar avg
+        start = time.time_ns()
+        avg_columnar()
+        end = time.time_ns()
+        print(f"{avg_columnar.__name__} took {end - start}ns")
+        avg_times_data.append((avg_columnar.__name__, end - start))
+
+    with open("insert_data.json", "w") as file:
+        json.dump(insert_times_data, file)
+
+    with open("avg_data.json", "w") as file:
+        json.dump(avg_times_data, file)
+```
+
+The inserts were significantly faster:
+
+<img width="800" height="500" alt="inserts 1000" src="https://github.com/user-attachments/assets/56f8b224-0064-4d1a-b5b9-a1555b87243b" />
+
+So where the tests to get the average time delta:
+
+<img width="800" height="500" alt="avg 1000" src="https://github.com/user-attachments/assets/fd7270f6-3651-4a01-a19b-655247e2559d" />
+
 ## Analytics Web Dashboard
 
 The Analytics Web Dashboard is still under construction. This feature will let you remotely view the logs collected from Kronicler.
