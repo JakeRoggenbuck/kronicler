@@ -20,11 +20,13 @@ def capture(func):
         # for a in args:
         #   if isinstance(a, str):
         #       strings.append(a)
-        func(*args, **krawgs)
+        value = func(*args, **krawgs)
 
         end: int = time.time_ns()
 
         DB.capture(func.__name__, args, start, end)
+
+        return value
 
     return wrapper
 
