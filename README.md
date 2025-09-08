@@ -295,4 +295,22 @@ The tests should all succeed
 
 <img width="1157" height="377" alt="image" src="https://github.com/user-attachments/assets/aae0fb07-f9d5-4482-a06e-1e2e5e6eb320" />
 
+## Misc Docs
+
+#### Python Virtual Environment
+
+Create the virtual environment
+
+```py
+python3 -m venv .venv
+```
+
+Enter the virtual environment
+
+```
+source .venv/bin/activate
+```
+
+I usually call my virtual environment either `.venv` or more frequently just `venv`
+
 <!-- :frog: -->
