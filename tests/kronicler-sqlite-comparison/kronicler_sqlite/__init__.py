@@ -22,7 +22,7 @@ class Database:
             conn.commit()
 
     def capture(self, func_name: str, args: tuple, start_ns: int, end_ns: int):
-        args_json = json.dumps([str(arg) for arg in args])
+        # args_json = json.dumps([str(arg) for arg in args])
         timestamp = datetime.now().isoformat()
 
         with sqlite3.connect(self.db_path) as conn:
@@ -30,7 +30,7 @@ class Database:
                 INSERT INTO function_calls
                 (function_name, args, start_time, end_time, timestamp)
                 VALUES (?, ?, ?, ?, ?)
-            """, (func_name, args_json, start_ns, end_ns, timestamp))
+            """, (func_name, "", start_ns, end_ns, timestamp))
             conn.commit()
 
 DB = Database()

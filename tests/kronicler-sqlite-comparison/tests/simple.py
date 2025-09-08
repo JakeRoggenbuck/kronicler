@@ -5,7 +5,7 @@ import json
 
 
 WARMUP_COUNT = 10
-CAPTURE_COUNT = 1000
+CAPTURE_COUNT = 100
 REPEATS = 5
 
 
@@ -54,7 +54,7 @@ def test_columnar():
 
 
 if __name__ == "__main__":
-    data = []
+    insert_times_data = []
 
     for x in range(REPEATS):
 
@@ -62,13 +62,17 @@ if __name__ == "__main__":
         test_sqlite()
         end = time.time_ns()
         print(f"{test_sqlite.__name__} took {end - start}ns")
-        data.append((test_sqlite.__name__, end - start))
+        insert_times_data.append((test_sqlite.__name__, end - start))
+
+        #avg_sqlite()
 
         start = time.time_ns()
         test_columnar()
         end = time.time_ns()
         print(f"{test_columnar.__name__} took {end - start}ns")
-        data.append((test_columnar.__name__, end - start))
+        insert_times_data.append((test_columnar.__name__, end - start))
 
-    with open("data.json", "w") as file:
-        json.dump(data, file)
+        #avg_columnar()
+
+    with open("insert_data.json", "w") as file:
+        json.dump(insert_times_data, file)

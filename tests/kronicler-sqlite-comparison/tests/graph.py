@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import json
 
 
-with open("data.json") as file:
+with open("insert_data.json") as file:
     data = json.load(file)
 
 # Separate data
