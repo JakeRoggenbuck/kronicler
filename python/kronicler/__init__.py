@@ -31,7 +31,6 @@ def capture(func):
 
 def decorator_example(func):
     def wrapper():
-
         print("Kronicler start...")
 
         func()
@@ -41,6 +40,4 @@ def decorator_example(func):
     return wrapper
 
 
-__all__: Final[list[str]] = [
-    "kronicler"
-]
+__all__: Final[list[str]] = ["kronicler"]
