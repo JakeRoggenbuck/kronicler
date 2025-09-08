@@ -43,7 +43,9 @@ impl Database {
     pub fn new_reader() -> Self {
         Database::check_for_data();
 
-        let bp = Bufferpool::new(3);
+        let column_count = 4;
+
+        let bp = Bufferpool::new(column_count);
         let bufferpool = Arc::new(RwLock::new(bp));
 
         let name_col = Column::new(
@@ -67,9 +69,20 @@ impl Database {
             FieldType::Epoch(0),
         );
 
+        let delta_col = Column::new(
+            "delta".to_string(),
+            3,
+            bufferpool.clone(),
+            FieldType::Epoch(0),
+        );
+
+        let columns = vec![name_col, start_col, end_col, delta_col];
+
+        assert_eq!(columns.len(), column_count);
+
         Database {
             queue: KQueue::new(),
-            columns: vec![name_col, start_col, end_col],
+            columns,
         }
     }
 

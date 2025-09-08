@@ -21,6 +21,7 @@ impl KQueue {
             args,
             start,
             end,
+            delta: end - start,
         };
 
         info!("Added {:?} to log", &c);

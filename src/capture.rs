@@ -7,6 +7,7 @@ pub struct Capture {
     pub args: Vec<PyObject>,
     pub start: Epoch,
     pub end: Epoch,
+    pub delta: Epoch,
 }
 
 impl Capture {
@@ -21,6 +22,7 @@ impl Capture {
                 FieldType::Name(name_bytes),
                 FieldType::Epoch(self.start),
                 FieldType::Epoch(self.end),
+                FieldType::Epoch(self.delta),
             ],
         }
     }

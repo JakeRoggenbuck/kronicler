@@ -94,10 +94,11 @@ impl Row {
         let name = self.fields[0].to_string();
         let start = self.fields[1].clone();
         let end = self.fields[2].clone();
+        let delta = self.fields[3].clone();
 
         format!(
-            "Row {{ id: {}, fields: [\"{}\", {:?}, {:?}]}}",
-            self.id, name, start, end
+            "Row {{ id: {}, fields: [\"{}\", {:?}, {:?}, {:?}]}}",
+            self.id, name, start, end, delta
         )
     }
 }
@@ -108,10 +109,11 @@ impl Row {
         let name = self.fields[0].to_string();
         let start = self.fields[1].clone();
         let end = self.fields[2].clone();
+        let delta = self.fields[3].clone();
 
         format!(
-            "Row(id={}, fields=[\"{}\", {:?}, {:?}])",
-            self.id, name, start, end
+            "Row(id={}, fields=[\"{}\", {:?}, {:?}, {:?}])",
+            self.id, name, start, end, delta
         )
     }
 
