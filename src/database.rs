@@ -2,19 +2,23 @@ use super::bufferpool::Bufferpool;
 use super::capture::Capture;
 use super::column::Column;
 use super::constants::{DATA_DIRECTORY, DB_WRITE_BUFFER_SIZE};
+use super::index::Index;
 use super::queue::KQueue;
 use super::row::{Epoch, FieldType, Row};
-use log::info;
+use log::{debug, info};
 use pyo3::prelude::*;
 use std::collections::VecDeque;
 use std::fs;
 use std::path::Path;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex, RwLock};
 
 #[pyclass]
 pub struct Database {
     queue: KQueue,
     columns: Vec<Column>,
+    name_index: Index,
+    row_id: AtomicUsize,
 }
 
 #[pymethods]
@@ -80,9 +84,14 @@ impl Database {
 
         assert_eq!(columns.len(), column_count);
 
+        let name_index = Index::new();
+
         Database {
             queue: KQueue::new(),
             columns,
+            name_index,
+            // TODO: Load this in from metadata
+            row_id: AtomicUsize::new(0),
         }
     }
 
@@ -139,13 +148,14 @@ impl Database {
             while !q.is_empty() {
                 let capture = q.pop_front();
 
-                let index = 0;
-
                 if let Some(c) = capture {
                     // TODO: Replace for real ID
                     // Maybe it does not need an ID?
                     // Because the columns keep track of that
-                    let row = c.to_row(index);
+
+                    // Get the self.row_id value (prev) and then add one to self.row_id
+                    let prev = self.row_id.fetch_add(1, Ordering::SeqCst);
+                    let row = c.to_row(prev);
 
                     info!("Writing {:?}...", &row);
 
@@ -153,8 +163,13 @@ impl Database {
                     let mut col_index = 0;
                     for field in &row.fields {
                         self.columns[col_index].insert(field);
+
+                        debug!("{:?}", self.name_index);
+
                         col_index += 1;
                     }
+
+                    self.name_index.insert(row.clone(), 0);
                 }
             }
         }
