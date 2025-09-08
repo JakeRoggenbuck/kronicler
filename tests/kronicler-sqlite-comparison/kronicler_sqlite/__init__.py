@@ -1,7 +1,5 @@
 import time
 import sqlite3
-import json
-from datetime import datetime
 
 
 class Database:
@@ -16,22 +14,32 @@ class Database:
                     args TEXT,
                     start_time INTEGER NOT NULL,
                     end_time INTEGER NOT NULL,
-                    timestamp TEXT NOT NULL
+                    delta INTEGER NOT NULL
                 )
             """)
             conn.commit()
 
     def capture(self, func_name: str, args: tuple, start_ns: int, end_ns: int):
-        args_json = json.dumps([str(arg) for arg in args])
-        timestamp = datetime.now().isoformat()
+        delta = end_ns - start_ns
 
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("""
                 INSERT INTO function_calls
-                (function_name, args, start_time, end_time, timestamp)
+                (function_name, args, start_time, end_time, delta)
                 VALUES (?, ?, ?, ?, ?)
-            """, (func_name, args_json, start_ns, end_ns, timestamp))
+            """, (func_name, "", start_ns, end_ns, delta))
             conn.commit()
+
+    def average(self, function_name: str) -> float:
+        """Return the average delta in nanoseconds for a specific function."""
+        with sqlite3.connect(self.db_path) as conn:
+            result = conn.execute("""
+                SELECT AVG(delta)
+                FROM function_calls
+                WHERE function_name = ?
+            """, (function_name,)).fetchone()[0]
+            return result if result is not None else 0.0
+
 
 DB = Database()
 

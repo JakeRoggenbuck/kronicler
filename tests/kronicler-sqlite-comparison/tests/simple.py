@@ -5,7 +5,7 @@ import json
 
 
 WARMUP_COUNT = 10
-CAPTURE_COUNT = 1000
+CAPTURE_COUNT = 100
 REPEATS = 5
 
 
@@ -53,22 +53,56 @@ def test_columnar():
         foo_2()
 
 
+def avg_sqlite() -> float:
+    DB = kronicler_sqlite.Database()
+
+    avg = DB.average("foo_1")
+    return avg
+
+
+def avg_columnar() -> float:
+    DB = kronicler.Database()
+
+    avg = DB.average("foo_2")
+    return avg
+
+
 if __name__ == "__main__":
-    data = []
+    insert_times_data = []
+    avg_times_data = []
 
     for x in range(REPEATS):
 
+        # TEST sqlite inserts
         start = time.time_ns()
         test_sqlite()
         end = time.time_ns()
         print(f"{test_sqlite.__name__} took {end - start}ns")
-        data.append((test_sqlite.__name__, end - start))
+        insert_times_data.append((test_sqlite.__name__, end - start))
 
+        # TEST sqlite avg
+        start = time.time_ns()
+        avg_sqlite()
+        end = time.time_ns()
+        print(f"{avg_sqlite.__name__} took {end - start}ns")
+        avg_times_data.append((avg_sqlite.__name__, end - start))
+
+        # TEST columnar inserts
         start = time.time_ns()
         test_columnar()
         end = time.time_ns()
         print(f"{test_columnar.__name__} took {end - start}ns")
-        data.append((test_columnar.__name__, end - start))
+        insert_times_data.append((test_columnar.__name__, end - start))
 
-    with open("data.json", "w") as file:
-        json.dump(data, file)
+        # TEST columnar avg
+        start = time.time_ns()
+        avg_columnar()
+        end = time.time_ns()
+        print(f"{avg_columnar.__name__} took {end - start}ns")
+        avg_times_data.append((avg_columnar.__name__, end - start))
+
+    with open("insert_data.json", "w") as file:
+        json.dump(insert_times_data, file)
+
+    with open("avg_data.json", "w") as file:
+        json.dump(avg_times_data, file)

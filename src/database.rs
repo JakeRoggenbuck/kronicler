@@ -141,8 +141,12 @@ impl Database {
     }
 
     /// Find the average time a function took to run
-    pub fn average(&mut self, function_name: FieldType) -> Option<f64> {
-        if let Some(ids) = self.name_index.get(function_name) {
+    pub fn average(&mut self, function_name: &str) -> Option<f64> {
+        let mut name_bytes = [0u8; 64];
+        let bytes = function_name.as_bytes();
+        name_bytes[..bytes.len()].copy_from_slice(bytes);
+
+        if let Some(ids) = self.name_index.get(FieldType::Name(name_bytes)) {
             let mut values = vec![];
 
             for id in &ids {
@@ -226,18 +230,15 @@ mod tests {
         db.capture("hello".to_string(), vec![], 100, 200);
         db.capture("hello".to_string(), vec![], 300, 450);
 
-        let mut name_bytes = [0u8; 64];
         let name_str = "hello";
-        let bytes = name_str.as_bytes();
-        name_bytes[..bytes.len()].copy_from_slice(bytes);
 
-        let avg = db.average(FieldType::Name(name_bytes)).unwrap();
+        let avg = db.average(name_str).unwrap();
         assert_eq!(avg, 125.0);
 
         db.capture("hello".to_string(), vec![], 100, 300);
         db.capture("hello".to_string(), vec![], 300, 452);
 
-        let avg = db.average(FieldType::Name(name_bytes)).unwrap();
+        let avg = db.average(name_str).unwrap();
         assert_eq!(avg, 150.5);
     }
 }
