@@ -17,7 +17,9 @@ use std::sync::{Arc, Mutex, RwLock};
 pub struct Database {
     queue: KQueue,
     columns: Vec<Column>,
+    /// Index rows by `name` field in capture
     name_index: Index,
+    /// Keep track of the current row being inserted
     row_id: AtomicUsize,
 }
 
@@ -95,6 +97,7 @@ impl Database {
         }
     }
 
+    /// Capture a function and write it to the queue
     pub fn capture(&mut self, name: String, args: Vec<PyObject>, start: Epoch, end: Epoch) {
         self.queue.capture(name, args, start, end);
 
@@ -137,6 +140,7 @@ impl Database {
         })
     }
 
+    /// Find the average time a function took to run
     pub fn average(&mut self, function_name: FieldType) -> Option<f64> {
         if let Some(ids) = self.name_index.get(function_name) {
             let mut values = vec![];
