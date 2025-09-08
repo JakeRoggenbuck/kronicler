@@ -391,4 +391,18 @@ fn main() {
 
 You only need to call `try_init` once, and that's already done in [lib.rs](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/lib.rs) and [main.rs](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/bin/main.rs).
 
+#### Formatting for Python
+
+You can format all Python files with:
+
+```
+ruff format *.py
+```
+
+You can also check that they have the right format with:
+
+```
+ruff check *.py
+```
+
 <!-- :frog: -->
