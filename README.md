@@ -297,9 +297,23 @@ if __name__ == "__main__":
 
 <img width="800" height="500" alt="inserts 1000" src="https://github.com/user-attachments/assets/56f8b224-0064-4d1a-b5b9-a1555b87243b" />
 
+The data:
+
+```
+[["test_sqlite", 2522475112], ["test_columnar", 144274244], ["test_sqlite", 2461806212], ["test_columnar", 139670709], ["test_sqlite", 2447023113],
+["test_columnar", 140689219], ["test_sqlite", 2444356540], ["test_columnar", 142753131], ["test_sqlite", 2447511719], ["test_columnar", 147328073]]
+```
+
 ##### Averages: So where the tests to get the average time delta:
 
 <img width="800" height="500" alt="avg 1000" src="https://github.com/user-attachments/assets/fd7270f6-3651-4a01-a19b-655247e2559d" />
+
+The data:
+
+```
+[["avg_sqlite", 360146], ["avg_columnar", 30667], ["avg_sqlite", 628669], ["avg_columnar", 27301], ["avg_sqlite", 486973],
+["avg_columnar", 24526], ["avg_sqlite", 477205], ["avg_columnar", 26540], ["avg_sqlite", 846257], ["avg_columnar", 24796]]
+```
 
 ## Analytics Web Dashboard
 
