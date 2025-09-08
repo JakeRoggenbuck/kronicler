@@ -393,6 +393,8 @@ You only need to call `try_init` once, and that's already done in [lib.rs](https
 
 #### Formatting for Python
 
+Kronicler uses [Ruff](https://github.com/astral-sh/ruff) for formatting.
+
 You can format all Python files with:
 
 ```
@@ -404,5 +406,9 @@ You can also check that they have the right format with:
 ```
 ruff check *.py
 ```
+
+#### Formatting for Rust
+
+Kronicler uses `cargo fmt`
 
 <!-- :frog: -->
