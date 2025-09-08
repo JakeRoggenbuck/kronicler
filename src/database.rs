@@ -136,6 +136,34 @@ impl Database {
             fields: data,
         })
     }
+
+    pub fn average(&mut self, function_name: FieldType) -> Option<f64> {
+        if let Some(ids) = self.name_index.get(function_name) {
+            let mut values = vec![];
+
+            for id in &ids {
+                // TODO: This could be optimized
+                if let Some(row) = self.fetch(*id) {
+                    let delta_index = 3;
+
+                    let fs = row.fields;
+                    let f = fs[delta_index].clone();
+
+                    match f {
+                        FieldType::Epoch(e) => values.push(e),
+                        _ => {}
+                    }
+                }
+            }
+
+            let sum: u128 = values.iter().sum();
+            let avg = sum as f64 / values.len() as f64;
+
+            return Some(avg);
+        }
+
+        None
+    }
 }
 
 impl Database {
@@ -180,5 +208,32 @@ impl Database {
             .expect(&format!("Could not create directory '{}'.", DATA_DIRECTORY));
 
         info!("Created data directory at '{}'!", DATA_DIRECTORY);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn average_test() {
+        let mut db = Database::new();
+
+        db.capture("hello".to_string(), vec![], 100, 200);
+        db.capture("hello".to_string(), vec![], 300, 450);
+
+        let mut name_bytes = [0u8; 64];
+        let name_str = "hello";
+        let bytes = name_str.as_bytes();
+        name_bytes[..bytes.len()].copy_from_slice(bytes);
+
+        let avg = db.average(FieldType::Name(name_bytes)).unwrap();
+        assert_eq!(avg, 125.0);
+
+        db.capture("hello".to_string(), vec![], 100, 300);
+        db.capture("hello".to_string(), vec![], 300, 452);
+
+        let avg = db.average(FieldType::Name(name_bytes)).unwrap();
+        assert_eq!(avg, 150.5);
     }
 }

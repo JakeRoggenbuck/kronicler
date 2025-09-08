@@ -10,7 +10,7 @@ use std::collections::BTreeMap;
 /// Index { index: {String("Foo"): [1, 2]} }
 #[derive(Debug)]
 pub struct Index {
-    index: BTreeMap<FieldType, Vec<RID>>,
+    pub index: BTreeMap<FieldType, Vec<RID>>,
 }
 
 impl Index {
