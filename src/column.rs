@@ -7,7 +7,7 @@ use std::sync::{Arc, RwLock};
 /// Used to safe the state of the Column struct
 pub struct ColumnMetadata {
     // Which column it is
-    pub column_number: usize,
+    pub column_index: usize,
     pub current_index: usize,
     pub name: String,
     pub field_type: FieldType,
@@ -15,9 +15,9 @@ pub struct ColumnMetadata {
 
 /// Implement column specific traits
 impl ColumnMetadata {
-    fn new(name: String, column_number: usize, field_type: FieldType) -> Self {
+    fn new(name: String, column_index: usize, field_type: FieldType) -> Self {
         ColumnMetadata {
-            column_number,
+            column_index,
             current_index: 0,
             name,
             field_type,
@@ -49,7 +49,7 @@ impl Column {
 
         let mut bp = self.bufferpool.write().expect("Could write.");
         // Index is auto-incremented
-        bp.insert(i, self.metadata.column_number, value);
+        bp.insert(i, self.metadata.column_index, value);
 
         self.metadata.current_index += 1;
     }
@@ -61,7 +61,7 @@ impl Column {
         let bufferpool = self.bufferpool.write();
 
         match bufferpool {
-            Ok(mut bp) => return bp.fetch(index, self.metadata.column_number, field_type_size),
+            Ok(mut bp) => return bp.fetch(index, self.metadata.column_index, field_type_size),
             Err(e) => {
                 info!("{}", e);
                 return None;
@@ -71,17 +71,17 @@ impl Column {
 
     pub fn new(
         name: String,
-        column_number: usize,
+        column_index: usize,
         bufferpool: Arc<RwLock<Bufferpool>>,
         field_type: FieldType,
     ) -> Self {
         {
             // let mut bp = bufferpool.write().expect("Should write.");
-            // bp.create_column(column_number);
+            // bp.create_column(column_index);
         }
 
         Column {
-            metadata: ColumnMetadata::new(name, column_number, field_type),
+            metadata: ColumnMetadata::new(name, column_index, field_type),
             bufferpool,
         }
     }
