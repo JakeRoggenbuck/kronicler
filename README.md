@@ -373,7 +373,7 @@ RUST_LOG=info cargo run -- --fetch 0
 
 This will print the logs:
 
-TODO: Include image
+<img width="1171" height="653" alt="image" src="https://github.com/user-attachments/assets/60b7cab1-95f5-4f03-a73d-43660db6e5af" />
 
 ##### Adding a log
 
