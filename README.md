@@ -219,7 +219,7 @@ I implemented a [test version of Kronicler](https://github.com/JakeRoggenbuck/kr
 
 #### Experiment 1. Insert 1000 captures
 
-Here is the function that we capture with `kronicler_sqlite.capture` defined by our test package that uses SQLite.
+Here is the function that we capture with `kronicler_sqlite.capture` defined by our test package that uses SQLite. The [test file](https://github.com/JakeRoggenbuck/kronicler/blob/main/tests/kronicler-sqlite-comparison/tests/simple.py) is also included in git as well as the [graphing code](https://github.com/JakeRoggenbuck/kronicler/blob/main/tests/kronicler-sqlite-comparison/tests/graph.py).
 
 ```python
 @kronicler_sqlite.capture
