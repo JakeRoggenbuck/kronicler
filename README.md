@@ -361,4 +361,34 @@ pip install maturin
 
 For more info, see the [maturin docs](https://github.com/PyO3/maturin).
 
+#### Rust Logging
+
+Kronicler uses [env_logger](https://docs.rs/env_logger/latest/env_logger/) to log internals. To view these logs, you add the `RUST_LOG` env var.
+
+For instance, you can include the logger for `cargo run` with the `fetch` argument.
+
+```
+RUST_LOG=info cargo run -- --fetch 0
+```
+
+This will print the logs:
+
+TODO: Include image
+
+##### Adding a log
+
+You can add logs with the `info!` macro. There are also `debug!`, `warn!`, `trace!`, and `error!` variants.
+
+```rs
+use log::info;
+
+fn main() {
+    let _ = env_logger::try_init();
+
+    info!("Some info here");
+}
+```
+
+You only need to call `try_init` once, and that's already done in [lib.rs](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/lib.rs) and [main.rs](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/bin/main.rs).
+
 <!-- :frog: -->
