@@ -40,22 +40,22 @@ def test_columnar():
 
     # Warmup
     for _ in range(10):
-        foo_1()
+        foo_2()
 
     # Test
     for _ in range(10_000):
-        foo_1()
+        foo_2()
 
 
 if __name__ == "__main__":
     for x in range(5):
 
         start = time.time_ns()
-        test_columnar()
-        end = time.time_ns()
-        print(f"{test_columnar.__name__} took {end - start}ns")
-
-        start = time.time_ns()
         test_sqlite()
         end = time.time_ns()
         print(f"{test_sqlite.__name__} took {end - start}ns")
+
+        start = time.time_ns()
+        test_columnar()
+        end = time.time_ns()
+        print(f"{test_columnar.__name__} took {end - start}ns")
