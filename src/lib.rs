@@ -7,6 +7,7 @@ pub mod capture;
 pub mod column;
 pub mod constants;
 pub mod database;
+pub mod filewriter;
 pub mod index;
 pub mod metadata;
 pub mod page;
