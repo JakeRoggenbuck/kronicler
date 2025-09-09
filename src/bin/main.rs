@@ -1,6 +1,7 @@
 use kronicler::database::Database;
 use std::str::FromStr;
 use structopt::StructOpt;
+use log::debug;
 
 #[derive(Debug)]
 enum Fetch {
@@ -67,6 +68,8 @@ fn main() {
     init_logging();
 
     let opt = Opt::from_args();
+
+    debug!("Passed args and logging");
 
     match opt.fetch {
         Fetch::All => {

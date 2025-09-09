@@ -7,7 +7,7 @@ use std::path::Path;
 use std::sync::{Arc, RwLock};
 
 /// Used to safe the state of the Column struct
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct ColumnMetadata {
     // Which column it is
     pub column_index: usize,
@@ -59,8 +59,9 @@ impl Column {
     pub fn load(column_index: usize) -> ColumnMetadata {
         let writer: Writer<ColumnMetadata> = build_binary_writer();
         let filepath = format!("./.kronicler_data/column-{}.data", column_index);
+
         info!("Loading Column {} to {}", column_index, filepath);
-        return writer.read_file(filepath.as_str());
+        writer.read_file(filepath.as_str())
     }
 }
 
