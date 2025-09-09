@@ -304,6 +304,8 @@ The data:
 ["test_columnar", 140689219], ["test_sqlite", 2444356540], ["test_columnar", 142753131], ["test_sqlite", 2447511719], ["test_columnar", 147328073]]
 ```
 
+This is a **17.24x** speedup!
+
 ##### Averages: So where the tests to get the average time delta:
 
 <img width="800" height="500" alt="avg 1000" src="https://github.com/user-attachments/assets/fd7270f6-3651-4a01-a19b-655247e2559d" />
@@ -314,6 +316,8 @@ The data:
 [["avg_sqlite", 360146], ["avg_columnar", 30667], ["avg_sqlite", 628669], ["avg_columnar", 27301], ["avg_sqlite", 486973],
 ["avg_columnar", 24526], ["avg_sqlite", 477205], ["avg_columnar", 26540], ["avg_sqlite", 846257], ["avg_columnar", 24796]]
 ```
+
+This is a **20.92x** speedup!
 
 ## Analytics Web Dashboard
 
