@@ -34,9 +34,11 @@ pub struct Column {
 }
 
 /// Implement common traits from Metadata
+/// TODO: How do I use ./metadata.rs as a trait and then have the return time for `load` be the
+/// correct type? Right now, I will just have load and save be their own functions
 impl Column {
-    pub fn metadata_exists(&self) -> bool {
-        let filepath = format!("./kronicler/column-{}.data", self.metadata.column_index);
+    pub fn metadata_exists(column_index: usize) -> bool {
+        let filepath = format!("./kronicler/column-{}.data", column_index);
 
         Path::new(&filepath).exists()
     }
@@ -47,9 +49,9 @@ impl Column {
         writer.write_file(filepath.as_str(), &self.metadata);
     }
 
-    pub fn load(&self) -> ColumnMetadata {
+    pub fn load(column_index: usize) -> ColumnMetadata {
         let writer: Writer<ColumnMetadata> = build_binary_writer();
-        let filepath = format!("./kronicler/column-{}.data", self.metadata.column_index);
+        let filepath = format!("./kronicler/column-{}.data", column_index);
         return writer.read_file(filepath.as_str());
     }
 }
@@ -89,6 +91,14 @@ impl Column {
         {
             // let mut bp = bufferpool.write().expect("Should write.");
             // bp.create_column(column_index);
+        }
+
+        // Use existing metadata if it's around
+        if Column::metadata_exists(column_index) {
+            return Column {
+                metadata: Column::load(column_index),
+                bufferpool,
+            };
         }
 
         Column {
