@@ -144,6 +144,26 @@ impl Database {
         })
     }
 
+    pub fn fetch_all(&mut self) -> Vec<Row> {
+        let mut all = vec![];
+
+        let mut index = 0;
+
+        loop {
+            let row = self.fetch(index);
+
+            if let Some(r) = row {
+                all.push(r);
+            } else {
+                break;
+            }
+
+            index += 1;
+        }
+
+        all
+    }
+
     /// Find the average time a function took to run
     pub fn average(&mut self, function_name: &str) -> Option<f64> {
         let mut name_bytes = [0u8; 64];

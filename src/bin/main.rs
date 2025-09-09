@@ -48,18 +48,8 @@ fn init_logging() {
 fn fetch_all() {
     let mut db = Database::new_reader();
 
-    let mut index = 0;
-
-    loop {
-        let row = db.fetch(index);
-
-        if let Some(r) = row {
-            println!("{}", r.to_string());
-        } else {
-            break;
-        }
-
-        index += 1;
+    for row in db.fetch_all() {
+        println!("{}", row.to_string());
     }
 }
 
