@@ -1,5 +1,5 @@
 use super::bufferpool::Bufferpool;
-use super::filewriter::{build_binary_writer, build_json_writer, Writer};
+use super::filewriter::{build_binary_writer, Writer};
 use super::row::FieldType;
 use log::info;
 use serde::{Deserialize, Serialize};
@@ -44,7 +44,7 @@ impl Column {
     }
 
     pub fn save(&self) {
-        let writer: Writer<ColumnMetadata> = build_json_writer();
+        let writer: Writer<ColumnMetadata> = build_binary_writer();
         let filepath = format!(
             "./.kronicler_data/column-{}.data",
             self.metadata.column_index
@@ -57,7 +57,7 @@ impl Column {
     }
 
     pub fn load(column_index: usize) -> ColumnMetadata {
-        let writer: Writer<ColumnMetadata> = build_json_writer();
+        let writer: Writer<ColumnMetadata> = build_binary_writer();
         let filepath = format!("./.kronicler_data/column-{}.data", column_index);
         info!("Loading Column {} to {}", column_index, filepath);
         return writer.read_file(filepath.as_str());
