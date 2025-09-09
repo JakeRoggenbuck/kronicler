@@ -1,10 +1,13 @@
 use super::bufferpool::Bufferpool;
-use super::metadata::Metadata;
+use super::filewriter::{build_binary_writer, Writer};
 use super::row::FieldType;
 use log::info;
+use serde::{Deserialize, Serialize};
+use std::path::Path;
 use std::sync::{Arc, RwLock};
 
 /// Used to safe the state of the Column struct
+#[derive(Serialize, Deserialize)]
 pub struct ColumnMetadata {
     // Which column it is
     pub column_index: usize,
@@ -31,15 +34,23 @@ pub struct Column {
 }
 
 /// Implement common traits from Metadata
-impl Metadata for Column {
-    fn save() {
-        // Write self.metadata to a file
-        todo!()
+impl Column {
+    pub fn metadata_exists(&self) -> bool {
+        let filepath = format!("./kronicler/column-{}.data", self.metadata.column_index);
+
+        Path::new(&filepath).exists()
     }
 
-    fn load() {
-        // Load self.metadata from a file if it exists
-        todo!()
+    pub fn save(&self) {
+        let writer: Writer<ColumnMetadata> = build_binary_writer();
+        let filepath = format!("./kronicler/column-{}.data", self.metadata.column_index);
+        writer.write_file(filepath.as_str(), &self.metadata);
+    }
+
+    pub fn load(&self) -> ColumnMetadata {
+        let writer: Writer<ColumnMetadata> = build_binary_writer();
+        let filepath = format!("./kronicler/column-{}.data", self.metadata.column_index);
+        return writer.read_file(filepath.as_str());
     }
 }
 

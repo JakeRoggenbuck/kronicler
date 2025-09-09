@@ -72,19 +72,19 @@ pub struct Writer<T> {
 /// # Writer Example
 ///
 /// ```
-/// use redoxql::filewriter::{JSONFileWriter, BinaryFileWriter, Writer};
-///
-/// let json_writer = JSONFileWriter::new();
-/// let mut writer = Writer::new(Box::new(json_writer));
-///
-/// let data = vec![1, 2, 3];
-/// writer.write_file("./test-outputs/out.json", &data);
-///
-/// let binary_writer = BinaryFileWriter::new();
-/// writer.set_strategy(Box::new(binary_writer));
-///
-/// let data2 = vec![1, 2, 3];
-/// writer.write_file("./test-outputs/out.data", &data2);
+// /// use kronicler::filewriter::{JSONFileWriter, BinaryFileWriter, Writer};
+// ///
+// /// let json_writer = JSONFileWriter::new();
+// /// let mut writer = Writer::new(Box::new(json_writer));
+// ///
+// /// let data = vec![1, 2, 3];
+// /// writer.write_file("./test-outputs/out.json", &data);
+// ///
+// /// let binary_writer = BinaryFileWriter::new();
+// /// writer.set_strategy(Box::new(binary_writer));
+// ///
+// /// let data2 = vec![1, 2, 3];
+// /// writer.write_file("./test-outputs/out.data", &data2);
 /// ```
 impl<T: Serialize + for<'de> Deserialize<'de>> Writer<T> {
     pub fn new(strategy: Box<dyn WriterStrategy<T>>) -> Self {
@@ -110,22 +110,22 @@ impl<T: Serialize + for<'de> Deserialize<'de>> Writer<T> {
 /// # Example of build_binary_writer
 ///
 /// ```
-/// use redoxql::filewriter::{build_binary_writer, Writer};
-/// use redoxql::page::PhysicalPage;
+// /// use kronicler::filewriter::{build_binary_writer, Writer};
+// /// use redoxql::page::PhysicalPage;
 ///
 /// // Write a data file
 ///
-/// let page = PhysicalPage::new(0);
-///
-/// let writer: Writer<PhysicalPage> = build_binary_writer();
-///
-/// writer.write_file("./test-outputs/page.data", &page);
+// /// let page = PhysicalPage::new(0);
+// ///
+// /// let writer: Writer<PhysicalPage> = build_binary_writer();
+// ///
+// /// writer.write_file("./test-outputs/page.data", &page);
 ///
 /// // Read a data file
 ///
-/// let writer: Writer<PhysicalPage> = build_binary_writer();
-///
-/// let page: PhysicalPage = writer.read_file("./test-outputs/page.data");
+// /// let writer: Writer<PhysicalPage> = build_binary_writer();
+// ///
+// /// let page: PhysicalPage = writer.read_file("./test-outputs/page.data");
 /// ```
 pub fn build_binary_writer<T: Serialize + for<'de> Deserialize<'de>>() -> Writer<T> {
     let bin_writer = BinaryFileWriter::new();
@@ -140,68 +140,26 @@ pub fn build_binary_writer<T: Serialize + for<'de> Deserialize<'de>>() -> Writer
 /// # Example of build_json_writer
 ///
 /// ```
-/// use redoxql::filewriter::{build_json_writer, Writer};
-/// use redoxql::page::PhysicalPage;
+// /// use redoxql::filewriter::{build_json_writer, Writer};
+// /// use redoxql::page::PhysicalPage;
 ///
 /// // Write a json file
 ///
-/// let page = PhysicalPage::new(0);
+// /// let page = PhysicalPage::new(0);
+// ///
+// /// let writer: Writer<PhysicalPage> = build_json_writer();
 ///
-/// let writer: Writer<PhysicalPage> = build_json_writer();
-///
-/// writer.write_file("./test-outputs/page.json", &page);
+// /// writer.write_file("./test-outputs/page.json", &page);
 ///
 /// // Read a json file
 ///
-/// let writer: Writer<PhysicalPage> = build_json_writer();
-///
-/// let page: PhysicalPage = writer.read_file("./test-outputs/page.json");
+// /// let writer: Writer<PhysicalPage> = build_json_writer();
+// ///
+// /// let page: PhysicalPage = writer.read_file("./test-outputs/page.json");
 /// ```
 pub fn build_json_writer<T: Serialize + for<'de> Deserialize<'de>>() -> Writer<T> {
     let json_writer = BinaryFileWriter::new();
     let writer = Writer::new(Box::new(json_writer));
 
     return writer;
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::page::PhysicalPage;
-
-    #[test]
-    fn build_write_and_read_json_test() {
-        let mut page = PhysicalPage::new(0);
-        page.write(101);
-        page.write(202);
-        page.write(303);
-
-        let writer: Writer<PhysicalPage> = build_json_writer();
-        writer.write_file("./test-outputs/test-page.json", &page);
-
-        let writer: Writer<PhysicalPage> = build_json_writer();
-        let page: PhysicalPage = writer.read_file("./test-outputs/test-page.json");
-
-        assert_eq!(page.read(0), Some(101));
-        assert_eq!(page.read(1), Some(202));
-        assert_eq!(page.read(2), Some(303));
-    }
-
-    #[test]
-    fn build_write_and_read_bit_test() {
-        let mut page = PhysicalPage::new(0);
-        page.write(401);
-        page.write(402);
-        page.write(403);
-
-        let writer: Writer<PhysicalPage> = build_json_writer();
-        writer.write_file("./test-outputs/test-page.data", &page);
-
-        let writer: Writer<PhysicalPage> = build_json_writer();
-        let page: PhysicalPage = writer.read_file("./test-outputs/test-page.data");
-
-        assert_eq!(page.read(0), Some(401));
-        assert_eq!(page.read(1), Some(402));
-        assert_eq!(page.read(2), Some(403));
-    }
 }

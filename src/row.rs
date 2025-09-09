@@ -1,11 +1,14 @@
 use pyo3::prelude::*;
+use serde::{Deserialize, Serialize};
+use serde_big_array::BigArray;
 
 pub type RID = usize;
 pub type Epoch = u128;
 
 #[pyclass]
-#[derive(Debug, Eq, Clone, PartialEq, Ord, PartialOrd)]
+#[derive(Debug, Eq, Clone, PartialEq, Ord, PartialOrd, Serialize, Deserialize)]
 pub enum FieldType {
+    #[serde(with = "BigArray")]
     Name([u8; 64]),
     Epoch(Epoch),
 }
