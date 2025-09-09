@@ -1,6 +1,7 @@
 use kronicler::database::Database;
 use std::str::FromStr;
 use structopt::StructOpt;
+use log::debug;
 
 #[derive(Debug)]
 enum Fetch {
@@ -48,18 +49,8 @@ fn init_logging() {
 fn fetch_all() {
     let mut db = Database::new_reader();
 
-    let mut index = 0;
-
-    loop {
-        let row = db.fetch(index);
-
-        if let Some(r) = row {
-            println!("{}", r.to_string());
-        } else {
-            break;
-        }
-
-        index += 1;
+    for row in db.fetch_all() {
+        println!("{}", row.to_string());
     }
 }
 
@@ -77,6 +68,8 @@ fn main() {
     init_logging();
 
     let opt = Opt::from_args();
+
+    debug!("Passed args and logging");
 
     match opt.fetch {
         Fetch::All => {
