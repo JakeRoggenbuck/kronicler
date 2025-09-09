@@ -207,11 +207,117 @@ fn main() {
 
 ## Performance
 
-Kronicler is designed to be as lightweight as possible. By adding logs to a queue concurrently\*, Kronicler doesn't affect performance by much \[citation needed\].
+Kronicler is designed to be as lightweight as possible. By adding logs to a queue concurrently\*, Kronicler doesn't affect performance by much \[[PR #73](https://github.com/JakeRoggenbuck/kronicler/pull/73), [PR #76](https://github.com/JakeRoggenbuck/kronicler/pull/76)\].
 
 For accessing logs and running calculations, Kronicler uses a columnar database design to optimize file operations when looking at lots of data from only a few columns typical of analytics tasks.
 
 \* concurrency is in development but not fully implemented as of version 0.1.0. Track concurrency in [issue #41](https://github.com/JakeRoggenbuck/kronicler/issues/41).
+
+### Kronicler DB vs. SQLite
+
+I implemented a [test version of Kronicler](https://github.com/JakeRoggenbuck/kronicler/tree/main/tests/kronicler-sqlite-comparison) logging that uses SQLite under the hood to benchmark against.
+
+#### Experiment 1. Insert 1000 captures
+
+Here is the function that we capture with `kronicler_sqlite.capture` defined by our test package that uses SQLite. The [test file](https://github.com/JakeRoggenbuck/kronicler/blob/main/tests/kronicler-sqlite-comparison/tests/simple.py) is also included in git as well as the [graphing code](https://github.com/JakeRoggenbuck/kronicler/blob/main/tests/kronicler-sqlite-comparison/tests/graph.py).
+
+```python
+@kronicler_sqlite.capture
+def foo_1():
+    val = 9
+
+    for x in range(4):
+        val += val + x
+
+    return val
+```
+
+Here is where we call the function `CAPTURE_COUNT` times. Which in this case is 1000.
+
+```python
+def test_sqlite():
+    ## Test for kronicler_sqlite
+
+    # Warmup
+    for _ in range(WARMUP_COUNT):
+        foo_1()
+
+    # Test
+    for _ in range(CAPTURE_COUNT):
+        foo_1()
+```
+
+We do the same for the Kronicler DB version with `kronicler.capture`.
+
+We then run each of those functions a few times and log the results:
+
+```python
+if __name__ == "__main__":
+    insert_times_data = []
+    avg_times_data = []
+
+    for x in range(REPEATS):
+
+        # TEST sqlite inserts
+        start = time.time_ns()
+        test_sqlite()
+        end = time.time_ns()
+        print(f"{test_sqlite.__name__} took {end - start}ns")
+        insert_times_data.append((test_sqlite.__name__, end - start))
+
+        # TEST sqlite avg
+        start = time.time_ns()
+        avg_sqlite()
+        end = time.time_ns()
+        print(f"{avg_sqlite.__name__} took {end - start}ns")
+        avg_times_data.append((avg_sqlite.__name__, end - start))
+
+        # TEST columnar inserts
+        start = time.time_ns()
+        test_columnar()
+        end = time.time_ns()
+        print(f"{test_columnar.__name__} took {end - start}ns")
+        insert_times_data.append((test_columnar.__name__, end - start))
+
+        # TEST columnar avg
+        start = time.time_ns()
+        avg_columnar()
+        end = time.time_ns()
+        print(f"{avg_columnar.__name__} took {end - start}ns")
+        avg_times_data.append((avg_columnar.__name__, end - start))
+
+    with open("insert_data.json", "w") as file:
+        json.dump(insert_times_data, file)
+
+    with open("avg_data.json", "w") as file:
+        json.dump(avg_times_data, file)
+```
+
+##### Inserts: The inserts were significantly faster:
+
+<img width="800" height="500" alt="inserts 1000" src="https://github.com/user-attachments/assets/56f8b224-0064-4d1a-b5b9-a1555b87243b" />
+
+The data:
+
+```
+[["test_sqlite", 2522475112], ["test_columnar", 144274244], ["test_sqlite", 2461806212], ["test_columnar", 139670709], ["test_sqlite", 2447023113],
+["test_columnar", 140689219], ["test_sqlite", 2444356540], ["test_columnar", 142753131], ["test_sqlite", 2447511719], ["test_columnar", 147328073]]
+```
+
+This is a **17.24x** speedup!
+
+##### Averages: So where the tests to get the average time delta:
+
+<img width="800" height="500" alt="avg 1000" src="https://github.com/user-attachments/assets/fd7270f6-3651-4a01-a19b-655247e2559d" />
+
+The data:
+
+```
+[["avg_sqlite", 360146], ["avg_columnar", 30667], ["avg_sqlite", 628669], ["avg_columnar", 27301], ["avg_sqlite", 486973],
+["avg_columnar", 24526], ["avg_sqlite", 477205], ["avg_columnar", 26540], ["avg_sqlite", 846257], ["avg_columnar", 24796]]
+```
+
+This is a **20.92x** speedup!
 
 ## Analytics Web Dashboard
 
