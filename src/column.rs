@@ -1,5 +1,5 @@
 use super::bufferpool::Bufferpool;
-use super::filewriter::{build_binary_writer, Writer};
+use super::filewriter::{build_binary_writer, build_json_writer, Writer};
 use super::row::FieldType;
 use log::info;
 use serde::{Deserialize, Serialize};
@@ -38,20 +38,28 @@ pub struct Column {
 /// correct type? Right now, I will just have load and save be their own functions
 impl Column {
     pub fn metadata_exists(column_index: usize) -> bool {
-        let filepath = format!("./kronicler/column-{}.data", column_index);
+        let filepath = format!("./.kronicler_data/column-{}.data", column_index);
 
         Path::new(&filepath).exists()
     }
 
     pub fn save(&self) {
-        let writer: Writer<ColumnMetadata> = build_binary_writer();
-        let filepath = format!("./kronicler/column-{}.data", self.metadata.column_index);
+        let writer: Writer<ColumnMetadata> = build_json_writer();
+        let filepath = format!(
+            "./.kronicler_data/column-{}.data",
+            self.metadata.column_index
+        );
+        info!(
+            "Saving Column {} to {}",
+            self.metadata.column_index, filepath
+        );
         writer.write_file(filepath.as_str(), &self.metadata);
     }
 
     pub fn load(column_index: usize) -> ColumnMetadata {
-        let writer: Writer<ColumnMetadata> = build_binary_writer();
-        let filepath = format!("./kronicler/column-{}.data", column_index);
+        let writer: Writer<ColumnMetadata> = build_json_writer();
+        let filepath = format!("./.kronicler_data/column-{}.data", column_index);
+        info!("Loading Column {} to {}", column_index, filepath);
         return writer.read_file(filepath.as_str());
     }
 }

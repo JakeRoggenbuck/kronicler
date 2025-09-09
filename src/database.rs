@@ -86,6 +86,10 @@ impl Database {
 
         assert_eq!(columns.len(), column_count);
 
+        for col in &columns {
+            col.save();
+        }
+
         let name_index = Index::new();
 
         Database {

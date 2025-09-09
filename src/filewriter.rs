@@ -158,7 +158,7 @@ pub fn build_binary_writer<T: Serialize + for<'de> Deserialize<'de>>() -> Writer
 // /// let page: PhysicalPage = writer.read_file("./test-outputs/page.json");
 /// ```
 pub fn build_json_writer<T: Serialize + for<'de> Deserialize<'de>>() -> Writer<T> {
-    let json_writer = BinaryFileWriter::new();
+    let json_writer = JSONFileWriter::new();
     let writer = Writer::new(Box::new(json_writer));
 
     return writer;
