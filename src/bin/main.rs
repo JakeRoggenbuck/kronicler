@@ -1,7 +1,7 @@
 use kronicler::database::Database;
+use log::debug;
 use std::str::FromStr;
 use structopt::StructOpt;
-use log::debug;
 
 #[derive(Debug)]
 enum Fetch {
