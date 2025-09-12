@@ -16,18 +16,19 @@ sqlite_times_ms = [t / 1e6 for t in sqlite_times]
 columnar_times_ms = [t / 1e6 for t in columnar_times]
 no_logging_times_ms = [t / 1e6 for t in no_logging_times]
 
-# Plot Insert benchmark with no logging
+# Plot Insert benchmark with log scale
 plt.figure(figsize=(8, 5))
 plt.plot(runs, sqlite_times_ms, marker="o", label="SQLite")
 plt.plot(runs, columnar_times_ms, marker="o", label="Columnar")
 plt.plot(runs, no_logging_times_ms, marker="o", label="No Logging")
-plt.title("Insert Benchmark Results")
+plt.yscale("log")  # <-- Logarithmic scale
+plt.title("Insert Benchmark Results (Log Scale)")
 plt.xlabel("Run #")
-plt.ylabel("Time (ms)")
+plt.ylabel("Time (ms, log scale)")
 plt.legend()
-plt.grid(True)
+plt.grid(True, which="both", ls="--")  # grid for log scale
 plt.tight_layout()
-plt.savefig(f"insert_{len(runs)}.png")
+plt.savefig(f"insert_log_{len(runs)}.png")
 plt.show()
 
 
@@ -46,16 +47,17 @@ sqlite_times_ms = [t / 1e6 for t in sqlite_times]
 columnar_times_ms = [t / 1e6 for t in columnar_times]
 no_logging_times_ms = [t / 1e6 for t in no_logging_times]
 
-# Plot Average benchmark with no logging
+# Plot Average benchmark with log scale
 plt.figure(figsize=(8, 5))
 plt.plot(runs, sqlite_times_ms, marker="o", label="SQLite")
 plt.plot(runs, columnar_times_ms, marker="o", label="Columnar")
 plt.plot(runs, no_logging_times_ms, marker="o", label="No Logging")
-plt.title("Average Function Benchmark Results")
+plt.yscale("log")  # <-- Logarithmic scale
+plt.title("Average Function Benchmark Results (Log Scale)")
 plt.xlabel("Run #")
-plt.ylabel("Time (ms)")
+plt.ylabel("Time (ms, log scale)")
 plt.legend()
-plt.grid(True)
+plt.grid(True, which="both", ls="--")
 plt.tight_layout()
-plt.savefig(f"avg_{len(runs)}.png")
+plt.savefig(f"avg_log_{len(runs)}.png")
 plt.show()
