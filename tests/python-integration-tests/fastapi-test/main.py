@@ -20,7 +20,7 @@ def read_root():
 
 @app.get("/logs")
 def read_logs():
-    return db.fetch_all()
+    return db.fetch_all_as_dict()
 
 
 if __name__ == "__main__":

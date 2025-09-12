@@ -1,4 +1,5 @@
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
 use serde::{Deserialize, Serialize};
 use serde_big_array::BigArray;
 
@@ -40,6 +41,29 @@ impl FieldType {
 
             FieldType::Epoch(e) => e.to_string(),
         }
+    }
+
+    fn __dict__<'py>(&self, py: Python<'py>) -> Bound<'py, PyDict> {
+        let dict = PyDict::new(py);
+
+        match self {
+            FieldType::Name(arr) => {
+                let name: String = arr
+                    .iter()
+                    .take_while(|&&c| c != 0)
+                    .map(|&c| c as char)
+                    .collect();
+
+                dict.set_item("type", "Name").unwrap();
+                dict.set_item("value", name).unwrap();
+            }
+            FieldType::Epoch(e) => {
+                dict.set_item("type", "Epoch").unwrap();
+                dict.set_item("value", *e).unwrap();
+            }
+        }
+
+        dict
     }
 }
 
@@ -108,6 +132,18 @@ impl Row {
 
 #[pymethods]
 impl Row {
+    pub fn __dict__<'py>(&self, py: Python<'py>) -> Bound<'py, PyDict> {
+        let dict = PyDict::new(py);
+
+        let field_dicts: Vec<Bound<'py, PyDict>> =
+            self.fields.iter().map(|f| f.__dict__(py)).collect();
+
+        dict.set_item("id", self.id).unwrap();
+        dict.set_item("fields", field_dicts).unwrap();
+
+        dict
+    }
+
     fn __str__(&self) -> String {
         let name = self.fields[0].to_string();
         let start = self.fields[1].clone();

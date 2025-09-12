@@ -7,6 +7,7 @@ use super::queue::KQueue;
 use super::row::{Epoch, FieldType, Row};
 use log::{debug, info};
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
 use std::collections::VecDeque;
 use std::fs;
 use std::path::Path;
@@ -162,6 +163,12 @@ impl Database {
         }
 
         all
+    }
+
+    pub fn fetch_all_as_dict<'py>(&mut self, py: Python<'py>) -> Vec<Bound<'py, PyDict>> {
+        let a = self.fetch_all().into_iter().map(|x| x.__dict__(py));
+        let rows_dict: Vec<Bound<'py, PyDict>> = a.collect();
+        rows_dict
     }
 
     /// Find the average time a function took to run
