@@ -33,5 +33,6 @@ fn kronicler(m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     m.add_class::<Database>()?;
     m.add_class::<Row>()?;
+    m.add_function(wrap_pyfunction!(database::database_init, m)?)?;
     Ok(())
 }

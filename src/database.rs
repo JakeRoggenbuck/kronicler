@@ -113,7 +113,7 @@ impl Database {
             name_index,
             // TODO: Load this in from metadata
             row_id: AtomicUsize::new(0),
-            sync_consume: true,
+            sync_consume: false,
         }
     }
 
@@ -213,6 +213,8 @@ impl Database {
 
 impl Database {
     fn consume_capture(&mut self, queue: Arc<Mutex<VecDeque<Capture>>>) {
+        info!("Calling consume_capture");
+
         let mut q = queue.lock().unwrap();
 
         if q.len() > DB_WRITE_BUFFER_SIZE {
@@ -254,6 +256,15 @@ impl Database {
 
         info!("Created data directory at '{}'!", DATA_DIRECTORY);
     }
+}
+
+#[pyfunction]
+pub fn database_init() {
+    thread::spawn(|| {
+        let mut db = Database::new();
+
+        db.init();
+    });
 }
 
 #[cfg(test)]
