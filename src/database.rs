@@ -251,6 +251,8 @@ impl Database {
     ) {
         let mut q = queue.lock().unwrap();
 
+        info!("Running consume_capture_threaded with queue: {:?}!", q);
+
         if q.len() > DB_WRITE_BUFFER_SIZE {
             info!("Starting bulk write!");
 
