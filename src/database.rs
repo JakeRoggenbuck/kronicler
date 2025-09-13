@@ -124,8 +124,22 @@ impl Database {
     }
 
     /// Capture a function and write it to the queue
-    pub fn capture(&mut self, name: String, args: Vec<PyObject>, start: Epoch, end: Epoch) {
-        self.queue.capture(name, args, start, end);
+    /// FIXED: Now writes directly to the shared queue that the consumer thread monitors
+    pub fn capture(&self, name: String, args: Vec<PyObject>, start: Epoch, end: Epoch) {
+        // Create the capture object
+        let capture = Capture {
+            name,
+            args,
+            start,
+            end,
+            delta: end - start,
+        };
+
+        // Add directly to the shared queue that the consumer thread monitors
+        let mut queue = self.queue.queue.lock().unwrap();
+        queue.push_back(capture);
+
+        info!("Added capture to queue. Queue length: {}", queue.len());
     }
 
     pub fn fetch(&self, index: usize) -> Option<Row> {
@@ -251,7 +265,10 @@ impl Database {
     ) {
         let mut q = queue.lock().unwrap();
 
-        info!("Running consume_capture_threaded with queue: {:?}!", q);
+        info!(
+            "Running consume_capture_threaded with queue length: {}",
+            q.len()
+        );
 
         if q.len() > DB_WRITE_BUFFER_SIZE {
             info!("Starting bulk write!");
@@ -286,6 +303,8 @@ impl Database {
                     } // Release name_index lock
                 }
             }
+
+            info!("Bulk write completed!");
         }
     }
 
@@ -341,8 +360,14 @@ mod tests {
     fn average_test() {
         let mut db = Database::new();
 
+        // Start the consumer thread
+        let handle = db.init_with_handle();
+
         db.capture("hello".to_string(), vec![], 100, 200);
         db.capture("hello".to_string(), vec![], 300, 450);
+
+        // Give the consumer thread time to process
+        thread::sleep(time::Duration::from_millis(100));
 
         let name_str = "hello";
 
@@ -351,6 +376,9 @@ mod tests {
 
         db.capture("hello".to_string(), vec![], 100, 300);
         db.capture("hello".to_string(), vec![], 300, 452);
+
+        // Give the consumer thread time to process
+        thread::sleep(time::Duration::from_millis(100));
 
         let avg = db.average(name_str).unwrap();
         assert_eq!(avg, 150.5);
