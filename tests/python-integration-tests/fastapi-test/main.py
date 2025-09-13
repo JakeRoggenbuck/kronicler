@@ -4,6 +4,7 @@ import kronicler
 
 app = FastAPI()
 DB = kronicler.Database()
+kronicler.database_init()
 
 
 # You need to wrap helper functions

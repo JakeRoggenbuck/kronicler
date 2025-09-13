@@ -114,6 +114,11 @@ impl DatabaseInner {
                     self.name_index.insert(row.clone(), 0);
                 }
             }
+
+            // Save columns if there was new data
+            for col in &self.columns {
+                col.save();
+            }
         }
     }
 }
