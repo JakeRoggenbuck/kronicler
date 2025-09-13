@@ -13,15 +13,14 @@ use std::fs;
 use std::path::Path;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex, RwLock};
-use std::thread::JoinHandle;
 use std::{thread, time};
 
 #[pyclass]
 pub struct Database {
     queue: KQueue,
-    columns: Arc<Mutex<Vec<Column>>>,
+    columns: Vec<Column>,
     /// Index rows by `name` field in capture
-    name_index: Arc<Mutex<Index>>,
+    name_index: Index,
     /// Keep track of the current row being inserted
     row_id: AtomicUsize,
 }
@@ -35,24 +34,16 @@ impl Database {
         Database::new_reader()
     }
 
-    // Returns immediately while consumer runs in background - Python compatible
-    pub fn init(&self) {
-        let queue_clone = Arc::clone(&self.queue.queue);
-        let columns_clone = Arc::clone(&self.columns);
-        let name_index_clone = Arc::clone(&self.name_index);
-        let row_id = Arc::new(AtomicUsize::new(self.row_id.load(Ordering::SeqCst)));
+    // Used to turn on the capture consumer
+    pub fn init(&mut self) {
+        loop {
+            let queue_clone = Arc::clone(&self.queue.queue);
 
-        thread::spawn(move || loop {
-            Self::consume_capture_threaded(
-                queue_clone.clone(),
-                columns_clone.clone(),
-                name_index_clone.clone(),
-                &row_id,
-            );
+            self.consume_capture(queue_clone);
 
             let timeout = time::Duration::from_millis(CONSUMER_DELAY);
             thread::sleep(timeout);
-        });
+        }
     }
 
     #[staticmethod]
@@ -117,8 +108,9 @@ impl Database {
 
         Database {
             queue: KQueue::new(),
-            columns: Arc::new(Mutex::new(columns)),
-            name_index: Arc::new(Mutex::new(name_index)),
+            columns,
+            name_index,
+            // TODO: Load this in from metadata
             row_id: AtomicUsize::new(0),
         }
     }
@@ -128,13 +120,12 @@ impl Database {
         self.queue.capture(name, args, start, end);
     }
 
-    pub fn fetch(&self, index: usize) -> Option<Row> {
+    pub fn fetch(&mut self, index: usize) -> Option<Row> {
         info!("Starting fetch on index {}", index);
 
         let mut data = vec![];
 
-        let mut columns = self.columns.lock().unwrap();
-        for col in columns.iter_mut() {
+        for col in &mut self.columns {
             let field = col.fetch(index);
 
             if let Some(f) = field {
@@ -143,7 +134,7 @@ impl Database {
         }
 
         // TODO: Fix this to make it a better check for unwritten data
-        if data.len() > 1 && data[1] == FieldType::Epoch(0) {
+        if data[1] == FieldType::Epoch(0) {
             return None;
         }
 
@@ -153,7 +144,7 @@ impl Database {
         })
     }
 
-    pub fn fetch_all(&self) -> Vec<Row> {
+    pub fn fetch_all(&mut self) -> Vec<Row> {
         let mut all = vec![];
 
         let mut index = 0;
@@ -173,48 +164,40 @@ impl Database {
         all
     }
 
-    pub fn fetch_all_as_dict<'py>(&self, py: Python<'py>) -> Vec<Bound<'py, PyDict>> {
+    pub fn fetch_all_as_dict<'py>(&mut self, py: Python<'py>) -> Vec<Bound<'py, PyDict>> {
         let a = self.fetch_all().into_iter().map(|x| x.__dict__(py));
         let rows_dict: Vec<Bound<'py, PyDict>> = a.collect();
         rows_dict
     }
 
     /// Find the average time a function took to run
-    pub fn average(&self, function_name: &str) -> Option<f64> {
+    pub fn average(&mut self, function_name: &str) -> Option<f64> {
         let mut name_bytes = [0u8; 64];
         let bytes = function_name.as_bytes();
         name_bytes[..bytes.len()].copy_from_slice(bytes);
 
-        let name_index = self.name_index.lock().unwrap();
-        if let Some(ids) = name_index.get(FieldType::Name(name_bytes)) {
-            let ids_clone = ids.clone();
-            drop(name_index); // Release the lock early
-
+        if let Some(ids) = self.name_index.get(FieldType::Name(name_bytes)) {
             let mut values = vec![];
 
-            for id in &ids_clone {
+            for id in &ids {
                 // TODO: This could be optimized
                 if let Some(row) = self.fetch(*id) {
                     let delta_index = 3;
 
                     let fs = row.fields;
-                    if fs.len() > delta_index {
-                        let f = fs[delta_index].clone();
+                    let f = fs[delta_index].clone();
 
-                        match f {
-                            FieldType::Epoch(e) => values.push(e),
-                            _ => {}
-                        }
+                    match f {
+                        FieldType::Epoch(e) => values.push(e),
+                        _ => {}
                     }
                 }
             }
 
-            if !values.is_empty() {
-                let sum: u128 = values.iter().sum();
-                let avg = sum as f64 / values.len() as f64;
+            let sum: u128 = values.iter().sum();
+            let avg = sum as f64 / values.len() as f64;
 
-                return Some(avg);
-            }
+            return Some(avg);
         }
 
         None
@@ -222,72 +205,6 @@ impl Database {
 }
 
 impl Database {
-    // If you need the JoinHandle for testing, use this method instead
-    pub fn init_with_handle(&self) -> JoinHandle<()> {
-        let queue_clone = Arc::clone(&self.queue.queue);
-        let columns_clone = Arc::clone(&self.columns);
-        let name_index_clone = Arc::clone(&self.name_index);
-        let row_id = Arc::new(AtomicUsize::new(self.row_id.load(Ordering::SeqCst)));
-
-        thread::spawn(move || loop {
-            Self::consume_capture_threaded(
-                queue_clone.clone(),
-                columns_clone.clone(),
-                name_index_clone.clone(),
-                &row_id,
-            );
-
-            let timeout = time::Duration::from_millis(CONSUMER_DELAY);
-            thread::sleep(timeout);
-        })
-    }
-
-    // New threaded version of consume_capture
-    fn consume_capture_threaded(
-        queue: Arc<Mutex<VecDeque<Capture>>>,
-        columns: Arc<Mutex<Vec<Column>>>,
-        name_index: Arc<Mutex<Index>>,
-        row_id: &AtomicUsize,
-    ) {
-        let mut q = queue.lock().unwrap();
-
-        if q.len() > DB_WRITE_BUFFER_SIZE {
-            info!("Starting bulk write!");
-
-            while !q.is_empty() {
-                let capture = q.pop_front();
-
-                if let Some(c) = capture {
-                    // Get the row_id value (prev) and then add one to row_id
-                    let prev = row_id.fetch_add(1, Ordering::SeqCst);
-                    let row = c.to_row(prev);
-
-                    info!("Writing {:?}...", &row);
-
-                    // Insert each field into its respective column
-                    {
-                        let mut cols = columns.lock().unwrap();
-                        let mut col_index = 0;
-                        for field in &row.fields {
-                            if col_index < cols.len() {
-                                cols[col_index].insert(field);
-                                col_index += 1;
-                            }
-                        }
-                    } // Release columns lock
-
-                    // Insert into name index
-                    {
-                        let mut idx = name_index.lock().unwrap();
-                        debug!("{:?}", *idx);
-                        idx.insert(row.clone(), 0);
-                    } // Release name_index lock
-                }
-            }
-        }
-    }
-
-    // Original consume_capture method (kept for compatibility)
     fn consume_capture(&mut self, queue: Arc<Mutex<VecDeque<Capture>>>) {
         let mut q = queue.lock().unwrap();
 
@@ -298,6 +215,10 @@ impl Database {
                 let capture = q.pop_front();
 
                 if let Some(c) = capture {
+                    // TODO: Replace for real ID
+                    // Maybe it does not need an ID?
+                    // Because the columns keep track of that
+
                     // Get the self.row_id value (prev) and then add one to self.row_id
                     let prev = self.row_id.fetch_add(1, Ordering::SeqCst);
                     let row = c.to_row(prev);
@@ -306,18 +227,15 @@ impl Database {
 
                     // Insert each field into its respective column
                     let mut col_index = 0;
-                    let mut columns = self.columns.lock().unwrap();
                     for field in &row.fields {
-                        if col_index < columns.len() {
-                            columns[col_index].insert(field);
-                            col_index += 1;
-                        }
-                    }
-                    drop(columns);
+                        self.columns[col_index].insert(field);
 
-                    let mut name_index = self.name_index.lock().unwrap();
-                    debug!("{:?}", *name_index);
-                    name_index.insert(row.clone(), 0);
+                        debug!("{:?}", self.name_index);
+
+                        col_index += 1;
+                    }
+
+                    self.name_index.insert(row.clone(), 0);
                 }
             }
         }
@@ -344,28 +262,13 @@ mod tests {
 
         let name_str = "hello";
 
-        let avg = db.average(name_str);
-        assert_eq!(avg, Some(125.0));
+        let avg = db.average(name_str).unwrap();
+        assert_eq!(avg, 125.0);
 
         db.capture("hello".to_string(), vec![], 100, 300);
         db.capture("hello".to_string(), vec![], 300, 452);
 
         let avg = db.average(name_str).unwrap();
         assert_eq!(avg, 150.5);
-    }
-
-    #[test]
-    fn concurrent_init_test() {
-        let db = Database::new();
-
-        // Start the background consumer - this returns immediately
-        db.init();
-
-        // You can now do other work while consumer runs in background
-        println!("Consumer started in background");
-
-        // If you need the handle for testing, use init_with_handle instead:
-        let _handle = db.init_with_handle();
-        // _handle.join().unwrap(); // This would block until the thread finishes
     }
 }
