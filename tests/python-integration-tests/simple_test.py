@@ -1,5 +1,6 @@
 import kronicler
 
+# Concurrent consume
 kronicler.database_init()
 
 @kronicler.capture
