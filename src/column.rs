@@ -1,4 +1,5 @@
 use super::bufferpool::Bufferpool;
+use super::constants::DATA_DIRECTORY;
 use super::filewriter::{build_binary_writer, Writer};
 use super::row::FieldType;
 use log::info;
@@ -38,7 +39,7 @@ pub struct Column {
 /// correct type? Right now, I will just have load and save be their own functions
 impl Column {
     pub fn metadata_exists(column_index: usize) -> bool {
-        let filepath = format!("./.kronicler_data/column-{}.data", column_index);
+        let filepath = format!("{}/column-{}.data", DATA_DIRECTORY, column_index);
 
         Path::new(&filepath).exists()
     }
@@ -46,8 +47,8 @@ impl Column {
     pub fn save(&self) {
         let writer: Writer<ColumnMetadata> = build_binary_writer();
         let filepath = format!(
-            "./.kronicler_data/column-{}.data",
-            self.metadata.column_index
+            "{}/column-{}.data",
+            DATA_DIRECTORY, self.metadata.column_index
         );
         info!(
             "Saving Column {} to {}",
@@ -58,7 +59,7 @@ impl Column {
 
     pub fn load(column_index: usize) -> ColumnMetadata {
         let writer: Writer<ColumnMetadata> = build_binary_writer();
-        let filepath = format!("./.kronicler_data/column-{}.data", column_index);
+        let filepath = format!("{}/column-{}.data", DATA_DIRECTORY, column_index);
 
         info!("Loading Column {} to {}", column_index, filepath);
         writer.read_file(filepath.as_str())
