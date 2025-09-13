@@ -1,7 +1,7 @@
 use super::bufferpool::Bufferpool;
 use super::capture::Capture;
 use super::column::Column;
-use super::constants::{DATA_DIRECTORY, DB_WRITE_BUFFER_SIZE};
+use super::constants::{CONSUMER_DELAY, DATA_DIRECTORY, DB_WRITE_BUFFER_SIZE};
 use super::index::Index;
 use super::queue::KQueue;
 use super::row::{Epoch, FieldType, Row};
@@ -13,6 +13,7 @@ use std::fs;
 use std::path::Path;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex, RwLock};
+use std::{thread, time};
 
 #[pyclass]
 pub struct Database {
@@ -31,6 +32,18 @@ impl Database {
         Database::create_data_dir();
 
         Database::new_reader()
+    }
+
+    // Used to turn on the capture consumer
+    pub fn init(&mut self) {
+        loop {
+            let queue_clone = Arc::clone(&self.queue.queue);
+
+            self.consume_capture(queue_clone);
+
+            let timeout = time::Duration::from_millis(CONSUMER_DELAY);
+            thread::sleep(timeout);
+        }
     }
 
     #[staticmethod]
@@ -105,20 +118,6 @@ impl Database {
     /// Capture a function and write it to the queue
     pub fn capture(&mut self, name: String, args: Vec<PyObject>, start: Epoch, end: Epoch) {
         self.queue.capture(name, args, start, end);
-
-        let queue_clone = Arc::clone(&self.queue.queue);
-
-        // // Invoke the concurrent consumer
-        // self.execute(move || {
-        //     Database::consume_capture(queue_clone);
-        // });
-        //
-        // TODO: Figure out how to call consume_capture
-        // Maybe it makes sense to run it infinitely in the main loop
-        // to check for captures added to the queue
-
-        // Doing this single threaded right now
-        self.consume_capture(queue_clone);
     }
 
     pub fn fetch(&mut self, index: usize) -> Option<Row> {
