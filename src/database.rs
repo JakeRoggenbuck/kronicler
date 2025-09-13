@@ -5,7 +5,7 @@ use super::constants::{CONSUMER_DELAY, DATA_DIRECTORY, DB_WRITE_BUFFER_SIZE};
 use super::index::Index;
 use super::queue::KQueue;
 use super::row::{Epoch, FieldType, Row};
-use log::{debug, info};
+use log::{debug, info, warn};
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use std::collections::VecDeque;
@@ -16,8 +16,11 @@ use std::sync::{Arc, Mutex, RwLock};
 use std::thread::JoinHandle;
 use std::{thread, time};
 
+static DB_INSTANCE_COUNTER: AtomicUsize = AtomicUsize::new(0);
+
 #[pyclass]
 pub struct Database {
+    instance_id: usize,
     queue: KQueue,
     columns: Arc<Mutex<Vec<Column>>>,
     /// Index rows by `name` field in capture
@@ -30,28 +33,44 @@ pub struct Database {
 impl Database {
     #[new]
     pub fn new() -> Self {
+        let instance_id = DB_INSTANCE_COUNTER.fetch_add(1, Ordering::SeqCst);
+        info!("Creating Database instance #{}", instance_id);
+
         Database::create_data_dir();
 
-        Database::new_reader()
+        let mut db = Database::new_reader();
+        db.instance_id = instance_id;
+        info!("Database instance #{} created successfully", instance_id);
+        db
     }
 
     // Returns immediately while consumer runs in background - Python compatible
     pub fn init(&self) {
+        info!("Initializing Database instance #{}", self.instance_id);
+
         let queue_clone = Arc::clone(&self.queue.queue);
         let columns_clone = Arc::clone(&self.columns);
         let name_index_clone = Arc::clone(&self.name_index);
         let row_id = Arc::new(AtomicUsize::new(self.row_id.load(Ordering::SeqCst)));
+        let instance_id = self.instance_id;
 
-        thread::spawn(move || loop {
-            Self::consume_capture_threaded(
-                queue_clone.clone(),
-                columns_clone.clone(),
-                name_index_clone.clone(),
-                &row_id,
+        thread::spawn(move || {
+            info!(
+                "Consumer thread started for Database instance #{}",
+                instance_id
             );
+            loop {
+                Self::consume_capture_threaded(
+                    queue_clone.clone(),
+                    columns_clone.clone(),
+                    name_index_clone.clone(),
+                    &row_id,
+                    instance_id,
+                );
 
-            let timeout = time::Duration::from_millis(CONSUMER_DELAY);
-            thread::sleep(timeout);
+                let timeout = time::Duration::from_millis(CONSUMER_DELAY);
+                thread::sleep(timeout);
+            }
         });
     }
 
@@ -116,6 +135,7 @@ impl Database {
         let name_index = Index::new();
 
         Database {
+            instance_id: 0, // Will be set in new()
             queue: KQueue::new(),
             columns: Arc::new(Mutex::new(columns)),
             name_index: Arc::new(Mutex::new(name_index)),
@@ -124,11 +144,15 @@ impl Database {
     }
 
     /// Capture a function and write it to the queue
-    /// FIXED: Now writes directly to the shared queue that the consumer thread monitors
     pub fn capture(&self, name: String, args: Vec<PyObject>, start: Epoch, end: Epoch) {
+        info!(
+            "Database instance #{} capturing: {}",
+            self.instance_id, name
+        );
+
         // Create the capture object
         let capture = Capture {
-            name,
+            name: name.clone(),
             args,
             start,
             end,
@@ -139,11 +163,19 @@ impl Database {
         let mut queue = self.queue.queue.lock().unwrap();
         queue.push_back(capture);
 
-        info!("Added capture to queue. Queue length: {}", queue.len());
+        info!(
+            "Database instance #{} added '{}' to queue. Queue length: {}",
+            self.instance_id,
+            name,
+            queue.len()
+        );
     }
 
     pub fn fetch(&self, index: usize) -> Option<Row> {
-        info!("Starting fetch on index {}", index);
+        info!(
+            "Database instance #{} starting fetch on index {}",
+            self.instance_id, index
+        );
 
         let mut data = vec![];
 
@@ -242,17 +274,25 @@ impl Database {
         let columns_clone = Arc::clone(&self.columns);
         let name_index_clone = Arc::clone(&self.name_index);
         let row_id = Arc::new(AtomicUsize::new(self.row_id.load(Ordering::SeqCst)));
+        let instance_id = self.instance_id;
 
-        thread::spawn(move || loop {
-            Self::consume_capture_threaded(
-                queue_clone.clone(),
-                columns_clone.clone(),
-                name_index_clone.clone(),
-                &row_id,
+        thread::spawn(move || {
+            info!(
+                "Consumer thread with handle started for Database instance #{}",
+                instance_id
             );
+            loop {
+                Self::consume_capture_threaded(
+                    queue_clone.clone(),
+                    columns_clone.clone(),
+                    name_index_clone.clone(),
+                    &row_id,
+                    instance_id,
+                );
 
-            let timeout = time::Duration::from_millis(CONSUMER_DELAY);
-            thread::sleep(timeout);
+                let timeout = time::Duration::from_millis(CONSUMER_DELAY);
+                thread::sleep(timeout);
+            }
         })
     }
 
@@ -262,16 +302,18 @@ impl Database {
         columns: Arc<Mutex<Vec<Column>>>,
         name_index: Arc<Mutex<Index>>,
         row_id: &AtomicUsize,
+        instance_id: usize,
     ) {
         let mut q = queue.lock().unwrap();
 
         info!(
-            "Running consume_capture_threaded with queue length: {}",
+            "Database instance #{} running consume_capture_threaded with queue length: {}",
+            instance_id,
             q.len()
         );
 
         if q.len() > DB_WRITE_BUFFER_SIZE {
-            info!("Starting bulk write!");
+            info!("Database instance #{} starting bulk write!", instance_id);
 
             while !q.is_empty() {
                 let capture = q.pop_front();
@@ -281,7 +323,7 @@ impl Database {
                     let prev = row_id.fetch_add(1, Ordering::SeqCst);
                     let row = c.to_row(prev);
 
-                    info!("Writing {:?}...", &row);
+                    info!("Database instance #{} writing {:?}...", instance_id, &row);
 
                     // Insert each field into its respective column
                     {
@@ -304,7 +346,10 @@ impl Database {
                 }
             }
 
-            info!("Bulk write completed!");
+            info!("Database instance #{} bulk write completed!", instance_id);
+        } else if q.len() > 0 {
+            warn!("Database instance #{} has {} items in queue but waiting for {} items before bulk write", 
+                  instance_id, q.len(), DB_WRITE_BUFFER_SIZE);
         }
     }
 
