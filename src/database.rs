@@ -12,11 +12,10 @@ use std::collections::VecDeque;
 use std::fs;
 use std::path::Path;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex, RwLock};
+use std::sync::{Arc, Mutex, OnceLock, RwLock};
 use std::{thread, time};
 
-#[pyclass]
-pub struct Database {
+pub struct DatabaseInner {
     queue: KQueue,
     columns: Vec<Column>,
     /// Index rows by `name` field in capture
@@ -26,42 +25,9 @@ pub struct Database {
     sync_consume: bool,
 }
 
-#[pymethods]
-impl Database {
-    #[new]
-    pub fn new() -> Self {
+impl DatabaseInner {
+    fn new() -> Self {
         Database::create_data_dir();
-
-        Database::new_reader()
-    }
-
-    // Used to turn on the capture consumer
-    pub fn init(&mut self) {
-        loop {
-            let queue_clone = Arc::clone(&self.queue.queue);
-
-            self.consume_capture(queue_clone);
-
-            let timeout = time::Duration::from_millis(CONSUMER_DELAY);
-            thread::sleep(timeout);
-        }
-    }
-
-    #[staticmethod]
-    pub fn exists() -> bool {
-        Path::new(&DATA_DIRECTORY).exists()
-    }
-
-    #[staticmethod]
-    pub fn check_for_data() {
-        if !Database::exists() {
-            eprintln!("Database does not exist at \"{}\".", &DATA_DIRECTORY);
-            std::process::exit(0);
-        }
-    }
-
-    #[staticmethod]
-    pub fn new_reader() -> Self {
         Database::check_for_data();
 
         let column_count = 4;
@@ -107,7 +73,7 @@ impl Database {
 
         let name_index = Index::new();
 
-        Database {
+        DatabaseInner {
             queue: KQueue::new(),
             columns,
             name_index,
@@ -117,101 +83,6 @@ impl Database {
         }
     }
 
-    /// Capture a function and write it to the queue
-    pub fn capture(&mut self, name: String, args: Vec<PyObject>, start: Epoch, end: Epoch) {
-        self.queue.capture(name, args, start, end);
-
-        if self.sync_consume {
-            let queue_clone = Arc::clone(&self.queue.queue);
-            self.consume_capture(queue_clone);
-        }
-    }
-
-    pub fn fetch(&mut self, index: usize) -> Option<Row> {
-        info!("Starting fetch on index {}", index);
-
-        let mut data = vec![];
-
-        for col in &mut self.columns {
-            let field = col.fetch(index);
-
-            if let Some(f) = field {
-                data.push(f);
-            }
-        }
-
-        // TODO: Fix this to make it a better check for unwritten data
-        if data[1] == FieldType::Epoch(0) {
-            return None;
-        }
-
-        Some(Row {
-            id: index,
-            fields: data,
-        })
-    }
-
-    pub fn fetch_all(&mut self) -> Vec<Row> {
-        let mut all = vec![];
-
-        let mut index = 0;
-
-        loop {
-            let row = self.fetch(index);
-
-            if let Some(r) = row {
-                all.push(r);
-            } else {
-                break;
-            }
-
-            index += 1;
-        }
-
-        all
-    }
-
-    pub fn fetch_all_as_dict<'py>(&mut self, py: Python<'py>) -> Vec<Bound<'py, PyDict>> {
-        let a = self.fetch_all().into_iter().map(|x| x.__dict__(py));
-        let rows_dict: Vec<Bound<'py, PyDict>> = a.collect();
-        rows_dict
-    }
-
-    /// Find the average time a function took to run
-    pub fn average(&mut self, function_name: &str) -> Option<f64> {
-        let mut name_bytes = [0u8; 64];
-        let bytes = function_name.as_bytes();
-        name_bytes[..bytes.len()].copy_from_slice(bytes);
-
-        if let Some(ids) = self.name_index.get(FieldType::Name(name_bytes)) {
-            let mut values = vec![];
-
-            for id in &ids {
-                // TODO: This could be optimized
-                if let Some(row) = self.fetch(*id) {
-                    let delta_index = 3;
-
-                    let fs = row.fields;
-                    let f = fs[delta_index].clone();
-
-                    match f {
-                        FieldType::Epoch(e) => values.push(e),
-                        _ => {}
-                    }
-                }
-            }
-
-            let sum: u128 = values.iter().sum();
-            let avg = sum as f64 / values.len() as f64;
-
-            return Some(avg);
-        }
-
-        None
-    }
-}
-
-impl Database {
     fn consume_capture(&mut self, queue: Arc<Mutex<VecDeque<Capture>>>) {
         info!("Calling consume_capture");
 
@@ -249,6 +120,20 @@ impl Database {
             }
         }
     }
+}
+
+// Global singleton instance
+static DATABASE_INSTANCE: OnceLock<Arc<Mutex<DatabaseInner>>> = OnceLock::new();
+
+#[pyclass]
+pub struct Database;
+
+impl Database {
+    fn get_instance() -> Arc<Mutex<DatabaseInner>> {
+        DATABASE_INSTANCE
+            .get_or_init(|| Arc::new(Mutex::new(DatabaseInner::new())))
+            .clone()
+    }
 
     fn create_data_dir() {
         fs::create_dir_all(DATA_DIRECTORY)
@@ -256,13 +141,167 @@ impl Database {
 
         info!("Created data directory at '{}'!", DATA_DIRECTORY);
     }
+
+    fn check_for_data() {
+        if !Database::exists() {
+            eprintln!("Database does not exist at \"{}\".", &DATA_DIRECTORY);
+            std::process::exit(0);
+        }
+    }
+}
+
+#[pymethods]
+impl Database {
+    #[new]
+    pub fn new() -> Self {
+        // Just return a Database handle - the actual data is in the singleton
+        Database
+    }
+
+    // Used to turn on the capture consumer
+    pub fn init(&mut self) {
+        let db_instance = Database::get_instance();
+
+        loop {
+            let queue_clone = {
+                let db = db_instance.lock().unwrap();
+                Arc::clone(&db.queue.queue)
+            };
+
+            {
+                let mut db = db_instance.lock().unwrap();
+                db.consume_capture(queue_clone);
+            }
+
+            let timeout = time::Duration::from_millis(CONSUMER_DELAY);
+            thread::sleep(timeout);
+        }
+    }
+
+    #[staticmethod]
+    pub fn exists() -> bool {
+        Path::new(&DATA_DIRECTORY).exists()
+    }
+
+    #[staticmethod]
+    pub fn new_reader() -> Self {
+        // All instances share the same data, so just return a handle
+        Database::new()
+    }
+
+    /// Capture a function and write it to the queue
+    pub fn capture(&mut self, name: String, args: Vec<PyObject>, start: Epoch, end: Epoch) {
+        let db_instance = Database::get_instance();
+        let mut db = db_instance.lock().unwrap();
+
+        db.queue.capture(name, args, start, end);
+
+        if db.sync_consume {
+            let queue_clone = Arc::clone(&db.queue.queue);
+            db.consume_capture(queue_clone);
+        }
+    }
+
+    pub fn fetch(&mut self, index: usize) -> Option<Row> {
+        info!("Starting fetch on index {}", index);
+
+        let db_instance = Database::get_instance();
+        let mut db = db_instance.lock().unwrap();
+        let mut data = vec![];
+
+        for col in &mut db.columns {
+            let field = col.fetch(index);
+
+            if let Some(f) = field {
+                data.push(f);
+            }
+        }
+
+        // TODO: Fix this to make it a better check for unwritten data
+        if data.len() > 1 && data[1] == FieldType::Epoch(0) {
+            return None;
+        }
+
+        Some(Row {
+            id: index,
+            fields: data,
+        })
+    }
+
+    pub fn fetch_all(&mut self) -> Vec<Row> {
+        let mut all = vec![];
+        let mut index = 0;
+
+        loop {
+            let row = self.fetch(index);
+
+            if let Some(r) = row {
+                all.push(r);
+            } else {
+                break;
+            }
+
+            index += 1;
+        }
+
+        all
+    }
+
+    pub fn fetch_all_as_dict<'py>(&mut self, py: Python<'py>) -> Vec<Bound<'py, PyDict>> {
+        let a = self.fetch_all().into_iter().map(|x| x.__dict__(py));
+        let rows_dict: Vec<Bound<'py, PyDict>> = a.collect();
+        rows_dict
+    }
+
+    /// Find the average time a function took to run
+    pub fn average(&mut self, function_name: &str) -> Option<f64> {
+        let mut name_bytes = [0u8; 64];
+        let bytes = function_name.as_bytes();
+        name_bytes[..bytes.len()].copy_from_slice(bytes);
+
+        let db_instance = Database::get_instance();
+
+        // Get the IDs we need to fetch
+        let ids = {
+            let db = db_instance.lock().unwrap();
+            db.name_index.get(FieldType::Name(name_bytes))
+        };
+
+        if let Some(ids) = ids {
+            let mut values = vec![];
+
+            for id in &ids {
+                // TODO: This could be optimized
+                if let Some(row) = self.fetch(*id) {
+                    let delta_index = 3;
+
+                    let fs = row.fields;
+                    if fs.len() > delta_index {
+                        let f = fs[delta_index].clone();
+
+                        match f {
+                            FieldType::Epoch(e) => values.push(e),
+                            _ => {}
+                        }
+                    }
+                }
+            }
+
+            if !values.is_empty() {
+                let sum: u128 = values.iter().sum();
+                let avg = sum as f64 / values.len() as f64;
+                return Some(avg);
+            }
+        }
+
+        None
+    }
 }
 
 #[pyfunction]
 pub fn database_init() {
     thread::spawn(|| {
         let mut db = Database::new();
-
         db.init();
     });
 }
@@ -288,5 +327,18 @@ mod tests {
 
         let avg = db.average(name_str).unwrap();
         assert_eq!(avg, 150.5);
+    }
+
+    #[test]
+    fn singleton_test() {
+        let mut db1 = Database::new();
+        let mut db2 = Database::new();
+
+        // Data inserted through db1 should be visible through db2
+        db1.capture("test".to_string(), vec![], 100, 200);
+
+        // This should be able to fetch the data inserted by db1
+        let row = db2.fetch(0);
+        assert!(row.is_some());
     }
 }
