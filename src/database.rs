@@ -23,6 +23,7 @@ pub struct Database {
     name_index: Index,
     /// Keep track of the current row being inserted
     row_id: AtomicUsize,
+    sync_consume: bool,
 }
 
 #[pymethods]
@@ -112,12 +113,18 @@ impl Database {
             name_index,
             // TODO: Load this in from metadata
             row_id: AtomicUsize::new(0),
+            sync_consume: true,
         }
     }
 
     /// Capture a function and write it to the queue
     pub fn capture(&mut self, name: String, args: Vec<PyObject>, start: Epoch, end: Epoch) {
         self.queue.capture(name, args, start, end);
+
+        if self.sync_consume {
+            let queue_clone = Arc::clone(&self.queue.queue);
+            self.consume_capture(queue_clone);
+        }
     }
 
     pub fn fetch(&mut self, index: usize) -> Option<Row> {
