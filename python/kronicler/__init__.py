@@ -1,4 +1,4 @@
-from .kronicler import Database
+from .kronicler import Database, database_init
 
 from typing import Final
 import time

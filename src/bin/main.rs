@@ -47,7 +47,7 @@ fn init_logging() {
 }
 
 fn fetch_all() {
-    let mut db = Database::new_reader();
+    let mut db = Database::new_reader(true);
 
     for row in db.fetch_all() {
         println!("{}", row.to_string());
@@ -55,7 +55,7 @@ fn fetch_all() {
 }
 
 fn fetch_one(index: usize) {
-    let mut db = Database::new_reader();
+    let mut db = Database::new_reader(true);
 
     let row = db.fetch(index);
 

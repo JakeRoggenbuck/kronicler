@@ -1,7 +1,7 @@
 use super::bufferpool::Bufferpool;
 use super::capture::Capture;
 use super::column::Column;
-use super::constants::{DATA_DIRECTORY, DB_WRITE_BUFFER_SIZE};
+use super::constants::{CONSUMER_DELAY, DATA_DIRECTORY, DB_WRITE_BUFFER_SIZE};
 use super::index::Index;
 use super::queue::KQueue;
 use super::row::{Epoch, FieldType, Row};
@@ -12,42 +12,22 @@ use std::collections::VecDeque;
 use std::fs;
 use std::path::Path;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex, RwLock};
+use std::sync::{Arc, Mutex, OnceLock, RwLock};
+use std::{thread, time};
 
-#[pyclass]
-pub struct Database {
+pub struct DatabaseInner {
     queue: KQueue,
     columns: Vec<Column>,
     /// Index rows by `name` field in capture
     name_index: Index,
     /// Keep track of the current row being inserted
     row_id: AtomicUsize,
+    sync_consume: bool,
 }
 
-#[pymethods]
-impl Database {
-    #[new]
-    pub fn new() -> Self {
+impl DatabaseInner {
+    fn new(sync_consume: bool) -> Self {
         Database::create_data_dir();
-
-        Database::new_reader()
-    }
-
-    #[staticmethod]
-    pub fn exists() -> bool {
-        Path::new(&DATA_DIRECTORY).exists()
-    }
-
-    #[staticmethod]
-    pub fn check_for_data() {
-        if !Database::exists() {
-            eprintln!("Database does not exist at \"{}\".", &DATA_DIRECTORY);
-            std::process::exit(0);
-        }
-    }
-
-    #[staticmethod]
-    pub fn new_reader() -> Self {
         Database::check_for_data();
 
         let column_count = 4;
@@ -93,40 +73,160 @@ impl Database {
 
         let name_index = Index::new();
 
-        Database {
+        DatabaseInner {
             queue: KQueue::new(),
             columns,
             name_index,
-            // TODO: Load this in from metadata
             row_id: AtomicUsize::new(0),
+            sync_consume,
         }
+    }
+
+    fn consume_capture(&mut self, queue: Arc<Mutex<VecDeque<Capture>>>) {
+        info!("Calling consume_capture");
+
+        let mut q = queue.lock().unwrap();
+
+        if q.len() > DB_WRITE_BUFFER_SIZE {
+            info!("Starting bulk write!");
+
+            while !q.is_empty() {
+                let capture = q.pop_front();
+
+                if let Some(c) = capture {
+                    // TODO: Replace for real ID
+                    // Maybe it does not need an ID?
+                    // Because the columns keep track of that
+
+                    // Get the self.row_id value (prev) and then add one to self.row_id
+                    let prev = self.row_id.fetch_add(1, Ordering::SeqCst);
+                    let row = c.to_row(prev);
+
+                    info!("Writing {:?}...", &row);
+
+                    let mut col_index = 0;
+                    for field in &row.fields {
+                        self.columns[col_index].insert(field);
+                        debug!("{:?}", self.name_index);
+                        col_index += 1;
+                    }
+
+                    self.name_index.insert(row.clone(), 0);
+                }
+            }
+        }
+    }
+}
+
+// Separate singleton instances for sync and async modes
+static DATABASE_SYNC: OnceLock<Arc<Mutex<DatabaseInner>>> = OnceLock::new();
+static DATABASE_ASYNC: OnceLock<Arc<Mutex<DatabaseInner>>> = OnceLock::new();
+
+#[pyclass]
+pub struct Database {
+    sync_consume: bool,
+}
+
+impl Database {
+    fn get_instance(&self) -> Arc<Mutex<DatabaseInner>> {
+        if self.sync_consume {
+            DATABASE_SYNC
+                .get_or_init(|| {
+                    info!("Creating sync DatabaseInner with sync_consume=true");
+                    Arc::new(Mutex::new(DatabaseInner::new(true)))
+                })
+                .clone()
+        } else {
+            DATABASE_ASYNC
+                .get_or_init(|| {
+                    info!("Creating async DatabaseInner with sync_consume=false");
+                    Arc::new(Mutex::new(DatabaseInner::new(false)))
+                })
+                .clone()
+        }
+    }
+
+    fn create_data_dir() {
+        fs::create_dir_all(DATA_DIRECTORY)
+            .expect(&format!("Could not create directory '{}'.", DATA_DIRECTORY));
+
+        info!("Created data directory at '{}'!", DATA_DIRECTORY);
+    }
+
+    fn check_for_data() {
+        if !Database::exists() {
+            eprintln!("Database does not exist at \"{}\".", &DATA_DIRECTORY);
+            std::process::exit(0);
+        }
+    }
+}
+
+#[pymethods]
+impl Database {
+    #[new]
+    #[pyo3(signature = (sync_consume = false))]
+    pub fn new(sync_consume: bool) -> Self {
+        info!("Creating Database with sync_consume={}", sync_consume);
+        Database { sync_consume }
+    }
+
+    pub fn init(&mut self) {
+        let db_instance = self.get_instance();
+
+        loop {
+            let queue_clone = {
+                let db = db_instance.lock().unwrap();
+                Arc::clone(&db.queue.queue)
+            };
+
+            {
+                let mut db = db_instance.lock().unwrap();
+                db.consume_capture(queue_clone);
+            }
+
+            let timeout = time::Duration::from_millis(CONSUMER_DELAY);
+            thread::sleep(timeout);
+        }
+    }
+
+    #[staticmethod]
+    pub fn exists() -> bool {
+        Path::new(&DATA_DIRECTORY).exists()
+    }
+
+    #[staticmethod]
+    #[pyo3(signature = (sync_consume = false))]
+    pub fn new_reader(sync_consume: bool) -> Self {
+        info!(
+            "Creating Database reader with sync_consume={}",
+            sync_consume
+        );
+        Database::new(sync_consume)
     }
 
     /// Capture a function and write it to the queue
     pub fn capture(&mut self, name: String, args: Vec<PyObject>, start: Epoch, end: Epoch) {
-        self.queue.capture(name, args, start, end);
+        let db_instance = self.get_instance();
+        let mut db = db_instance.lock().unwrap();
 
-        let queue_clone = Arc::clone(&self.queue.queue);
+        info!("Capturing with sync_consume={}", db.sync_consume);
+        db.queue.capture(name, args, start, end);
 
-        // // Invoke the concurrent consumer
-        // self.execute(move || {
-        //     Database::consume_capture(queue_clone);
-        // });
-        //
-        // TODO: Figure out how to call consume_capture
-        // Maybe it makes sense to run it infinitely in the main loop
-        // to check for captures added to the queue
-
-        // Doing this single threaded right now
-        self.consume_capture(queue_clone);
+        if db.sync_consume {
+            info!("Performing synchronous consume");
+            let queue_clone = Arc::clone(&db.queue.queue);
+            db.consume_capture(queue_clone);
+        }
     }
 
     pub fn fetch(&mut self, index: usize) -> Option<Row> {
         info!("Starting fetch on index {}", index);
 
+        let db_instance = self.get_instance();
+        let mut db = db_instance.lock().unwrap();
         let mut data = vec![];
 
-        for col in &mut self.columns {
+        for col in &mut db.columns {
             let field = col.fetch(index);
 
             if let Some(f) = field {
@@ -135,7 +235,7 @@ impl Database {
         }
 
         // TODO: Fix this to make it a better check for unwritten data
-        if data[1] == FieldType::Epoch(0) {
+        if data.len() > 1 && data[1] == FieldType::Epoch(0) {
             return None;
         }
 
@@ -147,7 +247,6 @@ impl Database {
 
     pub fn fetch_all(&mut self) -> Vec<Row> {
         let mut all = vec![];
-
         let mut index = 0;
 
         loop {
@@ -177,77 +276,50 @@ impl Database {
         let bytes = function_name.as_bytes();
         name_bytes[..bytes.len()].copy_from_slice(bytes);
 
-        if let Some(ids) = self.name_index.get(FieldType::Name(name_bytes)) {
+        let db_instance = self.get_instance();
+
+        // Get the IDs we need to fetch
+        let ids = {
+            let db = db_instance.lock().unwrap();
+            db.name_index.get(FieldType::Name(name_bytes))
+        };
+
+        if let Some(ids) = ids {
             let mut values = vec![];
 
             for id in &ids {
-                // TODO: This could be optimized
                 if let Some(row) = self.fetch(*id) {
                     let delta_index = 3;
 
                     let fs = row.fields;
-                    let f = fs[delta_index].clone();
+                    if fs.len() > delta_index {
+                        let f = fs[delta_index].clone();
 
-                    match f {
-                        FieldType::Epoch(e) => values.push(e),
-                        _ => {}
+                        match f {
+                            FieldType::Epoch(e) => values.push(e),
+                            _ => {}
+                        }
                     }
                 }
             }
 
-            let sum: u128 = values.iter().sum();
-            let avg = sum as f64 / values.len() as f64;
-
-            return Some(avg);
+            if !values.is_empty() {
+                let sum: u128 = values.iter().sum();
+                let avg = sum as f64 / values.len() as f64;
+                return Some(avg);
+            }
         }
 
         None
     }
 }
 
-impl Database {
-    fn consume_capture(&mut self, queue: Arc<Mutex<VecDeque<Capture>>>) {
-        let mut q = queue.lock().unwrap();
-
-        if q.len() > DB_WRITE_BUFFER_SIZE {
-            info!("Starting bulk write!");
-
-            while !q.is_empty() {
-                let capture = q.pop_front();
-
-                if let Some(c) = capture {
-                    // TODO: Replace for real ID
-                    // Maybe it does not need an ID?
-                    // Because the columns keep track of that
-
-                    // Get the self.row_id value (prev) and then add one to self.row_id
-                    let prev = self.row_id.fetch_add(1, Ordering::SeqCst);
-                    let row = c.to_row(prev);
-
-                    info!("Writing {:?}...", &row);
-
-                    // Insert each field into its respective column
-                    let mut col_index = 0;
-                    for field in &row.fields {
-                        self.columns[col_index].insert(field);
-
-                        debug!("{:?}", self.name_index);
-
-                        col_index += 1;
-                    }
-
-                    self.name_index.insert(row.clone(), 0);
-                }
-            }
-        }
-    }
-
-    fn create_data_dir() {
-        fs::create_dir_all(DATA_DIRECTORY)
-            .expect(&format!("Could not create directory '{}'.", DATA_DIRECTORY));
-
-        info!("Created data directory at '{}'!", DATA_DIRECTORY);
-    }
+#[pyfunction]
+pub fn database_init() {
+    thread::spawn(|| {
+        let mut db = Database::new(false);
+        db.init();
+    });
 }
 
 #[cfg(test)]
@@ -256,20 +328,50 @@ mod tests {
 
     #[test]
     fn average_test() {
-        let mut db = Database::new();
+        let mut db = Database::new(true);
 
         db.capture("hello".to_string(), vec![], 100, 200);
         db.capture("hello".to_string(), vec![], 300, 450);
 
         let name_str = "hello";
 
-        let avg = db.average(name_str).unwrap();
-        assert_eq!(avg, 125.0);
+        let avg = db.average(name_str);
+        assert_eq!(avg, Some(125.0));
 
         db.capture("hello".to_string(), vec![], 100, 300);
         db.capture("hello".to_string(), vec![], 300, 452);
 
-        let avg = db.average(name_str).unwrap();
-        assert_eq!(avg, 150.5);
+        let avg = db.average(name_str);
+        assert_eq!(avg, Some(150.5));
+    }
+
+    #[test]
+    fn singleton_test() {
+        let mut db1 = Database::new(true);
+        let mut db2 = Database::new(true);
+
+        // Data inserted through db1 should be visible through db2
+        db1.capture("test".to_string(), vec![], 100, 200);
+
+        // This should be able to fetch the data inserted by db1
+        let row = db2.fetch(0);
+        assert!(row.is_some());
+    }
+
+    #[test]
+    fn sync_vs_async_test() {
+        let mut sync_db = Database::new(true);
+        let mut async_db = Database::new(false);
+
+        // These should use different singleton instances
+        sync_db.capture("sync_test".to_string(), vec![], 100, 200);
+        async_db.capture("async_test".to_string(), vec![], 100, 200);
+
+        // sync_db should have its data immediately available
+        let sync_row = sync_db.fetch(0);
+        assert!(sync_row.is_some());
+
+        // async_db might not have data immediately available (depends on buffer size)
+        // but they should be separate instances
     }
 }
