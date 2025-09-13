@@ -26,7 +26,7 @@ pub struct DatabaseInner {
 }
 
 impl DatabaseInner {
-    fn new() -> Self {
+    fn new(sync_consume: bool) -> Self {
         Database::create_data_dir();
         Database::check_for_data();
 
@@ -77,9 +77,8 @@ impl DatabaseInner {
             queue: KQueue::new(),
             columns,
             name_index,
-            // TODO: Load this in from metadata
             row_id: AtomicUsize::new(0),
-            sync_consume: false,
+            sync_consume,
         }
     }
 
@@ -105,13 +104,10 @@ impl DatabaseInner {
 
                     info!("Writing {:?}...", &row);
 
-                    // Insert each field into its respective column
                     let mut col_index = 0;
                     for field in &row.fields {
                         self.columns[col_index].insert(field);
-
                         debug!("{:?}", self.name_index);
-
                         col_index += 1;
                     }
 
@@ -122,17 +118,32 @@ impl DatabaseInner {
     }
 }
 
-// Global singleton instance
-static DATABASE_INSTANCE: OnceLock<Arc<Mutex<DatabaseInner>>> = OnceLock::new();
+// Separate singleton instances for sync and async modes
+static DATABASE_SYNC: OnceLock<Arc<Mutex<DatabaseInner>>> = OnceLock::new();
+static DATABASE_ASYNC: OnceLock<Arc<Mutex<DatabaseInner>>> = OnceLock::new();
 
 #[pyclass]
-pub struct Database;
+pub struct Database {
+    sync_consume: bool,
+}
 
 impl Database {
-    fn get_instance() -> Arc<Mutex<DatabaseInner>> {
-        DATABASE_INSTANCE
-            .get_or_init(|| Arc::new(Mutex::new(DatabaseInner::new())))
-            .clone()
+    fn get_instance(&self) -> Arc<Mutex<DatabaseInner>> {
+        if self.sync_consume {
+            DATABASE_SYNC
+                .get_or_init(|| {
+                    info!("Creating sync DatabaseInner with sync_consume=true");
+                    Arc::new(Mutex::new(DatabaseInner::new(true)))
+                })
+                .clone()
+        } else {
+            DATABASE_ASYNC
+                .get_or_init(|| {
+                    info!("Creating async DatabaseInner with sync_consume=false");
+                    Arc::new(Mutex::new(DatabaseInner::new(false)))
+                })
+                .clone()
+        }
     }
 
     fn create_data_dir() {
@@ -153,14 +164,14 @@ impl Database {
 #[pymethods]
 impl Database {
     #[new]
-    pub fn new() -> Self {
-        // Just return a Database handle - the actual data is in the singleton
-        Database
+    #[pyo3(signature = (sync_consume = false))]
+    pub fn new(sync_consume: bool) -> Self {
+        info!("Creating Database with sync_consume={}", sync_consume);
+        Database { sync_consume }
     }
 
-    // Used to turn on the capture consumer
     pub fn init(&mut self) {
-        let db_instance = Database::get_instance();
+        let db_instance = self.get_instance();
 
         loop {
             let queue_clone = {
@@ -184,19 +195,25 @@ impl Database {
     }
 
     #[staticmethod]
-    pub fn new_reader() -> Self {
-        // All instances share the same data, so just return a handle
-        Database::new()
+    #[pyo3(signature = (sync_consume = false))]
+    pub fn new_reader(sync_consume: bool) -> Self {
+        info!(
+            "Creating Database reader with sync_consume={}",
+            sync_consume
+        );
+        Database::new(sync_consume)
     }
 
     /// Capture a function and write it to the queue
     pub fn capture(&mut self, name: String, args: Vec<PyObject>, start: Epoch, end: Epoch) {
-        let db_instance = Database::get_instance();
+        let db_instance = self.get_instance();
         let mut db = db_instance.lock().unwrap();
 
+        info!("Capturing with sync_consume={}", db.sync_consume);
         db.queue.capture(name, args, start, end);
 
         if db.sync_consume {
+            info!("Performing synchronous consume");
             let queue_clone = Arc::clone(&db.queue.queue);
             db.consume_capture(queue_clone);
         }
@@ -205,7 +222,7 @@ impl Database {
     pub fn fetch(&mut self, index: usize) -> Option<Row> {
         info!("Starting fetch on index {}", index);
 
-        let db_instance = Database::get_instance();
+        let db_instance = self.get_instance();
         let mut db = db_instance.lock().unwrap();
         let mut data = vec![];
 
@@ -259,7 +276,7 @@ impl Database {
         let bytes = function_name.as_bytes();
         name_bytes[..bytes.len()].copy_from_slice(bytes);
 
-        let db_instance = Database::get_instance();
+        let db_instance = self.get_instance();
 
         // Get the IDs we need to fetch
         let ids = {
@@ -271,7 +288,6 @@ impl Database {
             let mut values = vec![];
 
             for id in &ids {
-                // TODO: This could be optimized
                 if let Some(row) = self.fetch(*id) {
                     let delta_index = 3;
 
@@ -301,7 +317,7 @@ impl Database {
 #[pyfunction]
 pub fn database_init() {
     thread::spawn(|| {
-        let mut db = Database::new();
+        let mut db = Database::new(false);
         db.init();
     });
 }
@@ -312,27 +328,27 @@ mod tests {
 
     #[test]
     fn average_test() {
-        let mut db = Database::new();
+        let mut db = Database::new(true);
 
         db.capture("hello".to_string(), vec![], 100, 200);
         db.capture("hello".to_string(), vec![], 300, 450);
 
         let name_str = "hello";
 
-        let avg = db.average(name_str).unwrap();
-        assert_eq!(avg, 125.0);
+        let avg = db.average(name_str);
+        assert_eq!(avg, Some(125.0));
 
         db.capture("hello".to_string(), vec![], 100, 300);
         db.capture("hello".to_string(), vec![], 300, 452);
 
-        let avg = db.average(name_str).unwrap();
-        assert_eq!(avg, 150.5);
+        let avg = db.average(name_str);
+        assert_eq!(avg, Some(150.5));
     }
 
     #[test]
     fn singleton_test() {
-        let mut db1 = Database::new();
-        let mut db2 = Database::new();
+        let mut db1 = Database::new(true);
+        let mut db2 = Database::new(true);
 
         // Data inserted through db1 should be visible through db2
         db1.capture("test".to_string(), vec![], 100, 200);
@@ -340,5 +356,22 @@ mod tests {
         // This should be able to fetch the data inserted by db1
         let row = db2.fetch(0);
         assert!(row.is_some());
+    }
+
+    #[test]
+    fn sync_vs_async_test() {
+        let mut sync_db = Database::new(true);
+        let mut async_db = Database::new(false);
+
+        // These should use different singleton instances
+        sync_db.capture("sync_test".to_string(), vec![], 100, 200);
+        async_db.capture("async_test".to_string(), vec![], 100, 200);
+
+        // sync_db should have its data immediately available
+        let sync_row = sync_db.fetch(0);
+        assert!(sync_row.is_some());
+
+        // async_db might not have data immediately available (depends on buffer size)
+        // but they should be separate instances
     }
 }
