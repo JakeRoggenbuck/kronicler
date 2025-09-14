@@ -96,14 +96,53 @@ def perform_t_test(data1, data2, label1, label2):
             'note': f'Error in t-test: {e}'
         }
 
+def calculate_speedup(sqlite_data, columnar_data, operation_name, mode_name):
+    """Calculate speedup from SQLite to Columnar (SQLite as baseline)"""
+    if len(sqlite_data) == 0 or len(columnar_data) == 0:
+        return None
+
+    sqlite_mean = np.mean(sqlite_data)
+    columnar_mean = np.mean(columnar_data)
+    sqlite_median = np.median(sqlite_data)
+    columnar_median = np.median(columnar_data)
+
+    # Calculate speedup (SQLite time / Columnar time)
+    speedup_mean = sqlite_mean / columnar_mean
+    speedup_median = sqlite_median / columnar_median
+
+    # Calculate speedup without outliers
+    sqlite_no_outliers = remove_outliers_iqr(sqlite_data)
+    columnar_no_outliers = remove_outliers_iqr(columnar_data)
+
+    speedup_no_outliers = np.nan
+    if len(sqlite_no_outliers) > 0 and len(columnar_no_outliers) > 0:
+        speedup_no_outliers = np.mean(sqlite_no_outliers) / np.mean(columnar_no_outliers)
+
+    return {
+        'operation': operation_name,
+        'mode': mode_name,
+        'sqlite_mean_ms': sqlite_mean,
+        'columnar_mean_ms': columnar_mean,
+        'sqlite_median_ms': sqlite_median,
+        'columnar_median_ms': columnar_median,
+        'speedup_mean': speedup_mean,
+        'speedup_median': speedup_median,
+        'speedup_no_outliers': speedup_no_outliers,
+        'time_saved_ms': sqlite_mean - columnar_mean,
+        'percent_faster': ((speedup_mean - 1) * 100) if speedup_mean > 0 else 0
+    }
+
 def analyze_mode_data(mode_data, mode_name):
     """Analyze data for a specific mode (sync or concurrent)"""
     print(f"\n{'='*50}")
     print(f"=== {mode_name.upper()} MODE ANALYSIS ===")
     print(f"{'='*50}")
 
-    # Calculate statistics for each test type
+    # Initialize results
     results = []
+    speedup_results = []
+
+    # Calculate statistics for each test type
     for test_type, data in mode_data.items():
         if len(data) > 0:
             stats_result = calculate_statistics(data, f"{mode_name}_{test_type}")
@@ -117,6 +156,41 @@ def analyze_mode_data(mode_data, mode_name):
             print(f"Min: {stats_result['min']:,.3f} ms")
             print(f"Max: {stats_result['max']:,.3f} ms")
             print(f"Outliers removed: {stats_result['outliers_removed']}")
+
+    # Calculate and display speedup analysis
+    print(f"\n--- SPEEDUP ANALYSIS FOR {mode_name.upper()} MODE (SQLite as Baseline) ---")
+
+    # Insert operations speedup
+    if len(mode_data['test_sqlite']) > 0 and len(mode_data['test_columnar']) > 0:
+        speedup = calculate_speedup(mode_data['test_sqlite'], mode_data['test_columnar'],
+                                   'Insert', mode_name)
+        if speedup:
+            speedup_results.append(speedup)
+            print(f"\nInsert Operations ({mode_name}):")
+            print(f"  SQLite mean: {speedup['sqlite_mean_ms']:,.3f} ms")
+            print(f"  Columnar mean: {speedup['columnar_mean_ms']:,.3f} ms")
+            print(f"  Speedup (mean): {speedup['speedup_mean']:.2f}x faster")
+            print(f"  Speedup (median): {speedup['speedup_median']:.2f}x faster")
+            if not np.isnan(speedup['speedup_no_outliers']):
+                print(f"  Speedup (no outliers): {speedup['speedup_no_outliers']:.2f}x faster")
+            print(f"  Time saved: {speedup['time_saved_ms']:,.3f} ms per operation")
+            print(f"  Columnar is {speedup['percent_faster']:.1f}% faster")
+
+    # Average operations speedup
+    if len(mode_data['avg_sqlite']) > 0 and len(mode_data['avg_columnar']) > 0:
+        speedup = calculate_speedup(mode_data['avg_sqlite'], mode_data['avg_columnar'],
+                                   'Average', mode_name)
+        if speedup:
+            speedup_results.append(speedup)
+            print(f"\nAverage Operations ({mode_name}):")
+            print(f"  SQLite mean: {speedup['sqlite_mean_ms']:,.3f} ms")
+            print(f"  Columnar mean: {speedup['columnar_mean_ms']:,.3f} ms")
+            print(f"  Speedup (mean): {speedup['speedup_mean']:.2f}x faster")
+            print(f"  Speedup (median): {speedup['speedup_median']:.2f}x faster")
+            if not np.isnan(speedup['speedup_no_outliers']):
+                print(f"  Speedup (no outliers): {speedup['speedup_no_outliers']:.2f}x faster")
+            print(f"  Time saved: {speedup['time_saved_ms']:,.3f} ms per operation")
+            print(f"  Columnar is {speedup['percent_faster']:.1f}% faster")
 
     # Perform t-tests within this mode
     print(f"\n--- T-TEST RESULTS FOR {mode_name.upper()} MODE ---")
@@ -164,7 +238,7 @@ def analyze_mode_data(mode_data, mode_name):
         if 'effect_size' in t_result:
             print(f"  Effect size (Cohen's d): {t_result['effect_size']:.4f}")
 
-    return results
+    return results, speedup_results
 
 def cross_mode_comparisons(sync_data, concurrent_data):
     """Perform comparisons between sync and concurrent modes"""
@@ -252,26 +326,62 @@ def analyze_files():
                 concurrent_data[test_type].extend(data.get(test_type, []))
 
     # Analyze each mode separately
-    sync_results = analyze_mode_data(sync_data, "sync")
-    concurrent_results = analyze_mode_data(concurrent_data, "concurrent")
+    sync_results, sync_speedup = analyze_mode_data(sync_data, "sync")
+    concurrent_results, concurrent_speedup = analyze_mode_data(concurrent_data, "concurrent")
 
     # Perform cross-mode comparisons
     cross_mode_comparisons(sync_data, concurrent_data)
+
+    # Display comprehensive speedup summary
+    print(f"\n{'='*60}")
+    print("=== COMPREHENSIVE SPEEDUP SUMMARY (SQLite as Baseline) ===")
+    print(f"{'='*60}")
+
+    all_speedups = sync_speedup + concurrent_speedup
+    if all_speedups:
+        speedup_df = pd.DataFrame(all_speedups)
+
+        print("\nSpeedup Summary Table:")
+        display_cols = ['operation', 'mode', 'speedup_mean', 'speedup_median', 'speedup_no_outliers', 'percent_faster']
+        if not speedup_df.empty:
+            print(speedup_df[display_cols].to_string(index=False, float_format='%.2f'))
+
+        print("\nDetailed Performance Comparison:")
+        for speedup in all_speedups:
+            print(f"\n{speedup['operation']} Operations ({speedup['mode'].title()} Mode):")
+            print(f"  • Columnar is {speedup['speedup_mean']:.2f}x faster than SQLite")
+            print(f"  • Performance improvement: {speedup['percent_faster']:.1f}%")
+            print(f"  • Time saved per operation: {speedup['time_saved_ms']:,.3f} ms")
+
+            # Show which is better
+            if speedup['speedup_mean'] > 1:
+                print(f"  ✓ Columnar significantly outperforms SQLite")
+            elif speedup['speedup_mean'] < 1:
+                print(f"  ✗ SQLite actually performs better (Columnar is {1/speedup['speedup_mean']:.2f}x slower)")
+            else:
+                print(f"  ≈ Performance is roughly equivalent")
 
     # Create comprehensive summary DataFrame
     all_results = sync_results + concurrent_results
     if all_results:
         df = pd.DataFrame(all_results)
         print(f"\n{'='*50}")
-        print("=== COMPREHENSIVE SUMMARY TABLE (milliseconds) ===")
+        print("=== COMPREHENSIVE STATISTICS TABLE (milliseconds) ===")
         print(f"{'='*50}")
         print(df.to_string(index=False, float_format='%.3f'))
 
         # Save results to CSV
         df.to_csv('performance_analysis_results.csv', index=False)
-        print(f"\nResults saved to 'performance_analysis_results.csv'")
 
-    return sync_data, concurrent_data, all_results
+        # Save speedup results to separate CSV
+        if all_speedups:
+            speedup_df.to_csv('speedup_analysis_results.csv', index=False)
+            print(f"\nStatistics saved to 'performance_analysis_results.csv'")
+            print(f"Speedup analysis saved to 'speedup_analysis_results.csv'")
+        else:
+            print(f"\nResults saved to 'performance_analysis_results.csv'")
+
+    return sync_data, concurrent_data, all_results, all_speedups
 
 if __name__ == "__main__":
     # Check if required libraries are installed
