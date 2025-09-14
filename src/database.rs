@@ -85,7 +85,7 @@ impl DatabaseInner {
     fn consume_capture(&mut self, queue: Arc<RwLock<VecDeque<Capture>>>) {
         info!("Calling consume_capture");
 
-        let mut q = queue.lock().unwrap();
+        let mut q = queue.write().unwrap();
 
         if q.len() > DB_WRITE_BUFFER_SIZE {
             info!("Starting bulk write!");
