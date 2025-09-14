@@ -8,7 +8,8 @@ kronicler.database_init()
 WARMUP_COUNT = 10
 CAPTURE_COUNT = 1000
 REPEATS = 50
-AFTER_INSERT_WAIT = 4
+# No wait between insert and avg
+AFTER_INSERT_WAIT = 0
 
 
 @kronicler_sqlite.capture
