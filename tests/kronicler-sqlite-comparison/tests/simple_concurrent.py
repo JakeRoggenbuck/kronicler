@@ -7,7 +7,7 @@ kronicler.database_init()
 
 WARMUP_COUNT = 10
 CAPTURE_COUNT = 1000
-REPEATS = 10
+REPEATS = 50
 
 
 @kronicler_sqlite.capture
