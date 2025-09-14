@@ -12,7 +12,7 @@ use std::collections::VecDeque;
 use std::fs;
 use std::path::Path;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex, OnceLock, RwLock};
+use std::sync::{Arc, OnceLock, RwLock};
 use std::{thread, time};
 
 pub struct DatabaseInner {
@@ -82,7 +82,7 @@ impl DatabaseInner {
         }
     }
 
-    fn consume_capture(&mut self, queue: Arc<Mutex<VecDeque<Capture>>>) {
+    fn consume_capture(&mut self, queue: Arc<RwLock<VecDeque<Capture>>>) {
         info!("Calling consume_capture");
 
         let mut q = queue.lock().unwrap();
@@ -124,8 +124,8 @@ impl DatabaseInner {
 }
 
 // Separate singleton instances for sync and async modes
-static DATABASE_SYNC: OnceLock<Arc<Mutex<DatabaseInner>>> = OnceLock::new();
-static DATABASE_ASYNC: OnceLock<Arc<Mutex<DatabaseInner>>> = OnceLock::new();
+static DATABASE_SYNC: OnceLock<Arc<RwLock<DatabaseInner>>> = OnceLock::new();
+static DATABASE_ASYNC: OnceLock<Arc<RwLock<DatabaseInner>>> = OnceLock::new();
 
 #[pyclass]
 pub struct Database {
@@ -133,19 +133,19 @@ pub struct Database {
 }
 
 impl Database {
-    fn get_instance(&self) -> Arc<Mutex<DatabaseInner>> {
+    fn get_instance(&self) -> Arc<RwLock<DatabaseInner>> {
         if self.sync_consume {
             DATABASE_SYNC
                 .get_or_init(|| {
                     info!("Creating sync DatabaseInner with sync_consume=true");
-                    Arc::new(Mutex::new(DatabaseInner::new(true)))
+                    Arc::new(RwLock::new(DatabaseInner::new(true)))
                 })
                 .clone()
         } else {
             DATABASE_ASYNC
                 .get_or_init(|| {
                     info!("Creating async DatabaseInner with sync_consume=false");
-                    Arc::new(Mutex::new(DatabaseInner::new(false)))
+                    Arc::new(RwLock::new(DatabaseInner::new(false)))
                 })
                 .clone()
         }
@@ -180,12 +180,12 @@ impl Database {
 
         loop {
             let queue_clone = {
-                let db = db_instance.lock().unwrap();
+                let db = db_instance.write().unwrap();
                 Arc::clone(&db.queue.queue)
             };
 
             {
-                let mut db = db_instance.lock().unwrap();
+                let mut db = db_instance.write().unwrap();
                 db.consume_capture(queue_clone);
             }
 
@@ -212,7 +212,7 @@ impl Database {
     /// Capture a function and write it to the queue
     pub fn capture(&mut self, name: String, args: Vec<PyObject>, start: Epoch, end: Epoch) {
         let db_instance = self.get_instance();
-        let mut db = db_instance.lock().unwrap();
+        let mut db = db_instance.write().unwrap();
 
         info!("Capturing with sync_consume={}", db.sync_consume);
         db.queue.capture(name, args, start, end);
@@ -228,7 +228,7 @@ impl Database {
         info!("Starting fetch on index {}", index);
 
         let db_instance = self.get_instance();
-        let mut db = db_instance.lock().unwrap();
+        let mut db = db_instance.write().unwrap();
         let mut data = vec![];
 
         for col in &mut db.columns {
@@ -285,7 +285,7 @@ impl Database {
 
         // Get the IDs we need to fetch
         let ids = {
-            let db = db_instance.lock().unwrap();
+            let db = db_instance.read().unwrap();
             db.name_index.get(FieldType::Name(name_bytes))
         };
 
