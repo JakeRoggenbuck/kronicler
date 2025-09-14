@@ -6,4 +6,4 @@ pub const DATA_DIRECTORY: &str = ".kronicler_data";
 
 pub const PAGE_SIZE: usize = 4096;
 
-pub const CONSUMER_DELAY: u64 = 50; // Half a second
+pub const CONSUMER_DELAY: u64 = 500; // Half a second
