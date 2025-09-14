@@ -8,6 +8,8 @@ kronicler.database_init()
 WARMUP_COUNT = 10
 CAPTURE_COUNT = 1000
 REPEATS = 50
+# No wait between insert and avg
+AFTER_INSERT_WAIT = 0
 
 
 @kronicler_sqlite.capture
@@ -106,6 +108,8 @@ if __name__ == "__main__":
         print(f"{test_sqlite.__name__} took {end - start}ns")
         insert_times_data.append((test_sqlite.__name__, end - start))
 
+        time.sleep(AFTER_INSERT_WAIT)
+
         # TEST sqlite avg
         start = time.time_ns()
         avg_sqlite()
@@ -120,6 +124,8 @@ if __name__ == "__main__":
         print(f"{test_columnar.__name__} took {end - start}ns")
         insert_times_data.append((test_columnar.__name__, end - start))
 
+        time.sleep(AFTER_INSERT_WAIT)
+
         # TEST columnar avg
         start = time.time_ns()
         avg_columnar()
@@ -133,6 +139,8 @@ if __name__ == "__main__":
         end = time.time_ns()
         print(f"{test_no_logging.__name__} took {end - start}ns")
         insert_times_data.append((test_no_logging.__name__, end - start))
+
+        time.sleep(AFTER_INSERT_WAIT)
 
         # TEST no logging avg
         start = time.time_ns()
