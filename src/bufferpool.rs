@@ -1,7 +1,7 @@
 use super::page::{Page, PageID};
 use super::row::FieldType;
 use log::info;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, RwLock};
 
 // I had planned to test many different hashmap implementations
 type BHashMap<K, V> = std::collections::HashMap<K, V>;
@@ -23,7 +23,7 @@ type BHashMap<K, V> = std::collections::HashMap<K, V>;
 
 pub struct Bufferpool {
     // Right now, there is no removal strategy
-    pages_collections: Vec<BHashMap<PageID, Arc<Mutex<Page>>>>,
+    pages_collections: Vec<BHashMap<PageID, Arc<RwLock<Page>>>>,
     page_index: PageID,
     page_limit: usize,
 }
@@ -52,9 +52,9 @@ impl Bufferpool {
         self.page_limit = limit;
     }
 
-    pub fn create_page(&mut self, column_index: usize, field_type: FieldType) -> Arc<Mutex<Page>> {
+    pub fn create_page(&mut self, column_index: usize, field_type: FieldType) -> Arc<RwLock<Page>> {
         let p = Page::new(self.page_index, column_index, field_type.get_size());
-        let page = Arc::new(Mutex::new(p));
+        let page = Arc::new(RwLock::new(p));
 
         self.pages_collections[column_index].insert(self.page_index, page.clone());
         self.page_index += 1;
@@ -90,7 +90,7 @@ impl Bufferpool {
             if let Some(p) = page {
                 info!("Fetching value {} in page {}", index_in_page, pid);
 
-                let b = p.lock().unwrap();
+                let b = p.read().unwrap();
                 return b.get_value(index_in_page);
             }
         } else {
@@ -99,7 +99,7 @@ impl Bufferpool {
             page.open();
 
             // Then load the page into the pages_collections
-            self.pages_collections[column_index].insert(pid, Arc::new(Mutex::new(page)));
+            self.pages_collections[column_index].insert(pid, Arc::new(RwLock::new(page)));
 
             // Excellent use of recursion. Call this function again now that the page is loaded
             return self.fetch(index, column_index, field_type_size);
@@ -122,7 +122,7 @@ impl Bufferpool {
             // Get the page because it was opened
             let poption = collection.get(&pid);
 
-            let mut b = poption.unwrap().lock().unwrap();
+            let mut b = poption.unwrap().write().unwrap();
             // TODO: Remove clone if possible
             b.set_value(index_in_page, value.clone());
 
@@ -141,7 +141,7 @@ impl Bufferpool {
             new_page.write_page();
 
             // Make an Arc
-            let page = Some(Arc::new(Mutex::new(new_page)));
+            let page = Some(Arc::new(RwLock::new(new_page)));
             self.pages_collections[column_index].insert(pid, page.clone().unwrap());
         }
     }
@@ -171,7 +171,7 @@ mod tests {
         // Create a page of data
         let page_1_arc = bpool.create_page(0, FieldType::Epoch(0));
         {
-            let mut page_1 = page_1_arc.lock().unwrap();
+            let mut page_1 = page_1_arc.write().unwrap();
             page_1.set_all_values(four_k_of_data);
             page_1.write_page();
 
@@ -186,21 +186,21 @@ mod tests {
         // Insert 3 more pages to fill the bufferpool
         let page_2_arc = bpool.create_page(0, FieldType::Epoch(0));
         {
-            let mut page_2 = page_2_arc.lock().unwrap();
+            let mut page_2 = page_2_arc.write().unwrap();
             page_2.set_all_values(four_k_of_data);
             page_2.write_page();
         }
 
         let page_3_arc = bpool.create_page(0, FieldType::Epoch(0));
         {
-            let mut page_3 = page_3_arc.lock().unwrap();
+            let mut page_3 = page_3_arc.write().unwrap();
             page_3.set_all_values(four_k_of_data);
             page_3.write_page();
         }
 
         let page_4_arc = bpool.create_page(0, FieldType::Epoch(0));
         {
-            let mut page_4 = page_4_arc.lock().unwrap();
+            let mut page_4 = page_4_arc.write().unwrap();
             page_4.set_all_values(four_k_of_data);
             page_4.write_page();
         }
@@ -211,7 +211,7 @@ mod tests {
         // Add another page after it's full
         let page_5_arc = bpool.create_page(0, FieldType::Epoch(0));
         {
-            let mut page_5 = page_5_arc.lock().unwrap();
+            let mut page_5 = page_5_arc.write().unwrap();
             page_5.set_all_values(four_k_of_data);
             page_5.write_page();
         }

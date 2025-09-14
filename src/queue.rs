@@ -3,11 +3,11 @@ use super::row::Epoch;
 use log::info;
 use pyo3::prelude::*;
 use std::collections::VecDeque;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, RwLock};
 
 #[pyclass]
 pub struct KQueue {
-    pub queue: Arc<Mutex<VecDeque<Capture>>>,
+    pub queue: Arc<RwLock<VecDeque<Capture>>>,
 }
 
 // Internal Rust methods
@@ -28,7 +28,7 @@ impl KQueue {
 
         // Concurrently add the capture to the queue to be consumed later
         {
-            let mut q = self.queue.lock().unwrap();
+            let mut q = self.queue.write().unwrap();
             q.push_back(c);
         }
     }
@@ -36,12 +36,12 @@ impl KQueue {
     #[new]
     pub fn new() -> Self {
         KQueue {
-            queue: Arc::new(Mutex::new(VecDeque::new())),
+            queue: Arc::new(RwLock::new(VecDeque::new())),
         }
     }
 
     pub fn empty(&self) -> bool {
-        self.queue.lock().unwrap().is_empty()
+        self.queue.read().unwrap().is_empty()
     }
 }
 
