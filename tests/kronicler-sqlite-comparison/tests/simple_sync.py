@@ -97,7 +97,6 @@ if __name__ == "__main__":
     avg_times_data = []
 
     for x in range(REPEATS):
-
         # TEST sqlite inserts
         start = time.time_ns()
         test_sqlite()

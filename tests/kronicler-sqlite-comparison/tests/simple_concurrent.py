@@ -100,7 +100,6 @@ if __name__ == "__main__":
     avg_times_data = []
 
     for x in range(REPEATS):
-
         # TEST sqlite inserts
         start = time.time_ns()
         test_sqlite()
@@ -150,6 +149,7 @@ if __name__ == "__main__":
         avg_times_data.append((avg_no_logging.__name__, end - start))
 
     import time
+
     time.sleep(1)
 
     with open("concurrent_insert_data.json", "w") as file:
