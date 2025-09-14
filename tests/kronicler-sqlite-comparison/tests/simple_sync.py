@@ -140,8 +140,8 @@ if __name__ == "__main__":
         print(f"{avg_no_logging.__name__} took {end - start}ns")
         avg_times_data.append((avg_no_logging.__name__, end - start))
 
-    with open("insert_data.json", "w") as file:
+    with open("sync_insert_data.json", "w") as file:
         json.dump(insert_times_data, file)
 
-    with open("avg_data.json", "w") as file:
+    with open("sync_avg_data.json", "w") as file:
         json.dump(avg_times_data, file)

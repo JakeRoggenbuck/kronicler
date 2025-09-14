@@ -5,7 +5,7 @@ import json
 show_no_logging = False
 
 # --- Insert Data ---
-with open("insert_data.json") as file:
+with open("sync_insert_data.json") as file:
     insert_data = json.load(file)
 
 sqlite_times = [t for name, t in insert_data if name == "test_sqlite"]
@@ -31,12 +31,12 @@ plt.ylabel("Time (ms)")
 plt.legend()
 plt.grid(True)
 plt.tight_layout()
-plt.savefig(f"insert_{len(runs)}.png")
+plt.savefig(f"sync_insert_{len(runs)}.png")
 plt.show()
 
 
 # --- Average Data ---
-with open("avg_data.json") as file:
+with open("sync_avg_data.json") as file:
     avg_data = json.load(file)
 
 sqlite_times = [t for name, t in avg_data if name == "avg_sqlite"]
@@ -62,5 +62,5 @@ plt.ylabel("Time (ms)")
 plt.legend()
 plt.grid(True)
 plt.tight_layout()
-plt.savefig(f"avg_{len(runs)}.png")
+plt.savefig(f"sync_avg_{len(runs)}.png")
 plt.show()
