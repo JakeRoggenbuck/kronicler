@@ -4,10 +4,13 @@ import time
 import json
 import tqdm
 
+# Sync consume
+kronicler.DB = kronicler.Database(sync_consume=True)
+
 
 WARMUP_COUNT = 10
 CAPTURE_COUNT = 100
-REPEATS = 500
+REPEATS = 5
 
 
 @kronicler_sqlite.capture
