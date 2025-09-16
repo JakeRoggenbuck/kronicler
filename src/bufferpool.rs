@@ -1,6 +1,6 @@
 use super::page::{Page, PageID};
 use super::row::FieldType;
-use log::info;
+use log::{info, warn};
 use std::sync::{Arc, RwLock};
 
 // I had planned to test many different hashmap implementations
@@ -26,6 +26,8 @@ pub struct Bufferpool {
     pages_collections: Vec<BHashMap<PageID, Arc<RwLock<Page>>>>,
     page_index: PageID,
     page_limit: usize,
+    page_hit_count: usize,
+    page_miss_count: usize,
 }
 
 impl Bufferpool {
@@ -39,6 +41,8 @@ impl Bufferpool {
             pages_collections: page_maps,
             page_index: 0,
             page_limit: 0,
+            page_hit_count: 0,
+            page_miss_count: 0,
         }
     }
 
@@ -82,10 +86,16 @@ impl Bufferpool {
         let pid: usize = (index * field_type_size) / 512;
         let index_in_page = (index * field_type_size) % 512;
 
+        if self.page_hit_count as f64 / ((self.page_hit_count + self.page_miss_count) as f64) < 0.40
+        {
+            warn!("Page hit rate is below 40%");
+        }
+
         info!("Fetching index {} from page {}", index_in_page, pid);
 
         if self.pages_collections[column_index].contains_key(&pid) {
             let page = self.pages_collections[column_index].get(&pid);
+            self.page_hit_count += 1;
 
             if let Some(p) = page {
                 info!("Fetching value {} in page {}", index_in_page, pid);
@@ -97,6 +107,7 @@ impl Bufferpool {
             // The page was not loading in yet, so open the page
             let mut page = Page::new(pid, column_index, field_type_size);
             page.open();
+            self.page_miss_count += 1;
 
             // Then load the page into the pages_collections
             self.pages_collections[column_index].insert(pid, Arc::new(RwLock::new(page)));
@@ -121,6 +132,7 @@ impl Bufferpool {
         if collection.contains_key(&pid) {
             // Get the page because it was opened
             let poption = collection.get(&pid);
+            self.page_hit_count += 1;
 
             let mut b = poption.unwrap().write().unwrap();
             // TODO: Remove clone if possible
@@ -133,6 +145,8 @@ impl Bufferpool {
             // Open the page cause it was not opened
             let mut new_page = Page::new(pid, column_index, value.get_size());
             new_page.open();
+            self.page_miss_count += 1;
+
             // TODO: Remove clone if possible
             new_page.set_value(index_in_page, value.clone());
 
