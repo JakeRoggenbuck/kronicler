@@ -130,6 +130,7 @@ static DATABASE_ASYNC: OnceLock<Arc<RwLock<DatabaseInner>>> = OnceLock::new();
 #[pyclass]
 pub struct Database {
     sync_consume: bool,
+    queue_empty: bool,
 }
 
 impl Database {
@@ -172,25 +173,32 @@ impl Database {
     #[pyo3(signature = (sync_consume = false))]
     pub fn new(sync_consume: bool) -> Self {
         info!("Creating Database with sync_consume={}", sync_consume);
-        Database { sync_consume }
+        Database {
+            sync_consume,
+            queue_empty: true,
+        }
     }
 
     pub fn init(&mut self) {
         let db_instance = self.get_instance();
 
         loop {
-            let queue_clone = {
-                let db = db_instance.write().unwrap();
-                Arc::clone(&db.queue.queue)
-            };
+            if !self.queue_empty {
+                let queue_clone = {
+                    let db = db_instance.write().unwrap();
+                    Arc::clone(&db.queue.queue)
+                };
 
-            {
-                let mut db = db_instance.write().unwrap();
-                db.consume_capture(queue_clone);
+                {
+                    let mut db = db_instance.write().unwrap();
+                    db.consume_capture(queue_clone);
+                }
+
+                self.queue_empty = true;
+
+                // let timeout = time::Duration::from_millis(CONSUMER_DELAY);
+                // thread::sleep(timeout);
             }
-
-            let timeout = time::Duration::from_millis(CONSUMER_DELAY);
-            thread::sleep(timeout);
         }
     }
 
@@ -221,6 +229,8 @@ impl Database {
             info!("Performing synchronous consume");
             let queue_clone = Arc::clone(&db.queue.queue);
             db.consume_capture(queue_clone);
+        } else {
+            self.queue_empty = false;
         }
     }
 
