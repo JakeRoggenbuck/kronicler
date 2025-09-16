@@ -7,8 +7,8 @@ import tqdm
 kronicler.database_init()
 
 WARMUP_COUNT = 10
-CAPTURE_COUNT = 100
-REPEATS = 10
+CAPTURE_COUNT = 1000
+REPEATS = 5
 # No wait between insert and avg
 AFTER_INSERT_WAIT = 0
 
