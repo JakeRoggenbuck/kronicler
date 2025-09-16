@@ -5,7 +5,7 @@ use super::constants::{CONSUMER_DELAY, DATA_DIRECTORY, DB_WRITE_BUFFER_SIZE};
 use super::index::Index;
 use super::queue::KQueue;
 use super::row::{Epoch, FieldType, Row};
-use log::{debug, info};
+use log::{debug, info, warn};
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use std::collections::VecDeque;
@@ -342,6 +342,8 @@ impl Database {
                 let avg = sum as f64 / values.len() as f64;
                 return Some(avg);
             }
+        } else {
+            warn!("Could not get IDs");
         }
 
         None
