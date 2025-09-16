@@ -115,6 +115,9 @@ if __name__ == "__main__":
         print(f"{avg_sqlite.__name__} took {end - start}ns")
         avg_times_data.append((avg_sqlite.__name__, end - start))
 
+        # Wait for any cleanup to happen between SQLite and Columnar
+        time.sleep(2)
+
         # TEST columnar inserts
         start = time.time_ns()
         test_columnar()
@@ -128,6 +131,9 @@ if __name__ == "__main__":
         end = time.time_ns()
         print(f"{avg_columnar.__name__} took {end - start}ns")
         avg_times_data.append((avg_columnar.__name__, end - start))
+
+        # Wait for any cleanup to happen between Columnar and No log
+        time.sleep(2)
 
         # TEST no log inserts
         start = time.time_ns()
