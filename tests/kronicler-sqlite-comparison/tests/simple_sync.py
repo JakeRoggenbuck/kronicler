@@ -10,7 +10,7 @@ kronicler.DB = kronicler.Database(sync_consume=True)
 
 WARMUP_COUNT = 10
 CAPTURE_COUNT = 1000
-REPEATS = 5
+REPEATS = 50
 
 
 @kronicler_sqlite.capture
