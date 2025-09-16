@@ -11,7 +11,7 @@ use pyo3::types::PyDict;
 use std::collections::VecDeque;
 use std::fs;
 use std::path::Path;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::{Arc, OnceLock, RwLock};
 use std::{thread, time};
 
@@ -127,10 +127,13 @@ impl DatabaseInner {
 static DATABASE_SYNC: OnceLock<Arc<RwLock<DatabaseInner>>> = OnceLock::new();
 static DATABASE_ASYNC: OnceLock<Arc<RwLock<DatabaseInner>>> = OnceLock::new();
 
+// Shared queue state using atomic bools - one for each database type
+static QUEUE_HAS_DATA_SYNC: AtomicBool = AtomicBool::new(false);
+static QUEUE_HAS_DATA_ASYNC: AtomicBool = AtomicBool::new(false);
+
 #[pyclass]
 pub struct Database {
     sync_consume: bool,
-    queue_empty: bool,
 }
 
 impl Database {
@@ -149,6 +152,14 @@ impl Database {
                     Arc::new(RwLock::new(DatabaseInner::new(false)))
                 })
                 .clone()
+        }
+    }
+
+    fn get_queue_state(&self) -> &'static AtomicBool {
+        if self.sync_consume {
+            &QUEUE_HAS_DATA_SYNC
+        } else {
+            &QUEUE_HAS_DATA_ASYNC
         }
     }
 
@@ -173,19 +184,21 @@ impl Database {
     #[pyo3(signature = (sync_consume = false))]
     pub fn new(sync_consume: bool) -> Self {
         info!("Creating Database with sync_consume={}", sync_consume);
-        Database {
-            sync_consume,
-            queue_empty: true,
-        }
+        Database { sync_consume }
     }
 
     pub fn init(&mut self) {
         let db_instance = self.get_instance();
+        let queue_state = self.get_queue_state();
 
+        info!("Called init!");
         loop {
-            if !self.queue_empty {
+            // Use relaxed ordering since we don't need strict synchronization here
+            if queue_state.load(Ordering::Relaxed) {
+                info!("Running consume.");
+
                 let queue_clone = {
-                    let db = db_instance.write().unwrap();
+                    let db = db_instance.read().unwrap();
                     Arc::clone(&db.queue.queue)
                 };
 
@@ -194,7 +207,8 @@ impl Database {
                     db.consume_capture(queue_clone);
                 }
 
-                self.queue_empty = true;
+                // Mark queue as processed
+                queue_state.store(false, Ordering::Relaxed);
 
                 // let timeout = time::Duration::from_millis(CONSUMER_DELAY);
                 // thread::sleep(timeout);
@@ -220,7 +234,12 @@ impl Database {
     /// Capture a function and write it to the queue
     pub fn capture(&mut self, name: String, args: Vec<PyObject>, start: Epoch, end: Epoch) {
         let db_instance = self.get_instance();
+        let queue_state = self.get_queue_state();
+
         let mut db = db_instance.write().unwrap();
+
+        // Signal that queue has new data
+        queue_state.store(true, Ordering::Relaxed);
 
         info!("Capturing with sync_consume={}", db.sync_consume);
         db.queue.capture(name, args, start, end);
@@ -229,8 +248,8 @@ impl Database {
             info!("Performing synchronous consume");
             let queue_clone = Arc::clone(&db.queue.queue);
             db.consume_capture(queue_clone);
-        } else {
-            self.queue_empty = false;
+            // For sync consume, we immediately mark as processed
+            queue_state.store(false, Ordering::Relaxed);
         }
     }
 
@@ -388,5 +407,25 @@ mod tests {
 
         // async_db might not have data immediately available (depends on buffer size)
         // but they should be separate instances
+    }
+
+    #[test]
+    fn shared_queue_state_test() {
+        let mut db1 = Database::new(false);
+        let mut db2 = Database::new(false);
+
+        // Both instances should see the same queue state
+        let queue_state = db1.get_queue_state();
+
+        // Initially false
+        assert!(!queue_state.load(Ordering::Relaxed));
+
+        // After capture through db1, both should see true
+        db1.capture("test".to_string(), vec![], 100, 200);
+        assert!(queue_state.load(Ordering::Relaxed));
+
+        // Setting through one instance affects the other
+        queue_state.store(false, Ordering::Relaxed);
+        assert!(!db2.get_queue_state().load(Ordering::Relaxed));
     }
 }
