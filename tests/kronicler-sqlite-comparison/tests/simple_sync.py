@@ -2,11 +2,12 @@ import kronicler_sqlite
 import kronicler
 import time
 import json
+import tqdm
 
 
 WARMUP_COUNT = 10
 CAPTURE_COUNT = 1000
-REPEATS = 50
+REPEATS = 500
 
 
 @kronicler_sqlite.capture
@@ -96,7 +97,7 @@ if __name__ == "__main__":
     insert_times_data = []
     avg_times_data = []
 
-    for x in range(REPEATS):
+    for x in tqdm.tqdm(range(REPEATS)):
         # TEST sqlite inserts
         start = time.time_ns()
         test_sqlite()
