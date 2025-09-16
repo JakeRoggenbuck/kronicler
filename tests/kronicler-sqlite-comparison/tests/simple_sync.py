@@ -110,9 +110,9 @@ if __name__ == "__main__":
 
         # TEST sqlite avg
         start = time.time_ns()
-        avg_sqlite()
+        avg_val = avg_sqlite()
         end = time.time_ns()
-        print(f"{avg_sqlite.__name__} took {end - start}ns")
+        print(f"{avg_sqlite.__name__} = {avg_val} and took {end - start}ns")
         avg_times_data.append((avg_sqlite.__name__, end - start))
 
         # Wait for any cleanup to happen between SQLite and Columnar
@@ -127,9 +127,9 @@ if __name__ == "__main__":
 
         # TEST columnar avg
         start = time.time_ns()
-        avg_columnar()
+        avg_val = avg_columnar()
         end = time.time_ns()
-        print(f"{avg_columnar.__name__} took {end - start}ns")
+        print(f"{avg_columnar.__name__} = {avg_val} and took {end - start}ns")
         avg_times_data.append((avg_columnar.__name__, end - start))
 
         # Wait for any cleanup to happen between Columnar and No log
@@ -144,9 +144,9 @@ if __name__ == "__main__":
 
         # TEST no logging avg
         start = time.time_ns()
-        avg_no_logging()
+        avg_val = avg_no_logging()
         end = time.time_ns()
-        print(f"{avg_no_logging.__name__} took {end - start}ns")
+        print(f"{avg_no_logging.__name__} = {avg_val} and took {end - start}ns")
         avg_times_data.append((avg_no_logging.__name__, end - start))
 
     with open("sync_insert_data.json", "w") as file:
