@@ -2,11 +2,13 @@ import threading
 import kronicler
 import time
 
+
 @kronicler.capture
 def worker(name):
     print(f"{name} starting...")
     time.sleep(2)
     print(f"{name} finished!")
+
 
 threads = []
 
