@@ -1,10 +1,18 @@
+# Test: Does the average get the correct value?
+#
+# The main goal of this test is to double check that the average calculation is correct.
+
 rm -rf .kronicler_data
+
+sleep 2
 
 python3 ./large_average.py
 
 echo -e "Finished running large_average.\n\n"
 
 rm -rf .kronicler_data
+
+sleep 2
 
 python3 ./large_average_no_in_mem_comp.py
 
