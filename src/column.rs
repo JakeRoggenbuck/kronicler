@@ -15,6 +15,10 @@ pub struct ColumnMetadata {
     pub current_index: usize,
     pub name: String,
     pub field_type: FieldType,
+
+    // We can actually add a value to the average without storing the total value
+    // new_avg = ((old_avg + (current_index + 1)) + new_value) / (current_index + 2)
+    pub average: Option<usize>,
 }
 
 /// Implement column specific traits
@@ -25,6 +29,7 @@ impl ColumnMetadata {
             current_index: 0,
             name,
             field_type,
+            average: None,
         }
     }
 }
@@ -42,6 +47,19 @@ impl Column {
         let filepath = format!("{}/column-{}.data", DATA_DIRECTORY, column_index);
 
         Path::new(&filepath).exists()
+    }
+
+    pub fn update_average(&mut self, new_value: usize) {
+        let i = self.metadata.current_index;
+        let n = i + 1;
+
+        if let Some(old_avg) = self.metadata.average {
+            let new_avg = ((old_avg * n) + new_value) / (n + 1);
+
+            self.metadata.average = Some(new_avg);
+        } else {
+            self.metadata.average = Some(new_value);
+        }
     }
 
     pub fn save(&self) {
