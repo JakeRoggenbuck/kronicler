@@ -2,6 +2,15 @@ use super::row::RID;
 use super::row::{FieldType, Row};
 use std::collections::BTreeMap;
 
+#[derive(Debug)]
+pub struct IndexValue {
+    ids: Vec<RID>,
+
+    // We can actually add a value to the average without storing the total value
+    // new_avg = ((old_avg + (current_index + 1)) + new_value) / (current_index + 2)
+    pub average: Option<f64>,
+}
+
 /// The Index structure
 ///
 /// Use this to create an index on any column of a Row to achieve O(log n)
@@ -10,7 +19,7 @@ use std::collections::BTreeMap;
 /// Index { index: {String("Foo"): [1, 2]} }
 #[derive(Debug)]
 pub struct Index {
-    pub index: BTreeMap<FieldType, Vec<RID>>,
+    pub index: BTreeMap<FieldType, IndexValue>,
 }
 
 impl Index {
@@ -31,8 +40,18 @@ impl Index {
     /// name_bytes[..bytes.len()].copy_from_slice(bytes);
     ///
     /// let mut index = Index::new();
-    /// let row1 = Row::new(0, vec![FieldType::Name(name_bytes)]);
-    /// let row2 = Row::new(1, vec![FieldType::Name(name_bytes)]);
+    /// let row1 = Row::new(0, vec![
+    ///     FieldType::Name(name_bytes),
+    ///     FieldType::Epoch(10),
+    ///     FieldType::Epoch(20),
+    ///     FieldType::Epoch(10),
+    /// ]);
+    /// let row2 = Row::new(1, vec![
+    ///     FieldType::Name(name_bytes),
+    ///     FieldType::Epoch(10),
+    ///     FieldType::Epoch(20),
+    ///     FieldType::Epoch(10),
+    /// ]);
     ///
     /// index.insert(row1, 0);
     /// index.insert(row2, 0);
@@ -45,12 +64,26 @@ impl Index {
     /// ```
     pub fn insert(&mut self, row: Row, index_on_col: usize) {
         let key = row.fields[index_on_col].clone();
-        let ids_node: Option<&mut Vec<usize>> = self.index.get_mut(&key);
+        let index_value = self.index.get_mut(&key);
 
-        if let Some(ids_vec) = ids_node {
-            ids_vec.push(row.id);
+        if let Some(found_index) = index_value {
+            // Update average
+            let n = found_index.ids.len();
+            if let Some(avg) = found_index.average {
+                let new_avg = ((avg * n as f64) + row.get_delta() as f64) / (n as f64 + 1.0);
+                found_index.average = Some(new_avg);
+            }
+
+            // Push new value
+            found_index.ids.push(row.id);
         } else {
-            self.index.insert(key, vec![row.id]);
+            self.index.insert(
+                key,
+                IndexValue {
+                    ids: vec![row.id],
+                    average: Some(row.get_delta() as f64),
+                },
+            );
         }
     }
 
@@ -62,7 +95,17 @@ impl Index {
         let ids_node = self.index.get(&key);
 
         if let Some(ids_vec) = ids_node {
-            return Some(ids_vec.to_vec());
+            return Some(ids_vec.ids.to_vec());
+        }
+
+        None
+    }
+
+    pub fn get_average(&self, key: FieldType) -> Option<f64> {
+        let ids_node = self.index.get(&key);
+
+        if let Some(ids_vec) = ids_node {
+            return ids_vec.average;
         }
 
         None
@@ -82,7 +125,15 @@ mod tests {
         let name_str = "Jake".as_bytes();
         name_bytes[..name_str.len()].copy_from_slice(name_str);
 
-        let row_1 = Row::new(0, vec![FieldType::Name(name_bytes)]);
+        let row_1 = Row::new(
+            0,
+            vec![
+                FieldType::Name(name_bytes),
+                FieldType::Epoch(10),
+                FieldType::Epoch(20),
+                FieldType::Epoch(10),
+            ],
+        );
         rows.push(row_1.clone());
 
         index.insert(row_1, 0);
@@ -100,8 +151,24 @@ mod tests {
         let name_str = "Foo".as_bytes();
         name_bytes[..name_str.len()].copy_from_slice(name_str);
 
-        let row_2 = Row::new(1, vec![FieldType::Name(name_bytes)]);
-        let row_3 = Row::new(2, vec![FieldType::Name(name_bytes)]);
+        let row_2 = Row::new(
+            1,
+            vec![
+                FieldType::Name(name_bytes),
+                FieldType::Epoch(10),
+                FieldType::Epoch(20),
+                FieldType::Epoch(10),
+            ],
+        );
+        let row_3 = Row::new(
+            2,
+            vec![
+                FieldType::Name(name_bytes),
+                FieldType::Epoch(11),
+                FieldType::Epoch(21),
+                FieldType::Epoch(10),
+            ],
+        );
         index.insert(row_2, 0);
         index.insert(row_3, 0);
 

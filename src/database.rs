@@ -312,6 +312,14 @@ impl Database {
 
         let db_instance = self.get_instance();
 
+        let db = db_instance.read().unwrap();
+        if let Some(avg) = db.name_index.get_average(FieldType::Name(name_bytes)) {
+            info!("Using amortized const average!");
+            return Some(avg);
+        }
+
+        info!("Manually calculating average!");
+
         // Get the IDs we need to fetch
         let ids = {
             let db = db_instance.read().unwrap();
