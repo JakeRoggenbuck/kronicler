@@ -17,7 +17,7 @@ def mean(data: list):
 
 
 def foo():
-    for _ in range(1000000):
+    for _ in range(10_000):
         a = randint(100, 200)
         b = randint(300, 400)
 
