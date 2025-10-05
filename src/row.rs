@@ -116,6 +116,15 @@ impl Row {
         Row { id, fields }
     }
 
+    pub fn get_delta(&self) -> u128 {
+        let delta = self.fields[3].clone();
+
+        match delta {
+            FieldType::Epoch(a) => return a,
+            _ => unreachable!(),
+        }
+    }
+
     // TODO: Use to_string trait
     pub fn to_string(&self) -> String {
         let name = self.fields[0].to_string();
