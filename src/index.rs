@@ -100,6 +100,16 @@ impl Index {
 
         None
     }
+
+    pub fn get_average(&self, key: FieldType) -> Option<f64> {
+        let ids_node = self.index.get(&key);
+
+        if let Some(ids_vec) = ids_node {
+            return ids_vec.average;
+        }
+
+        None
+    }
 }
 
 #[cfg(test)]
