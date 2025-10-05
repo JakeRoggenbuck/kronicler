@@ -157,6 +157,9 @@ DB = kronicler.Database()
 def foo():
     DB.capture("String Value", [], 100, 200)
 
+# Call the function
+foo()
+
 fetched = DB.fetch(0)
 print(fetched)
 ```
