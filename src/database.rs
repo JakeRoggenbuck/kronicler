@@ -8,6 +8,7 @@ use super::row::{Epoch, FieldType, Row};
 use log::{debug, info, warn};
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
+use std::collections::HashSet;
 use std::collections::VecDeque;
 use std::fs;
 use std::path::Path;
@@ -304,6 +305,21 @@ impl Database {
         rows_dict
     }
 
+    pub fn get_function_names(&mut self) -> HashSet<String> {
+        let db_instance = self.get_instance();
+
+        let db = db_instance.read().unwrap();
+
+        let mut function_names = HashSet::new();
+        let keys: Vec<&FieldType> = db.name_index.index.keys().into_iter().collect();
+
+        for key in keys {
+            function_names.insert(key.to_string());
+        }
+
+        function_names
+    }
+
     /// Find the average time a function took to run
     pub fn average(&mut self, function_name: &str) -> Option<f64> {
         let mut name_bytes = [0u8; 64];
@@ -387,6 +403,24 @@ mod tests {
 
         let avg = db.average(name_str);
         assert_eq!(avg, Some(150.5));
+    }
+
+    #[test]
+    fn get_function_names() {
+        let mut db = Database::new(true);
+
+        db.capture("hello".to_string(), vec![], 100, 200);
+        db.capture("hello".to_string(), vec![], 300, 450);
+
+        db.capture("hey".to_string(), vec![], 300, 450);
+        db.capture("a".to_string(), vec![], 300, 450);
+
+        let mut r = HashSet::new();
+        r.insert("hello".to_string());
+        r.insert("hey".to_string());
+        r.insert("a".to_string());
+
+        assert_eq!(db.get_function_names(), r);
     }
 
     #[test]
