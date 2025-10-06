@@ -8,8 +8,8 @@ exclude = [
     "python/*",
     "images/*",
     "Makefile",
-	"dashboard/*",
-	"venv/*"
+    "dashboard/*",
+    "venv/*"
 ]
 description = "Automatic performance capture and analysis for production applications in Python using a custom columnar database written in Rust."
 homepage = "https://github.com/JakeRoggenbuck/kronicler"
