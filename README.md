@@ -398,8 +398,10 @@ python3 tests/many_test.py
 You can run the testing suite with the following command:
 
 ```
-cargo test
+cargo t
 ```
+
+We use `cargo t` as an alias to run the tests in one thread.
 
 The tests should all succeed
 
