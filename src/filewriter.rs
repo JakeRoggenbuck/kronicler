@@ -183,3 +183,14 @@ fn dir_filesize(folder: &str) -> u64 {
 pub fn database_filesize() -> u64 {
     dir_filesize(DATA_DIRECTORY)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn database_filesize_test() {
+        let size = database_filesize();
+        assert!(size > 1);
+    }
+}
