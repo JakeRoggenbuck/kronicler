@@ -405,10 +405,12 @@ mod tests {
         db.capture("hello".to_string(), vec![], 300, 450);
 
         db.capture("hey".to_string(), vec![], 300, 450);
+        db.capture("a".to_string(), vec![], 300, 450);
 
         let mut r = HashSet::new();
         r.insert("hello".to_string());
         r.insert("hey".to_string());
+        r.insert("a".to_string());
 
         assert_eq!(db.get_function_names(), r);
     }

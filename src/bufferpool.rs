@@ -151,6 +151,13 @@ impl Bufferpool {
 mod tests {
     use super::*;
     use crate::constants::PAGE_SIZE;
+    use crate::database::Database;
+
+    #[test]
+    fn a_setup_test() {
+        let mut db = Database::new(true);
+        db.capture("a".to_string(), vec![], 1, 2);
+    }
 
     #[test]
     fn basic_integration_test() {
