@@ -32,6 +32,7 @@ const App = () => {
   const [selectedFunction, setSelectedFunction] = useState(null);
   const [timeRange, setTimeRange] = useState("7d");
   const [viewMode, setViewMode] = useState("overview");
+  const [granularity, setGranularity] = useState("hour"); // 'minute', 'hour', 'day'
   const [apiUrl, setApiUrl] = useState("http://127.0.0.1:8000/logs");
 
   // Fetch data from API
@@ -90,65 +91,93 @@ const App = () => {
   const processedData = useMemo(() => {
     if (!rawData.length) return [];
 
-    // Group by hour and function
-    const groupedByHour = {};
+    // Group by selected granularity and function
+    const grouped = {};
 
     rawData.forEach((row) => {
       const date = new Date(row.date);
-      // Create hour key: YYYY-MM-DD HH:00
-      const hourKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:00`;
+      let key;
 
-      if (!groupedByHour[hourKey]) {
-        groupedByHour[hourKey] = {};
+      if (granularity === "minute") {
+        // YYYY-MM-DD HH:MM
+        key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+      } else if (granularity === "hour") {
+        // YYYY-MM-DD HH:00
+        key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:00`;
+      } else {
+        // YYYY-MM-DD (day)
+        key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
       }
-      if (!groupedByHour[hourKey][row.functionName]) {
-        groupedByHour[hourKey][row.functionName] = [];
+
+      if (!grouped[key]) {
+        grouped[key] = {};
       }
-      groupedByHour[hourKey][row.functionName].push(row.duration);
+      if (!grouped[key][row.functionName]) {
+        grouped[key][row.functionName] = [];
+      }
+      grouped[key][row.functionName].push(row.duration);
     });
 
-    // Calculate statistics for each hour and function
-    const result = Object.keys(groupedByHour)
+    // Calculate statistics for each time period and function
+    const result = Object.keys(grouped)
       .sort()
-      .map((hourKey) => {
-        const hourData = {
-          date: hourKey,
-          timestamp: new Date(hourKey).getTime(),
-        };
+      .map((key) => {
+        const timeData = { date: key, timestamp: new Date(key).getTime() };
 
         functions.forEach((funcName) => {
-          const durations = groupedByHour[hourKey][funcName] || [];
+          const durations = grouped[key][funcName] || [];
           if (durations.length > 0) {
             const sorted = [...durations].sort((a, b) => a - b);
             const mean =
               durations.reduce((a, b) => a + b, 0) / durations.length;
 
-            hourData[funcName] = mean;
-            hourData[`${funcName}_min`] = sorted[0];
-            hourData[`${funcName}_max`] = sorted[sorted.length - 1];
-            hourData[`${funcName}_p50`] =
+            timeData[funcName] = mean;
+            timeData[`${funcName}_min`] = sorted[0];
+            timeData[`${funcName}_max`] = sorted[sorted.length - 1];
+            timeData[`${funcName}_p50`] =
               sorted[Math.floor(sorted.length * 0.5)];
-            hourData[`${funcName}_p95`] =
+            timeData[`${funcName}_p95`] =
               sorted[Math.floor(sorted.length * 0.95)];
-            hourData[`${funcName}_p99`] =
+            timeData[`${funcName}_p99`] =
               sorted[Math.floor(sorted.length * 0.99)];
           }
         });
 
-        return hourData;
+        return timeData;
       });
 
     return result;
-  }, [rawData, functions]);
+  }, [rawData, functions, granularity]);
 
   const filteredData = useMemo(() => {
-    const hours =
-      timeRange === "7d" ? 7 * 24 : timeRange === "30d" ? 30 * 24 : 60 * 24;
-    return processedData.slice(-hours);
-  }, [processedData, timeRange]);
+    let periods;
+    if (granularity === "minute") {
+      periods =
+        timeRange === "7d"
+          ? 7 * 24 * 60
+          : timeRange === "30d"
+            ? 30 * 24 * 60
+            : 60 * 24 * 60;
+    } else if (granularity === "hour") {
+      periods =
+        timeRange === "7d" ? 7 * 24 : timeRange === "30d" ? 30 * 24 : 60 * 24;
+    } else {
+      periods = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 60;
+    }
+    return processedData.slice(-periods);
+  }, [processedData, timeRange, granularity]);
 
   const getCurrentStats = (funcName) => {
-    const recent = filteredData.slice(-7 * 24); // Last 7 days worth of hours
+    let recentPeriods;
+    if (granularity === "minute") {
+      recentPeriods = 7 * 24 * 60; // Last 7 days of minutes
+    } else if (granularity === "hour") {
+      recentPeriods = 7 * 24; // Last 7 days of hours
+    } else {
+      recentPeriods = 7; // Last 7 days
+    }
+
+    const recent = filteredData.slice(-recentPeriods);
     const values = recent
       .map((d) => d[funcName])
       .filter((v) => v !== undefined);
@@ -187,6 +216,28 @@ const App = () => {
     "#14B8A6",
   ];
 
+  const formatXAxisLabel = (value) => {
+    const date = new Date(value);
+    if (granularity === "minute") {
+      return `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+    } else if (granularity === "hour") {
+      return `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, "0")}:00`;
+    } else {
+      return `${date.getMonth() + 1}/${date.getDate()}`;
+    }
+  };
+
+  const formatTooltipLabel = (value) => {
+    const date = new Date(value);
+    if (granularity === "minute") {
+      return `${date.toLocaleDateString()} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+    } else if (granularity === "hour") {
+      return `${date.toLocaleDateString()} ${String(date.getHours()).padStart(2, "0")}:00`;
+    } else {
+      return date.toLocaleDateString();
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center">
@@ -215,6 +266,18 @@ const App = () => {
               <RefreshCw className="w-4 h-4" />
               <span>Refresh</span>
             </button>
+            <div className="flex items-center space-x-2">
+              <BarChart3 className="w-4 h-4 text-gray-400" />
+              <select
+                value={granularity}
+                onChange={(e) => setGranularity(e.target.value)}
+                className="bg-slate-700 text-white rounded-lg px-3 py-1 border border-slate-600"
+              >
+                <option value="minute">By Minute</option>
+                <option value="hour">By Hour</option>
+                <option value="day">By Day</option>
+              </select>
+            </div>
             <div className="flex items-center space-x-2">
               <Calendar className="w-4 h-4 text-gray-400" />
               <select
@@ -313,10 +376,7 @@ const App = () => {
                 dataKey="date"
                 stroke="#64748B"
                 fontSize={12}
-                tickFormatter={(value) => {
-                  const date = new Date(value);
-                  return `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, "0")}:00`;
-                }}
+                tickFormatter={formatXAxisLabel}
               />
               <YAxis stroke="#64748B" fontSize={12} />
               <Tooltip
@@ -326,10 +386,7 @@ const App = () => {
                   borderRadius: "8px",
                   color: "#fff",
                 }}
-                labelFormatter={(value) => {
-                  const date = new Date(value);
-                  return `${date.toLocaleDateString()} ${String(date.getHours()).padStart(2, "0")}:00`;
-                }}
+                labelFormatter={formatTooltipLabel}
               />
               <Legend />
               {functions.map((funcName, index) => (
@@ -360,10 +417,7 @@ const App = () => {
                 dataKey="date"
                 stroke="#64748B"
                 fontSize={12}
-                tickFormatter={(value) => {
-                  const date = new Date(value);
-                  return `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, "0")}:00`;
-                }}
+                tickFormatter={formatXAxisLabel}
               />
               <YAxis stroke="#64748B" fontSize={12} />
               <Tooltip
