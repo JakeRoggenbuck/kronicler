@@ -3,7 +3,7 @@ from .kronicler import Database, database_init
 from typing import Final
 import time
 
-DB = Database()
+DB = Database(sync_consume=True)
 
 
 def capture(func):
