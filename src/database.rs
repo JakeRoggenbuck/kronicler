@@ -8,6 +8,7 @@ use super::row::{Epoch, FieldType, Row};
 use log::{debug, info, warn};
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
+use std::collections::HashSet;
 use std::collections::VecDeque;
 use std::fs;
 use std::path::Path;
@@ -379,6 +380,22 @@ mod tests {
 
         let avg = db.average(name_str);
         assert_eq!(avg, Some(150.5));
+    }
+
+    #[test]
+    fn get_function_names() {
+        let mut db = Database::new(true);
+
+        db.capture("hello".to_string(), vec![], 100, 200);
+        db.capture("hello".to_string(), vec![], 300, 450);
+
+        db.capture("hey".to_string(), vec![], 300, 450);
+
+        let mut r = HashSet::new();
+        r.insert("hello");
+        r.insert("hey");
+
+        assert_eq!(db.get_function_names(), r);
     }
 
     #[test]
