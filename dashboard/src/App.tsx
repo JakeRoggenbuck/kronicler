@@ -652,6 +652,8 @@ const App = () => {
                   color: "#fff",
                 }}
                 formatter={(value) => [`${value}ms`, "Avg Response Time"]}
+                labelStyle={{ color: "#fff" }}
+                itemStyle={{ color: "#fff" }}
               />
               <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                 {functions.map((funcName, index) => (
