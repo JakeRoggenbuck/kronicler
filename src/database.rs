@@ -1,7 +1,7 @@
 use super::bufferpool::Bufferpool;
 use super::capture::Capture;
 use super::column::Column;
-use super::constants::{CONSUMER_DELAY, DATA_DIRECTORY, DB_WRITE_BUFFER_SIZE};
+use super::constants::{DATA_DIRECTORY, DB_WRITE_BUFFER_SIZE};
 use super::index::Index;
 use super::queue::KQueue;
 use super::row::{Epoch, FieldType, Row};
@@ -14,7 +14,7 @@ use std::fs;
 use std::path::Path;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::{Arc, OnceLock, RwLock};
-use std::{thread, time};
+use std::thread;
 
 pub struct DatabaseInner {
     queue: KQueue,
@@ -456,7 +456,7 @@ mod tests {
     #[test]
     fn shared_queue_state_test() {
         let mut db1 = Database::new(false);
-        let mut db2 = Database::new(false);
+        let db2 = Database::new(false);
 
         // Both instances should see the same queue state
         let queue_state = db1.get_queue_state();
