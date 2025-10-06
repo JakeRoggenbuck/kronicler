@@ -5,7 +5,9 @@ import json
 import tqdm
 
 # Sync consume
-kronicler.DB = kronicler.Database(sync_consume=True)
+KR_DB = kronicler.Database(sync_consume=True)
+
+SQL_DB = kronicler_sqlite.Database()
 
 
 WARMUP_COUNT = 10
@@ -79,16 +81,12 @@ def test_no_logging():
 
 
 def avg_sqlite() -> float:
-    DB = kronicler_sqlite.Database()
-
-    avg = DB.average("foo_1")
+    avg = SQL_DB.average("foo_1")
     return avg
 
 
 def avg_columnar() -> float:
-    DB = kronicler.Database()
-
-    avg = DB.average("foo_2")
+    avg = KR_DB.average("foo_2")
     return avg
 
 
