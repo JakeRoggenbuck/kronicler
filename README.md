@@ -12,7 +12,7 @@ Automatic performance capture and analytics for production applications in Pytho
 View Kronicler on [PyPi.org](https://pypi.org/project/kronicler), [Crates.io](https://crates.io/crates/kronicler) and [GitHub](https://github.com/JakeRoggenbuck/kronicler).
 
 > [!IMPORTANT]
-> Kronicler is still early in development! Currently you can install and try out the [logging](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#logging). [Analytics](https://github.com/JakeRoggenbuck/kronicler?tab=readme-ov-file#analytics) features are coming soon.
+> Kronicler is still early in development.
 
 ## Benefits of using Kronicler
 
@@ -119,7 +119,7 @@ import kronicler
 app = FastAPI()
 
 # Used only for optionally returning logs
-db = kronicler.Database()
+DB = kronicler.Database(sync_consume=True)
 
 
 # You need to wrap helper functions
@@ -136,7 +136,7 @@ def read_root():
 # Return the logs to the user (optional)
 @app.get("/logs")
 def read_logs():
-    return db.fetch_all_as_dict()
+    return DB.fetch_all_as_dict()
 
 
 if __name__ == "__main__":
@@ -152,7 +152,7 @@ It's recommended to first use Kronicler's build-in `capture` decorator. However,
 ```python
 import kronicler
 
-DB = kronicler.Database()
+DB = kronicler.Database(sync_consume=True)
 
 def foo():
     DB.capture("String Value", [], 100, 200)
@@ -180,7 +180,7 @@ Add as a dependency in your `Cargo.toml`.
 
 ```toml
 [dependencies]
-kronicler = "0.1.0"
+kronicler = "0.1.1"
 ```
 
 To get a good idea of how to use Kronicler's internal Rust database, I'd recommended looking at some of the tests in the Rust files. You can also look at the source code for the `kr` binary in [main.rs](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/bin/main.rs).
@@ -224,7 +224,7 @@ Kronicler is designed to be as lightweight as possible. By adding logs to a queu
 
 For accessing logs and running calculations, Kronicler uses a columnar database design to optimize file operations when looking at lots of data from only a few columns typical of analytics tasks.
 
-\* concurrency is in development but not fully implemented as of version 0.1.0. Track concurrency in [issue #41](https://github.com/JakeRoggenbuck/kronicler/issues/41).
+\* concurrency is in development but not fully implemented as of version 0.1.1. Track concurrency in [issue #123](https://github.com/JakeRoggenbuck/kronicler/issues/123).
 
 ### Kronicler DB vs. SQLite
 
@@ -232,7 +232,7 @@ I implemented a [test version of Kronicler](https://github.com/JakeRoggenbuck/kr
 
 #### Experiment 1. Insert 1000 captures
 
-Here is the function that we capture with `kronicler_sqlite.capture` defined by our test package that uses SQLite. The [test file](https://github.com/JakeRoggenbuck/kronicler/blob/main/tests/kronicler-sqlite-comparison/tests/simple.py) is also included in git as well as the [graphing code](https://github.com/JakeRoggenbuck/kronicler/blob/main/tests/kronicler-sqlite-comparison/tests/graph.py).
+Here is the function that we capture with `kronicler_sqlite.capture` defined by our test package that uses SQLite.
 
 ```python
 @kronicler_sqlite.capture
@@ -262,15 +262,14 @@ def test_sqlite():
 
 We do the same for the Kronicler DB version with `kronicler.capture`.
 
-We then run each of those functions a few times and log the results:
+We then run each of those functions 50 times and log the results:
 
 ```python
 if __name__ == "__main__":
     insert_times_data = []
     avg_times_data = []
 
-    for x in range(REPEATS):
-
+    for x in tqdm.tqdm(range(REPEATS)):
         # TEST sqlite inserts
         start = time.time_ns()
         test_sqlite()
@@ -280,10 +279,13 @@ if __name__ == "__main__":
 
         # TEST sqlite avg
         start = time.time_ns()
-        avg_sqlite()
+        avg_val = avg_sqlite()
         end = time.time_ns()
-        print(f"{avg_sqlite.__name__} took {end - start}ns")
+        print(f"{avg_sqlite.__name__} = {avg_val} and took {end - start}ns")
         avg_times_data.append((avg_sqlite.__name__, end - start))
+
+        # Wait for any cleanup to happen between SQLite and Columnar
+        time.sleep(2)
 
         # TEST columnar inserts
         start = time.time_ns()
@@ -294,42 +296,64 @@ if __name__ == "__main__":
 
         # TEST columnar avg
         start = time.time_ns()
-        avg_columnar()
+        avg_val = avg_columnar()
         end = time.time_ns()
-        print(f"{avg_columnar.__name__} took {end - start}ns")
+        print(f"{avg_columnar.__name__} = {avg_val} and took {end - start}ns")
         avg_times_data.append((avg_columnar.__name__, end - start))
 
-    with open("insert_data.json", "w") as file:
+        # Wait for any cleanup to happen between Columnar and No log
+        time.sleep(2)
+
+        # TEST no log inserts
+        start = time.time_ns()
+        test_no_logging()
+        end = time.time_ns()
+        print(f"{test_no_logging.__name__} took {end - start}ns")
+        insert_times_data.append((test_no_logging.__name__, end - start))
+
+        # TEST no logging avg
+        start = time.time_ns()
+        avg_val = avg_no_logging()
+        end = time.time_ns()
+        print(f"{avg_no_logging.__name__} = {avg_val} and took {end - start}ns")
+        avg_times_data.append((avg_no_logging.__name__, end - start))
+
+    with open("sync_insert_data.json", "w") as file:
         json.dump(insert_times_data, file)
 
-    with open("avg_data.json", "w") as file:
+    with open("sync_avg_data.json", "w") as file:
         json.dump(avg_times_data, file)
 ```
 
-##### Inserts: The inserts were significantly faster:
+##### Insert (writing data to disk):
 
-<img width="800" height="500" alt="inserts 1000" src="https://github.com/user-attachments/assets/56f8b224-0064-4d1a-b5b9-a1555b87243b" />
+<img width="800" height="500" alt="sync_insert_50" src="https://github.com/user-attachments/assets/712ee44d-e879-4d2c-85fe-219f4d36b373" />
 
-The data:
+The data can be found at [sync_insert_data.json](tests/kronicler-sqlite-comparison/tests/sync_insert_data.json).
 
+Inserting is **7.71x** faster than SQLite.
+
+##### Average (calculating the mean):
+
+<img width="800" height="500" alt="sync_avg_50" src="https://github.com/user-attachments/assets/33e5fb2a-92e8-4807-a1eb-bb89291572b8" />
+
+The data can be found at [sync_avg_data.json](tests/kronicler-sqlite-comparison/tests/sync_avg_data.json).
+
+Kronicler uses amortized constant calculations to keep an average runtime for functions. This causes the mean calculation to be **837.24x** faster than the average function in SQLite.
+
+Here is how it's done in SQLite:
+
+```sql
+SELECT AVG(delta) FROM function_calls WHERE function_name = ?
 ```
-[["test_sqlite", 2522475112], ["test_columnar", 144274244], ["test_sqlite", 2461806212], ["test_columnar", 139670709], ["test_sqlite", 2447023113],
-["test_columnar", 140689219], ["test_sqlite", 2444356540], ["test_columnar", 142753131], ["test_sqlite", 2447511719], ["test_columnar", 147328073]]
-```
 
-This is a **17.24x** speedup!
+Kronicler keeps an updated mean on insert. This same approach can be done with SQLite by having your own index on function names and a table to keep track of the mean function time the same way Kronicler does it, however that's not the default and you'd have to build that into your implementation.
 
 ## Analytics Web Dashboard
 
 The Analytics Web Dashboard is still under construction. This feature will let you remotely view the logs collected from Kronicler.
 
-#### Mock-up
-
-The Web Dashboard may look something like this. It will show important information about all of the functions at the top. It will also include a graph of the functions performance over time.
-
-<img width="1442" height="885" alt="image" src="https://github.com/user-attachments/assets/69f03f71-9e94-473a-b309-9a13dae94ff5" />
-
-This mock-up was created with Claude and the future dashboard may vary substantially.
+<img width="1903" height="1012" alt="Screenshot 2025-10-06 at 14-15-10 dashboard" src="https://github.com/user-attachments/assets/b56e9513-c18e-4e98-aa2f-f0d1b9eed8bb" />
 
 ## Analytics CLI
 
