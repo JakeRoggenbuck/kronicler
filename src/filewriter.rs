@@ -1,7 +1,8 @@
 // File Writer from https://github.com/JakeRoggenbuck/RedoxQL/blob/main/src/filewriter.rs
+use super::constants::DATA_DIRECTORY;
 use serde::{Deserialize, Serialize};
 use serde_json;
-use std::fs::{read_to_string, File};
+use std::fs::{metadata, read_dir, read_to_string, File};
 use std::io::{BufReader, BufWriter, Write};
 
 pub trait WriterStrategy<T: Serialize + for<'de> Deserialize<'de>> {
@@ -162,4 +163,23 @@ pub fn build_json_writer<T: Serialize + for<'de> Deserialize<'de>>() -> Writer<T
     let writer = Writer::new(Box::new(json_writer));
 
     return writer;
+}
+
+fn dir_filesize(folder: &str) -> u64 {
+    let mut size = 0;
+
+    for entry in read_dir(folder).unwrap() {
+        let path = entry.unwrap().path();
+        if path.is_dir() {
+            size += dir_filesize(path.to_str().unwrap());
+        } else {
+            size += metadata(path).unwrap().len();
+        }
+    }
+
+    size
+}
+
+pub fn database_filesize() -> u64 {
+    dir_filesize(DATA_DIRECTORY)
 }
