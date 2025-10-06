@@ -405,7 +405,7 @@ We use `cargo t` as an alias to run the tests in one thread.
 
 The tests should all succeed
 
-<img width="1157" height="377" alt="image" src="https://github.com/user-attachments/assets/aae0fb07-f9d5-4482-a06e-1e2e5e6eb320" />
+<img width="1309" height="1006" alt="image" src="https://github.com/user-attachments/assets/474f58d5-0195-439d-9218-99735de8862d" />
 
 ## Publishing
 
