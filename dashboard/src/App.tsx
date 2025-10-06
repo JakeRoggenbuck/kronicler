@@ -23,6 +23,7 @@ import {
   Filter,
   Calendar,
   RefreshCw,
+  Settings,
 } from "lucide-react";
 
 const App = () => {
@@ -34,6 +35,8 @@ const App = () => {
   const [viewMode, setViewMode] = useState("overview");
   const [granularity, setGranularity] = useState("hour"); // 'minute', 'hour', 'day'
   const [apiUrl, setApiUrl] = useState("http://127.0.0.1:8000/logs");
+  const [showSettings, setShowSettings] = useState(false);
+  const [tempApiUrl, setTempApiUrl] = useState("http://127.0.0.1:8000/logs");
 
   // Fetch data from API
   const fetchData = async () => {
@@ -75,6 +78,13 @@ const App = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSaveApiUrl = () => {
+    setApiUrl(tempApiUrl);
+    setShowSettings(false);
+    // Fetch data with new URL
+    fetchData();
   };
 
   useEffect(() => {
@@ -260,6 +270,13 @@ const App = () => {
           </div>
           <div className="flex items-center space-x-4">
             <button
+              onClick={() => setShowSettings(!showSettings)}
+              className="flex items-center space-x-2 bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              <Settings className="w-4 h-4" />
+              <span>Settings</span>
+            </button>
+            <button
               onClick={fetchData}
               className="flex items-center space-x-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors"
             >
@@ -312,6 +329,68 @@ const App = () => {
           </div>
         )}
       </div>
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={() => setShowSettings(false)}
+        >
+          <div
+            className="bg-slate-800 rounded-xl p-6 border border-slate-700 max-w-md w-full mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold flex items-center">
+                <Settings className="w-5 h-5 mr-2 text-green-500" />
+                Settings
+              </h3>
+              <button
+                onClick={() => setShowSettings(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">
+                  API Endpoint URL
+                </label>
+                <input
+                  type="text"
+                  value={tempApiUrl}
+                  onChange={(e) => setTempApiUrl(e.target.value)}
+                  className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-green-500 focus:outline-none"
+                  placeholder="http://0.0.0.0:8000/logs"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Current: <span className="text-green-400">{apiUrl}</span>
+                </p>
+              </div>
+
+              <div className="flex space-x-3 pt-2">
+                <button
+                  onClick={handleSaveApiUrl}
+                  className="flex-1 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  Save & Refresh
+                </button>
+                <button
+                  onClick={() => {
+                    setTempApiUrl(apiUrl);
+                    setShowSettings(false);
+                  }}
+                  className="flex-1 bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="flex justify-between gap-4 mb-6">
