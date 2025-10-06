@@ -21,7 +21,7 @@ View Kronicler on [PyPi.org](https://pypi.org/project/kronicler), [Crates.io](ht
 - One Python dependency
 - Works out-of-the-box without configuration 
 
-\* concurrency is in development but not fully implemented as of version 0.1.0. Track concurrency in [issue #41](https://github.com/JakeRoggenbuck/kronicler/issues/41).
+\* concurrency is in development but not fully implemented as of version 0.1.1. Track concurrency in [issue #41](https://github.com/JakeRoggenbuck/kronicler/issues/41).
 
 ## Why use Kronicler?
 
@@ -325,6 +325,8 @@ if __name__ == "__main__":
         json.dump(avg_times_data, file)
 ```
 
+This test is called [simple_sync.py](tests/kronicler-sqlite-comparison/tests/simple_sync.py). Note: concurrent mode is turned off as of v0.1.1, so those tests will not run. The concurrent version of the test is [simple_concurrent.py](tests/kronicler-sqlite-comparison/tests/simple_concurrent.py) and will exit with an error message explaining the lack of support in v0.1.1.
+
 ##### Insert (writing data to disk):
 
 <img width="800" height="500" alt="sync_insert_50" src="https://github.com/user-attachments/assets/712ee44d-e879-4d2c-85fe-219f4d36b373" />
@@ -332,6 +334,8 @@ if __name__ == "__main__":
 The data can be found at [sync_insert_data.json](tests/kronicler-sqlite-comparison/tests/sync_insert_data.json).
 
 Inserting is **7.71x** faster than SQLite.
+
+It's still unknown why SQLite has large latency spikes, but information about that will be mentioned in [issue #101](https://github.com/JakeRoggenbuck/kronicler/issues/101) if found.
 
 ##### Average (calculating the mean):
 
@@ -348,6 +352,74 @@ SELECT AVG(delta) FROM function_calls WHERE function_name = ?
 ```
 
 Kronicler keeps an updated mean on insert. This same approach can be done with SQLite by having your own index on function names and a table to keep track of the mean function time the same way Kronicler does it, however that's not the default and you'd have to build that into your implementation.
+
+### Kronicler Mean with Large Data Test
+
+#### Correctness for average (mean) calculation for large data
+
+##### The test script
+
+```sh
+rm -rf .kronicler_data
+
+sleep 2
+
+python3 ./large_average.py
+
+echo -e "Finished running large_average.\n\n"
+
+rm -rf .kronicler_data
+
+sleep 2
+
+python3 ./large_average_no_in_mem_comp.py
+
+echo -e "Finished running large_average_no_in_mem_comp.\n\n"
+
+echo "Note: large_average has a higher insert time because it needs to store ground truth values in memory. The ground truth average will also be quicker because it uses only in-memory values."
+```
+
+This script is called [run_large_avg.sh](tests/python-integration-tests/run_large_avg.sh).
+
+Importantly, we test that the average is correct using a "ground truth" calculation.
+
+```py
+start = time.time()
+kr_avg = DB.average("jake")
+kr_avg_time = time.time() - start
+print("Kronicler average: ", kr_avg, f"ran in {kr_avg_time}.")
+
+start = time.time()
+py_avg = mean(ground_truth_data)
+py_avg_time = time.time() - start
+print("Ground truth average: ", py_avg, f"ran in {py_avg_time}.")
+
+assert kr_avg - py_avg < 0.0001
+```
+
+This is from [large_average.py](tests/python-integration-tests/large_average.py).
+
+##### Results
+
+```
+Running insert took 76.3846685886383
+First row: Row(id=0, fields=["jake", Epoch(169), Epoch(367), Epoch(198)])
+Fetched all 100000 rows.
+Kronicler average:  200.19449000000037 ran in 2.1696090698242188e-05.
+Ground truth average:  200.19449 ran in 0.0007288455963134766.
+Finished running large_average.
+
+
+Running insert took 77.20267271995544
+First row: Row(id=0, fields=["jake", Epoch(191), Epoch(372), Epoch(181)])
+Fetched all 100000 rows.
+Kronicler average:  199.92816000000082 ran in 2.3126602172851562e-05.
+Finished running large_average_no_in_mem_comp.
+```
+
+As you can see, in the first test the kronicler_data amortized const average 
+took `2.1696090698242188e-05` seconds but the ground truth written in Python 
+`0.0007288455963134766` seconds. The Rust amortized constant is faster.
 
 ## Analytics Web Dashboard
 
