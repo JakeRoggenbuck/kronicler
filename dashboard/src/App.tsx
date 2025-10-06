@@ -1,60 +1,119 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, ScatterChart, Scatter, Cell } from 'recharts';
-import { Activity, Clock, TrendingUp, AlertTriangle, BarChart3, Filter, Calendar } from 'lucide-react';
-
-// Generate realistic performance data for 5 functions over 2 months
-const generatePerformanceData = () => {
-  const functions = [
-    { name: 'data_processor', baseTime: 150, variance: 50 },
-    { name: 'image_optimizer', baseTime: 300, variance: 100 },
-    { name: 'api_handler', baseTime: 75, variance: 25 },
-    { name: 'ml_inference', baseTime: 500, variance: 200 },
-    { name: 'cache_manager', baseTime: 25, variance: 10 }
-  ];
-  
-  const data = [];
-  const now = new Date();
-  
-  for (let i = 60; i >= 0; i--) {
-    const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-    const dayData = {
-      date: date.toISOString().split('T')[0],
-      timestamp: date.getTime()
-    };
-    
-    functions.forEach(func => {
-      const trend = Math.sin(i * 0.1) * 20; // Add some trend
-      const noise = (Math.random() - 0.5) * func.variance;
-      const baseValue = func.baseTime + trend + noise;
-      
-      dayData[func.name] = Math.max(10, baseValue);
-      dayData[`${func.name}_min`] = Math.max(5, baseValue - func.variance * 0.8);
-      dayData[`${func.name}_max`] = baseValue + func.variance * 1.2;
-      dayData[`${func.name}_p50`] = baseValue;
-      dayData[`${func.name}_p95`] = baseValue + func.variance * 0.6;
-      dayData[`${func.name}_p99`] = baseValue + func.variance * 0.9;
-    });
-    
-    data.push(dayData);
-  }
-  
-  return { data, functions };
-};
+import { Activity, Clock, TrendingUp, AlertTriangle, BarChart3, Filter, Calendar, RefreshCw } from 'lucide-react';
 
 const App = () => {
-  const { data, functions } = useMemo(() => generatePerformanceData(), []);
-  const [selectedFunction, setSelectedFunction] = useState('data_processor');
+  const [rawData, setRawData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedFunction, setSelectedFunction] = useState(null);
   const [timeRange, setTimeRange] = useState('7d');
   const [viewMode, setViewMode] = useState('overview');
+  const [apiUrl, setApiUrl] = useState('http://127.0.0.1:8000/logs');
+
+  // Fetch data from API
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(apiUrl);
+      if (!response.ok) throw new Error('Failed to fetch data');
+      const data = await response.json();
+      
+      // Transform API data to internal format
+      // Expected format: [{id: 0, fields: [{type: "Name", value: "foo"}, {type: "Epoch", value: 123}, ...]}]
+      const transformed = data.map(row => {
+        const functionName = row.fields[0].value;
+        const startTime = row.fields[1].value;
+        const endTime = row.fields[2].value;
+        const duration = row.fields[3].value;
+        
+        return {
+          id: row.id,
+          functionName: functionName,
+          startTime: startTime,
+          endTime: endTime,
+          duration: duration / 1000, // Convert nanoseconds to microseconds
+          date: new Date(startTime / 1000000) // Convert nanoseconds to milliseconds for Date
+        };
+      });
+      
+      setRawData(transformed);
+      if (!selectedFunction && transformed.length > 0) {
+        const uniqueFuncs = [...new Set(transformed.map(d => d.functionName))];
+        setSelectedFunction(uniqueFuncs[0]);
+      }
+    } catch (err) {
+      setError(err.message);
+      setRawData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // Get unique function names
+  const functions = useMemo(() => {
+    const uniqueFuncs = [...new Set(rawData.map(d => d.functionName))];
+    return uniqueFuncs.sort();
+  }, [rawData]);
+
+  // Process data for time series
+  const processedData = useMemo(() => {
+    if (!rawData.length) return [];
+    
+    // Group by date and function
+    const groupedByDate = {};
+    
+    rawData.forEach(row => {
+      const dateKey = row.date.toISOString().split('T')[0];
+      if (!groupedByDate[dateKey]) {
+        groupedByDate[dateKey] = {};
+      }
+      if (!groupedByDate[dateKey][row.functionName]) {
+        groupedByDate[dateKey][row.functionName] = [];
+      }
+      groupedByDate[dateKey][row.functionName].push(row.duration);
+    });
+    
+    // Calculate statistics for each date and function
+    const result = Object.keys(groupedByDate).sort().map(dateKey => {
+      const dayData = { date: dateKey, timestamp: new Date(dateKey).getTime() };
+      
+      functions.forEach(funcName => {
+        const durations = groupedByDate[dateKey][funcName] || [];
+        if (durations.length > 0) {
+          const sorted = [...durations].sort((a, b) => a - b);
+          const mean = durations.reduce((a, b) => a + b, 0) / durations.length;
+          
+          dayData[funcName] = mean;
+          dayData[`${funcName}_min`] = sorted[0];
+          dayData[`${funcName}_max`] = sorted[sorted.length - 1];
+          dayData[`${funcName}_p50`] = sorted[Math.floor(sorted.length * 0.5)];
+          dayData[`${funcName}_p95`] = sorted[Math.floor(sorted.length * 0.95)];
+          dayData[`${funcName}_p99`] = sorted[Math.floor(sorted.length * 0.99)];
+        }
+      });
+      
+      return dayData;
+    });
+    
+    return result;
+  }, [rawData, functions]);
 
   const filteredData = useMemo(() => {
     const days = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 60;
-    return data.slice(-days);
-  }, [data, timeRange]);
+    return processedData.slice(-days);
+  }, [processedData, timeRange]);
 
   const getCurrentStats = (funcName) => {
     const recent = filteredData.slice(-7);
-    const values = recent.map(d => d[funcName]);
+    const values = recent.map(d => d[funcName]).filter(v => v !== undefined);
+    if (values.length === 0) return { mean: '0.0', min: '0.0', max: '0.0', p95: '0.0' };
+    
     const mean = values.reduce((a, b) => a + b, 0) / values.length;
     const min = Math.min(...values);
     const max = Math.max(...values);
@@ -72,20 +131,20 @@ const App = () => {
     return 'healthy';
   };
 
-  const colors = {
-    primary: '#10B981', // Green
-    secondary: '#059669',
-    accent: '#34D399',
-    warning: '#F59E0B',
-    error: '#EF4444',
-    bg: '#0F172A',
-    card: '#1E293B',
-    border: '#334155'
-  };
-
   const functionColors = [
-    '#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444'
+    '#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899', '#14B8A6'
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="w-12 h-12 text-green-500 animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Loading performance data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-900 text-white p-6">
@@ -97,6 +156,13 @@ const App = () => {
             <h1 className="text-3xl font-bold">Kronicler</h1>
           </div>
           <div className="flex items-center space-x-4">
+            <button 
+              onClick={fetchData}
+              className="flex items-center space-x-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span>Refresh</span>
+            </button>
             <div className="flex items-center space-x-2">
               <Calendar className="w-4 h-4 text-gray-400" />
               <select 
@@ -122,25 +188,30 @@ const App = () => {
             </div>
           </div>
         </div>
-        <p className="text-gray-400 mt-2">Python Function Performance Monitor</p>
+        <p className="text-gray-400 mt-2">Python Function Performance Monitor • {rawData.length} total logs</p>
+        {error && (
+          <div className="mt-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
+            API Error: {error}. Please ensure the API is running at {apiUrl}
+          </div>
+        )}
       </div>
 
       {/* Stats Cards */}
       <div className="flex justify-between gap-4 mb-6">
-        {functions.map((func, index) => {
-          const stats = getCurrentStats(func.name);
-          const health = getHealthStatus(func.name);
+        {functions.map((funcName, index) => {
+          const stats = getCurrentStats(funcName);
+          const health = getHealthStatus(funcName);
           const healthColor = health === 'healthy' ? 'text-green-500' : health === 'warning' ? 'text-yellow-500' : 'text-red-500';
           
           return (
-            <div key={func.name} className="bg-slate-800 rounded-lg p-4 border border-slate-700 hover:border-green-500/50 transition-colors cursor-pointer flex-1 h-32 flex flex-col justify-between min-w-0"
-                 onClick={() => setSelectedFunction(func.name)}>
+            <div key={funcName} className="bg-slate-800 rounded-lg p-4 border border-slate-700 hover:border-green-500/50 transition-colors cursor-pointer flex-1 h-32 flex flex-col justify-between min-w-0"
+                 onClick={() => setSelectedFunction(funcName)}>
               <div className="flex items-center justify-between">
                 <Clock className="w-4 h-4 text-green-500" />
                 <div className={`w-2 h-2 rounded-full ${health === 'healthy' ? 'bg-green-500' : health === 'warning' ? 'bg-yellow-500' : 'bg-red-500'}`}></div>
               </div>
               <div className="text-center flex-1 flex flex-col justify-center">
-                <h3 className="text-sm font-semibold mb-2 truncate">{func.name}</h3>
+                <h3 className="text-sm font-semibold mb-2 truncate">{funcName}</h3>
                 <div className="space-y-1">
                   <div className="flex justify-center items-center space-x-2">
                     <span className="text-gray-400 text-xs">Mean</span>
@@ -185,15 +256,15 @@ const App = () => {
                 labelFormatter={(value) => `Date: ${new Date(value).toLocaleDateString()}`}
               />
               <Legend />
-              {functions.map((func, index) => (
+              {functions.map((funcName, index) => (
                 <Line 
-                  key={func.name}
+                  key={funcName}
                   type="monotone" 
-                  dataKey={func.name} 
-                  stroke={functionColors[index]}
-                  strokeWidth={selectedFunction === func.name ? 3 : 2}
+                  dataKey={funcName} 
+                  stroke={functionColors[index % functionColors.length]}
+                  strokeWidth={selectedFunction === funcName ? 3 : 2}
                   dot={false}
-                  name={func.name}
+                  name={funcName}
                 />
               ))}
             </LineChart>
@@ -252,14 +323,13 @@ const App = () => {
                 </tr>
               </thead>
               <tbody>
-                {functions.map((func, index) => {
-                  const stats = getCurrentStats(func.name);
-                  const health = getHealthStatus(func.name);
-                  const healthColor = health === 'healthy' ? 'text-green-500' : health === 'warning' ? 'text-yellow-500' : 'text-red-500';
+                {functions.map((funcName, index) => {
+                  const stats = getCurrentStats(funcName);
+                  const health = getHealthStatus(funcName);
                   
                   return (
-                    <tr key={func.name} className="border-b border-slate-700/50 hover:bg-slate-700/30">
-                      <td className="py-3 px-4 font-medium">{func.name}</td>
+                    <tr key={funcName} className="border-b border-slate-700/50 hover:bg-slate-700/30">
+                      <td className="py-3 px-4 font-medium">{funcName}</td>
                       <td className="py-3 px-4 text-right">{stats.mean}</td>
                       <td className="py-3 px-4 text-right text-gray-400">{stats.min}</td>
                       <td className="py-3 px-4 text-right text-gray-400">{stats.max}</td>
@@ -287,10 +357,10 @@ const App = () => {
         <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
           <h3 className="text-xl font-semibold mb-4">Average Response Times</h3>
           <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={functions.map(func => ({
-              name: func.name,
-              value: parseFloat(getCurrentStats(func.name).mean),
-              health: getHealthStatus(func.name)
+            <BarChart data={functions.map(funcName => ({
+              name: funcName,
+              value: parseFloat(getCurrentStats(funcName).mean),
+              health: getHealthStatus(funcName)
             }))}>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
               <XAxis dataKey="name" stroke="#64748B" fontSize={12} angle={-45} textAnchor="end" height={80} />
@@ -305,10 +375,10 @@ const App = () => {
                 formatter={(value) => [`${value}ms`, 'Avg Response Time']}
               />
               <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                {functions.map((func, index) => (
+                {functions.map((funcName, index) => (
                   <Cell key={index} fill={
-                    getHealthStatus(func.name) === 'healthy' ? '#10B981' : 
-                    getHealthStatus(func.name) === 'warning' ? '#F59E0B' : '#EF4444'
+                    getHealthStatus(funcName) === 'healthy' ? '#10B981' : 
+                    getHealthStatus(funcName) === 'warning' ? '#F59E0B' : '#EF4444'
                   } />
                 ))}
               </Bar>
@@ -321,22 +391,22 @@ const App = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg">
               <span className="font-medium">Healthy Functions</span>
-              <span className="text-green-500 font-bold">{functions.filter(f => getHealthStatus(f.name) === 'healthy').length}/{functions.length}</span>
+              <span className="text-green-500 font-bold">{functions.filter(f => getHealthStatus(f) === 'healthy').length}/{functions.length}</span>
             </div>
             <div className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg">
               <span className="font-medium">Warning Functions</span>
-              <span className="text-yellow-500 font-bold">{functions.filter(f => getHealthStatus(f.name) === 'warning').length}/{functions.length}</span>
+              <span className="text-yellow-500 font-bold">{functions.filter(f => getHealthStatus(f) === 'warning').length}/{functions.length}</span>
             </div>
             <div className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg">
               <span className="font-medium">Critical Functions</span>
-              <span className="text-red-500 font-bold">{functions.filter(f => getHealthStatus(f.name) === 'critical').length}/{functions.length}</span>
+              <span className="text-red-500 font-bold">{functions.filter(f => getHealthStatus(f) === 'critical').length}/{functions.length}</span>
             </div>
             <div className="mt-6 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
               <div className="flex items-center">
                 <Activity className="w-5 h-5 text-green-500 mr-2" />
                 <span className="text-green-400 font-medium">System Status: Operational</span>
               </div>
-              <p className="text-gray-400 text-sm mt-1">All critical functions are performing within acceptable ranges.</p>
+              <p className="text-gray-400 text-sm mt-1">Monitoring {rawData.length} performance logs across {functions.length} functions.</p>
             </div>
           </div>
         </div>
