@@ -1,0 +1,611 @@
+(venv) tests (amortized-const-stats) λ ./automation.sh
+  0%|                                                                                                                               | 0/50 [00:00<?, ?it/s]test_sqlite took 2525546622ns
+avg_sqlite = 1640.52647032426 and took 6537176ns
+test_columnar took 266265682ns
+avg_columnar = 959.3306930693069 and took 9167ns
+test_no_logging took 469913ns
+avg_no_logging = 0 and took 4218ns
+  2%|██▍                                                                                                                    | 1/50 [00:06<05:33,  6.80s/it]test_sqlite took 2524979435ns
+avg_sqlite = 1642.5887497943115 and took 6325678ns
+test_columnar took 277404016ns
+avg_columnar = 968.0792079207921 and took 8827ns
+test_no_logging took 494860ns
+avg_no_logging = 0 and took 3116ns
+  4%|████▊                                                                                                                  | 2/50 [00:13<05:26,  6.81s/it]test_sqlite took 2481504791ns
+avg_sqlite = 1644.3586167247822 and took 6476372ns
+test_columnar took 265840113ns
+avg_columnar = 969.2409240924093 and took 8436ns
+test_no_logging took 443223ns
+avg_no_logging = 0 and took 2825ns
+  6%|███████▏                                                                                                               | 3/50 [00:20<05:18,  6.78s/it]test_sqlite took 2497655845ns
+avg_sqlite = 1646.19267368525 and took 6279772ns
+test_columnar took 273980902ns
+avg_columnar = 985.2643564356435 and took 8105ns
+test_no_logging took 468240ns
+avg_no_logging = 0 and took 2705ns
+  8%|█████████▌                                                                                                             | 4/50 [00:27<05:11,  6.78s/it]test_sqlite took 2483198744ns
+avg_sqlite = 1647.1459290773225 and took 6479227ns
+test_columnar took 271837213ns
+avg_columnar = 993.523762376238 and took 8446ns
+test_no_logging took 466777ns
+avg_no_logging = 0 and took 3176ns
+ 10%|███████████▉                                                                                                           | 5/50 [00:33<05:04,  6.77s/it]test_sqlite took 2469212960ns
+avg_sqlite = 1648.2078080030828 and took 7419124ns
+test_columnar took 275779493ns
+avg_columnar = 1006.6424092409244 and took 8195ns
+test_no_logging took 463101ns
+avg_no_logging = 0 and took 2926ns
+ 12%|██████████████▎                                                                                                        | 6/50 [00:40<04:57,  6.77s/it]test_sqlite took 20403571132ns
+avg_sqlite = 1667.0072811202456 and took 6640330ns
+test_columnar took 3751245035ns
+avg_columnar = 1042.822772277228 and took 31088ns
+test_no_logging took 502664ns
+avg_no_logging = 0 and took 3126ns
+ 14%|████████████████▋                                                                                                      | 7/50 [01:08<09:51, 13.76s/it]test_sqlite took 27868228359ns
+avg_sqlite = 1693.875022042486 and took 5838783ns
+test_columnar took 4217275199ns
+avg_columnar = 1068.0319306930662 and took 9287ns
+test_no_logging took 445948ns
+avg_no_logging = 0 and took 2304ns
+ 16%|███████████████████                                                                                                    | 8/50 [01:44<14:36, 20.87s/it]test_sqlite took 9399974560ns
+avg_sqlite = 1701.1742358230804 and took 7415185ns
+test_columnar took 279314004ns
+avg_columnar = 1057.9765676567638 and took 9939ns
+test_no_logging took 486714ns
+avg_no_logging = 0 and took 2364ns
+ 18%|█████████████████████▍                                                                                                 | 9/50 [01:58<12:43, 18.63s/it]test_sqlite took 2496797862ns
+avg_sqlite = 1701.9983923383438 and took 8601526ns
+test_columnar took 267101383ns
+avg_columnar = 1051.0204950495001 and took 9518ns
+test_no_logging took 486895ns
+avg_no_logging = 0 and took 2314ns
+ 20%|███████████████████████▌                                                                                              | 10/50 [02:05<09:58, 14.97s/it]test_sqlite took 2449702342ns
+avg_sqlite = 1701.9896927111122 and took 7516446ns
+test_columnar took 266608687ns
+avg_columnar = 1042.4819981998162 and took 8125ns
+test_no_logging took 508937ns
+avg_no_logging = 0 and took 2575ns
+ 22%|█████████████████████████▉                                                                                            | 11/50 [02:12<08:05, 12.44s/it]test_sqlite took 2502933213ns
+avg_sqlite = 1702.1162699347947 and took 6707737ns
+test_columnar took 267505452ns
+avg_columnar = 1041.6301155115448 and took 9348ns
+test_no_logging took 493107ns
+avg_no_logging = 0 and took 2885ns
+ 24%|████████████████████████████▎                                                                                         | 12/50 [02:18<06:47, 10.72s/it]test_sqlite took 2499206770ns
+avg_sqlite = 1703.2470009876488 and took 7369620ns
+test_columnar took 277656229ns
+avg_columnar = 1037.4853008377754 and took 8005ns
+test_no_logging took 719683ns
+avg_no_logging = 0 and took 2485ns
+ 26%|██████████████████████████████▋                                                                                       | 13/50 [02:25<05:52,  9.53s/it]test_sqlite took 2453279344ns
+avg_sqlite = 1703.445002908157 and took 7460561ns
+test_columnar took 267128494ns
+avg_columnar = 1034.2620933521948 and took 8225ns
+test_no_logging took 146375ns
+avg_no_logging = 0 and took 1182ns
+ 28%|█████████████████████████████████                                                                                     | 14/50 [02:32<05:12,  8.68s/it]test_sqlite took 2541214116ns
+avg_sqlite = 1704.5544593142522 and took 6952636ns
+test_columnar took 268971848ns
+avg_columnar = 1030.0801320132045 and took 8105ns
+test_no_logging took 494710ns
+avg_no_logging = 0 and took 2665ns
+ 30%|███████████████████████████████████▍                                                                                  | 15/50 [02:39<04:44,  8.12s/it]test_sqlite took 2475654676ns
+avg_sqlite = 1704.976337459605 and took 7362637ns
+test_columnar took 278865001ns
+avg_columnar = 1027.1100247524796 and took 8045ns
+test_no_logging took 460916ns
+avg_no_logging = 0 and took 2464ns
+ 32%|█████████████████████████████████████▊                                                                                | 16/50 [02:45<04:22,  7.71s/it]test_sqlite took 2483296568ns
+avg_sqlite = 1705.1177870062559 and took 7749795ns
+test_columnar took 271856780ns
+avg_columnar = 1025.9763541060013 and took 8055ns
+test_no_logging took 536108ns
+avg_no_logging = 0 and took 2555ns
+ 34%|████████████████████████████████████████                                                                              | 17/50 [02:52<04:05,  7.43s/it]test_sqlite took 2493119338ns
+avg_sqlite = 1705.918077404033 and took 7285963ns
+test_columnar took 270339459ns
+avg_columnar = 1022.6124312431261 and took 9608ns
+test_no_logging took 462439ns
+avg_no_logging = 0 and took 3005ns
+ 36%|██████████████████████████████████████████▍                                                                           | 18/50 [02:59<03:51,  7.23s/it]test_sqlite took 2491495998ns
+avg_sqlite = 1706.4404354652554 and took 6867426ns
+test_columnar took 284065805ns
+avg_columnar = 1020.6838978634723 and took 7805ns
+test_no_logging took 506903ns
+avg_no_logging = 0 and took 9849ns
+ 38%|████████████████████████████████████████████▊                                                                         | 19/50 [03:06<03:39,  7.10s/it]test_sqlite took 11468606779ns
+avg_sqlite = 1713.570223187183 and took 7558626ns
+test_columnar took 4060722328ns
+avg_columnar = 1035.3063366336598 and took 10350ns
+test_no_logging took 483058ns
+avg_no_logging = 0 and took 2354ns
+ 40%|███████████████████████████████████████████████▏                                                                      | 20/50 [03:25<05:24, 10.83s/it]test_sqlite took 28069287674ns
+avg_sqlite = 1736.8602038841873 and took 7083924ns
+test_columnar took 2983692558ns
+avg_columnar = 1047.2278642149881 and took 32771ns
+test_no_logging took 456498ns
+avg_no_logging = 0 and took 2736ns
+ 42%|█████████████████████████████████████████████████▌                                                                    | 21/50 [04:00<08:45, 18.10s/it]test_sqlite took 3004099661ns
+avg_sqlite = 1738.0241524953883 and took 7872024ns
+test_columnar took 268588117ns
+avg_columnar = 1045.5938343834296 and took 8596ns
+test_no_logging took 457149ns
+avg_no_logging = 0 and took 2615ns
+ 44%|███████████████████████████████████████████████████▉                                                                  | 22/50 [04:08<06:55, 14.86s/it]test_sqlite took 2516553741ns
+avg_sqlite = 1738.5947232395 and took 7548827ns
+test_columnar took 265790359ns
+avg_columnar = 1042.4308652604295 and took 9758ns
+test_no_logging took 463060ns
+avg_no_logging = 0 and took 3867ns
+ 46%|██████████████████████████████████████████████████████▎                                                               | 23/50 [04:14<05:35, 12.44s/it]test_sqlite took 2494049658ns
+avg_sqlite = 1739.0052952392243 and took 8523609ns
+test_columnar took 273753765ns
+avg_columnar = 1040.8688118811817 and took 9348ns
+test_no_logging took 192743ns
+avg_no_logging = 0 and took 2785ns
+ 48%|████████████████████████████████████████████████████████▋                                                             | 24/50 [04:21<04:39, 10.74s/it]test_sqlite took 2500475174ns
+avg_sqlite = 1739.3250418162434 and took 7558425ns
+test_columnar took 287144471ns
+avg_columnar = 1040.911049504941 and took 8095ns
+test_no_logging took 565132ns
+avg_no_logging = 0 and took 2565ns
+ 50%|███████████████████████████████████████████████████████████                                                           | 25/50 [04:28<03:58,  9.56s/it]test_sqlite took 2473014735ns
+avg_sqlite = 1739.4081535794194 and took 8677288ns
+test_columnar took 277407592ns
+avg_columnar = 1039.4399466869666 and took 7985ns
+test_no_logging took 488388ns
+avg_no_logging = 0 and took 3065ns
+ 52%|█████████████████████████████████████████████████████████████▎                                                        | 26/50 [04:35<03:29,  8.72s/it]test_sqlite took 2485949514ns
+avg_sqlite = 1739.8830441330226 and took 7851766ns
+test_columnar took 273463800ns
+avg_columnar = 1039.7547854785323 and took 8265ns
+test_no_logging took 500310ns
+avg_no_logging = 0 and took 2555ns
+ 54%|███████████████████████████████████████████████████████████████▋                                                      | 27/50 [04:42<03:07,  8.13s/it]test_sqlite took 2503330659ns
+avg_sqlite = 1740.3138424707638 and took 7899436ns
+test_columnar took 266612935ns
+avg_columnar = 1037.502828854296 and took 8045ns
+test_no_logging took 464574ns
+avg_no_logging = 0 and took 2474ns
+ 56%|██████████████████████████████████████████████████████████████████                                                    | 28/50 [04:48<02:49,  7.73s/it]test_sqlite took 2510044878ns
+avg_sqlite = 1740.5057164096243 and took 8604742ns
+test_columnar took 280434491ns
+avg_columnar = 1037.7053943325159 and took 8115ns
+test_no_logging took 482386ns
+avg_no_logging = 0 and took 2264ns
+ 58%|████████████████████████████████████████████████████████████████████▍                                                 | 29/50 [04:55<02:36,  7.45s/it]test_sqlite took 2504728187ns
+avg_sqlite = 1740.8272792520715 and took 8126132ns
+test_columnar took 277987983ns
+avg_columnar = 1038.656039603939 and took 9548ns
+test_no_logging took 466216ns
+avg_no_logging = 0 and took 2434ns
+ 60%|██████████████████████████████████████████████████████████████████████▊                                               | 30/50 [05:02<02:25,  7.25s/it]test_sqlite took 2479207012ns
+avg_sqlite = 1741.2126176207141 and took 8342699ns
+test_columnar took 271371498ns
+avg_columnar = 1038.9235707441508 and took 8095ns
+test_no_logging took 499870ns
+avg_no_logging = 0 and took 2775ns
+ 62%|█████████████████████████████████████████████████████████████████████████▏                                            | 31/50 [05:09<02:14,  7.10s/it]test_sqlite took 2509108579ns
+avg_sqlite = 1741.8224385424005 and took 8332060ns
+test_columnar took 266453505ns
+avg_columnar = 1040.002413366319 and took 8235ns
+test_no_logging took 458312ns
+avg_no_logging = 0 and took 2485ns
+ 64%|███████████████████████████████████████████████████████████████████████████▌                                          | 32/50 [05:15<02:06,  7.01s/it]test_sqlite took 2475017439ns
+avg_sqlite = 1741.9195199115245 and took 8785832ns
+test_columnar took 282187075ns
+avg_columnar = 1040.2603660365871 and took 8146ns
+test_no_logging took 485934ns
+avg_no_logging = 0 and took 2886ns
+ 66%|█████████████████████████████████████████████████████████████████████████████▉                                        | 33/50 [05:22<01:57,  6.94s/it]test_sqlite took 2483325843ns
+avg_sqlite = 1741.9904601924131 and took 8598690ns
+test_columnar took 267409872ns
+avg_columnar = 1037.9451368666096 and took 8186ns
+test_no_logging took 496673ns
+avg_no_logging = 0 and took 2756ns
+ 68%|████████████████████████████████████████████████████████████████████████████████▏                                     | 34/50 [05:29<01:50,  6.88s/it]test_sqlite took 2472288520ns
+avg_sqlite = 1741.969216525865 and took 8534880ns
+test_columnar took 265847857ns
+avg_columnar = 1036.0658557284114 and took 7885ns
+test_no_logging took 494790ns
+avg_no_logging = 0 and took 3086ns
+ 70%|██████████████████████████████████████████████████████████████████████████████████▌                                   | 35/50 [05:36<01:42,  6.84s/it]test_sqlite took 6637453154ns
+avg_sqlite = 1745.6673989571477 and took 9070146ns
+test_columnar took 2646151854ns
+avg_columnar = 1042.4290429042676 and took 11281ns
+test_no_logging took 446830ns
+avg_no_logging = 0 and took 2224ns
+ 72%|████████████████████████████████████████████████████████████████████████████████████▉                                 | 36/50 [05:49<02:02,  8.78s/it]test_sqlite took 25739594013ns
+avg_sqlite = 1764.9780854022194 and took 8638976ns
+test_columnar took 4203551337ns
+avg_columnar = 1049.944929087486 and took 8626ns
+test_no_logging took 336352ns
+avg_no_logging = 0 and took 2044ns
+ 74%|███████████████████████████████████████████████████████████████████████████████████████▎                              | 37/50 [06:23<03:32, 16.33s/it]test_sqlite took 25756101417ns
+avg_sqlite = 1780.0331042015205 and took 8867215ns
+test_columnar took 264372584ns
+avg_columnar = 1049.7805367378648 and took 8365ns
+test_no_logging took 485222ns
+avg_no_logging = 0 and took 2705ns
+ 76%|█████████████████████████████████████████████████████████████████████████████████████████▋                            | 38/50 [06:53<04:05, 20.44s/it]test_sqlite took 2502469862ns
+avg_sqlite = 1779.9937012880994 and took 8760494ns
+test_columnar took 267682775ns
+avg_columnar = 1049.2259964457799 and took 9599ns
+test_no_logging took 619745ns
+avg_no_logging = 0 and took 1984ns
+ 78%|████████████████████████████████████████████████████████████████████████████████████████████                          | 39/50 [07:00<02:59, 16.34s/it]test_sqlite took 2500111629ns
+avg_sqlite = 1780.0413177376622 and took 8735938ns
+test_columnar took 266720056ns
+avg_columnar = 1049.7498019801772 and took 8346ns
+test_no_logging took 491163ns
+avg_no_logging = 0 and took 2845ns
+ 80%|██████████████████████████████████████████████████████████████████████████████████████████████▍                       | 40/50 [07:07<02:14, 13.47s/it]test_sqlite took 2479245285ns
+avg_sqlite = 1780.1747400606455 and took 8936495ns
+test_columnar took 267019619ns
+avg_columnar = 1048.133856556365 and took 8136ns
+test_no_logging took 491614ns
+avg_no_logging = 0 and took 2515ns
+ 82%|████████████████████████████████████████████████████████████████████████████████████████████████▊                     | 41/50 [07:13<01:43, 11.46s/it]test_sqlite took 2515068980ns
+avg_sqlite = 1780.1043106119612 and took 9212674ns
+test_columnar took 267284637ns
+avg_columnar = 1046.366148043353 and took 8266ns
+test_no_logging took 464382ns
+avg_no_logging = 0 and took 2535ns
+ 84%|███████████████████████████████████████████████████████████████████████████████████████████████████                   | 42/50 [07:20<01:20, 10.06s/it]test_sqlite took 2499526220ns
+avg_sqlite = 1780.1906023436009 and took 8838440ns
+test_columnar took 268416304ns
+avg_columnar = 1044.7608335251855 and took 8205ns
+test_no_logging took 492535ns
+avg_no_logging = 0 and took 2665ns
+ 86%|█████████████████████████████████████████████████████████████████████████████████████████████████████▍                | 43/50 [07:27<01:03,  9.07s/it]test_sqlite took 2511487239ns
+avg_sqlite = 1780.1017681987762 and took 9052503ns
+test_columnar took 265464827ns
+avg_columnar = 1042.7746399639652 and took 8416ns
+test_no_logging took 473710ns
+avg_no_logging = 0 and took 2655ns
+ 88%|███████████████████████████████████████████████████████████████████████████████████████████████████████▊              | 44/50 [07:34<00:50,  8.39s/it]test_sqlite took 2479616552ns
+avg_sqlite = 1779.774072349775 and took 8990837ns
+test_columnar took 266927727ns
+avg_columnar = 1041.3368096809347 and took 8426ns
+test_no_logging took 488508ns
+avg_no_logging = 0 and took 2795ns
+ 90%|██████████████████████████████████████████████████████████████████████████████████████████████████████████▏           | 45/50 [07:40<00:39,  7.90s/it]test_sqlite took 2472408195ns
+avg_sqlite = 1779.3102889592767 and took 9129387ns
+test_columnar took 270706798ns
+avg_columnar = 1040.198235040862 and took 7995ns
+test_no_logging took 461417ns
+avg_no_logging = 0 and took 2695ns
+ 92%|████████████████████████████████████████████████████████████████████████████████████████████████████████████▌         | 46/50 [07:47<00:30,  7.56s/it]test_sqlite took 2464746806ns
+avg_sqlite = 1779.4970229725277 and took 9245716ns
+test_columnar took 279360944ns
+avg_columnar = 1040.2474826205735 and took 7745ns
+test_no_logging took 468120ns
+avg_no_logging = 0 and took 2835ns
+ 94%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████▉       | 47/50 [07:54<00:21,  7.32s/it]test_sqlite took 2510082830ns
+avg_sqlite = 1779.8657133975753 and took 9344522ns
+test_columnar took 267074232ns
+avg_columnar = 1039.4246493399082 and took 8085ns
+test_no_logging took 458742ns
+avg_no_logging = 0 and took 2194ns
+ 96%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████▎    | 48/50 [08:01<00:14,  7.16s/it]test_sqlite took 2514699646ns
+avg_sqlite = 1780.0882322709194 and took 9258089ns
+test_columnar took 266365720ns
+avg_columnar = 1037.844493837112 and took 8075ns
+test_no_logging took 464854ns
+avg_no_logging = 0 and took 1983ns
+ 98%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████▋  | 49/50 [08:08<00:07,  7.05s/it]test_sqlite took 2520413304ns
+avg_sqlite = 1779.91332962042 and took 9273568ns
+test_columnar took 265164923ns
+avg_columnar = 1036.8446534653162 and took 8697ns
+test_no_logging took 491724ns
+avg_no_logging = 0 and took 2825ns
+100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 50/50 [08:14<00:00,  9.90s/it]
+[amortized-const-stats b32a722] automated checkpoint after simple_sync
+ 2 files changed, 2 insertions(+), 2 deletions(-)
++ rm ./database.db
++ rm -r ./.kronicler_data
+  0%|                                                                                                                               | 0/50 [00:00<?, ?it/s]test_sqlite took 2372958942ns
+avg_sqlite = 1371.5346534653465 and took 315383ns
+test_columnar took 288308419ns
+avg_columnar = None and took 43512ns
+test_no_logging took 199565ns
+avg_no_logging = 0 and took 1373ns
+  2%|██▍                                                                                                                    | 1/50 [00:06<05:26,  6.66s/it]test_sqlite took 2356514788ns
+avg_sqlite = 1390.470297029703 and took 331303ns
+test_columnar took 301454025ns
+avg_columnar = None and took 18414ns
+test_no_logging took 194836ns
+avg_no_logging = 0 and took 1523ns
+  4%|████▊                                                                                                                  | 2/50 [00:13<05:19,  6.66s/it]test_sqlite took 2380435494ns
+avg_sqlite = 1393.9699669966997 and took 470194ns
+test_columnar took 296645167ns
+avg_columnar = None and took 31519ns
+test_no_logging took 189626ns
+avg_no_logging = 0 and took 1684ns
+  6%|███████▏                                                                                                               | 3/50 [00:19<05:13,  6.67s/it]test_sqlite took 29493367981ns
+avg_sqlite = 1454.2227722772277 and took 612431ns
+test_columnar took 2766242709ns
+avg_columnar = None and took 28674ns
+test_no_logging took 209223ns
+avg_no_logging = 0 and took 1593ns
+  8%|█████████▌                                                                                                             | 4/50 [00:56<14:04, 18.35s/it]test_sqlite took 30115337694ns
+avg_sqlite = 1494.1825742574258 and took 676311ns
+test_columnar took 314307381ns
+avg_columnar = None and took 35417ns
+test_no_logging took 194235ns
+avg_no_logging = 0 and took 1503ns
+ 10%|███████████▉                                                                                                           | 5/50 [01:30<18:06, 24.15s/it]test_sqlite took 2376182621ns
+avg_sqlite = 1474.7278877887788 and took 740421ns
+test_columnar took 299683607ns
+avg_columnar = None and took 31409ns
+test_no_logging took 201980ns
+avg_no_logging = 0 and took 1173ns
+ 12%|██████████████▎                                                                                                        | 6/50 [01:37<13:21, 18.21s/it]test_sqlite took 2369931873ns
+avg_sqlite = 1460.8469589816125 and took 848354ns
+test_columnar took 312220859ns
+avg_columnar = None and took 31540ns
+test_no_logging took 203783ns
+avg_no_logging = 0 and took 1232ns
+ 14%|████████████████▋                                                                                                      | 7/50 [01:44<10:20, 14.44s/it]test_sqlite took 2445765162ns
+avg_sqlite = 1510.398514851485 and took 1142627ns
+test_columnar took 449755899ns
+avg_columnar = None and took 34575ns
+test_no_logging took 209383ns
+avg_no_logging = 0 and took 1643ns
+ 16%|███████████████████                                                                                                    | 8/50 [01:50<08:25, 12.04s/it]test_sqlite took 2378030544ns
+avg_sqlite = 1500.7468646864686 and took 1214753ns
+test_columnar took 292976793ns
+avg_columnar = None and took 18615ns
+test_no_logging took 201158ns
+avg_no_logging = 0 and took 1313ns
+ 18%|█████████████████████▍                                                                                                 | 9/50 [01:57<07:04, 10.36s/it]test_sqlite took 2367257096ns
+avg_sqlite = 1490.7628712871287 and took 1079118ns
+test_columnar took 291561282ns
+avg_columnar = None and took 32000ns
+test_no_logging took 217349ns
+avg_no_logging = 0 and took 1062ns
+ 20%|███████████████████████▌                                                                                              | 10/50 [02:04<06:08,  9.22s/it]test_sqlite took 2580856269ns
+avg_sqlite = 1479.9364536453645 and took 1405421ns
+test_columnar took 315519038ns
+avg_columnar = None and took 20138ns
+test_no_logging took 193434ns
+avg_no_logging = 0 and took 1133ns
+ 22%|█████████████████████████▉                                                                                            | 11/50 [02:11<05:31,  8.51s/it]test_sqlite took 2351747339ns
+avg_sqlite = 1470.4628712871288 and took 1475543ns
+test_columnar took 295210541ns
+avg_columnar = None and took 16110ns
+test_no_logging took 209072ns
+avg_no_logging = 0 and took 1042ns
+ 24%|████████████████████████████▎                                                                                         | 12/50 [02:17<05:01,  7.94s/it]test_sqlite took 2362965130ns
+avg_sqlite = 1460.8478293983244 and took 1507423ns
+test_columnar took 305786928ns
+avg_columnar = None and took 34154ns
+test_no_logging took 201398ns
+avg_no_logging = 0 and took 1793ns
+ 26%|██████████████████████████████▋                                                                                       | 13/50 [02:24<04:39,  7.56s/it]test_sqlite took 2365428370ns
+avg_sqlite = 1453.1455445544555 and took 1614554ns
+test_columnar took 292728055ns
+avg_columnar = None and took 18905ns
+test_no_logging took 210706ns
+avg_no_logging = 0 and took 2344ns
+ 28%|█████████████████████████████████                                                                                     | 14/50 [02:31<04:22,  7.29s/it]test_sqlite took 2369750543ns
+avg_sqlite = 1446.323498349835 and took 1509317ns
+test_columnar took 311472723ns
+avg_columnar = None and took 16391ns
+test_no_logging took 205186ns
+avg_no_logging = 0 and took 1272ns
+ 30%|███████████████████████████████████▍                                                                                  | 15/50 [02:37<04:08,  7.11s/it]test_sqlite took 2416628243ns
+avg_sqlite = 1444.8517945544554 and took 1871647ns
+test_columnar took 294790631ns
+avg_columnar = None and took 18054ns
+test_no_logging took 201499ns
+avg_no_logging = 0 and took 1383ns
+ 32%|█████████████████████████████████████▊                                                                                | 16/50 [02:44<03:57,  6.99s/it]test_sqlite took 2361895511ns
+avg_sqlite = 1439.109143855562 and took 1801967ns
+test_columnar took 294460731ns
+avg_columnar = None and took 17914ns
+test_no_logging took 209674ns
+avg_no_logging = 0 and took 2685ns
+ 34%|████████████████████████████████████████                                                                              | 17/50 [02:51<03:47,  6.89s/it]test_sqlite took 2367997278ns
+avg_sqlite = 1437.1504400440044 and took 2044522ns
+test_columnar took 295726389ns
+avg_columnar = None and took 22832ns
+test_no_logging took 209093ns
+avg_no_logging = 0 and took 2024ns
+ 36%|██████████████████████████████████████████▍                                                                           | 18/50 [02:57<03:38,  6.82s/it]test_sqlite took 2371442503ns
+avg_sqlite = 1435.4011985409068 and took 1751131ns
+test_columnar took 296481329ns
+avg_columnar = None and took 15850ns
+test_no_logging took 199885ns
+avg_no_logging = 0 and took 1733ns
+ 38%|████████████████████████████████████████████▊                                                                         | 19/50 [03:04<03:30,  6.78s/it]test_sqlite took 2369758879ns
+avg_sqlite = 1432.0880693069307 and took 1926561ns
+test_columnar took 295743072ns
+avg_columnar = None and took 17904ns
+test_no_logging took 204615ns
+avg_no_logging = 0 and took 1533ns
+ 40%|███████████████████████████████████████████████▏                                                                      | 20/50 [03:11<03:22,  6.74s/it]test_sqlite took 2384081777ns
+avg_sqlite = 1429.8226779820839 and took 2014385ns
+test_columnar took 311904395ns
+avg_columnar = None and took 16932ns
+test_no_logging took 211116ns
+avg_no_logging = 0 and took 1433ns
+ 42%|█████████████████████████████████████████████████▌                                                                    | 21/50 [03:17<03:15,  6.73s/it]test_sqlite took 2364415296ns
+avg_sqlite = 1427.7273177317732 and took 2376707ns
+test_columnar took 299509209ns
+avg_columnar = None and took 28814ns
+test_no_logging took 213461ns
+avg_no_logging = 0 and took 1874ns
+ 44%|███████████████████████████████████████████████████▉                                                                  | 22/50 [03:24<03:07,  6.71s/it]test_sqlite took 2376689554ns
+avg_sqlite = 1425.6381833835558 and took 2150822ns
+test_columnar took 292450393ns
+avg_columnar = None and took 29545ns
+test_no_logging took 196630ns
+avg_no_logging = 0 and took 1413ns
+ 46%|██████████████████████████████████████████████████████▎                                                               | 23/50 [03:31<03:00,  6.70s/it]test_sqlite took 29201383204ns
+avg_sqlite = 1433.0432755775578 and took 6760515ns
+test_columnar took 2538972654ns
+avg_columnar = None and took 16551ns
+test_no_logging took 201990ns
+avg_no_logging = 0 and took 1423ns
+ 48%|████████████████████████████████████████████████████████▋                                                             | 24/50 [04:07<06:40, 15.42s/it]test_sqlite took 16018376098ns
+avg_sqlite = 1436.2328712871288 and took 2679445ns
+test_columnar took 306439945ns
+avg_columnar = None and took 22973ns
+test_no_logging took 202871ns
+avg_no_logging = 0 and took 1552ns
+ 50%|███████████████████████████████████████████████████████████                                                           | 25/50 [04:27<07:02, 16.89s/it]test_sqlite took 2360503324ns
+avg_sqlite = 1434.4711348057883 and took 2629431ns
+test_columnar took 295522847ns
+avg_columnar = None and took 31208ns
+test_no_logging took 200847ns
+avg_no_logging = 0 and took 1533ns
+ 52%|█████████████████████████████████████████████████████████████▎                                                        | 26/50 [04:34<05:31, 13.82s/it]test_sqlite took 2370425992ns
+avg_sqlite = 1432.4183718371837 and took 2608732ns
+test_columnar took 304897175ns
+avg_columnar = None and took 15349ns
+test_no_logging took 201689ns
+avg_no_logging = 0 and took 1653ns
+ 54%|███████████████████████████████████████████████████████████████▋                                                      | 27/50 [04:40<04:28, 11.68s/it]test_sqlite took 2387676182ns
+avg_sqlite = 1430.4720650636493 and took 2642466ns
+test_columnar took 294531845ns
+avg_columnar = None and took 34855ns
+test_no_logging took 205667ns
+avg_no_logging = 0 and took 1573ns
+ 56%|██████████████████████████████████████████████████████████████████                                                    | 28/50 [04:47<03:43, 10.18s/it]test_sqlite took 2369103927ns
+avg_sqlite = 1429.4183680437009 and took 2766088ns
+test_columnar took 528232435ns
+avg_columnar = None and took 20369ns
+test_no_logging took 199234ns
+avg_no_logging = 0 and took 1553ns
+ 58%|████████████████████████████████████████████████████████████████████▍                                                 | 29/50 [04:54<03:13,  9.20s/it]test_sqlite took 2396786022ns
+avg_sqlite = 1427.269207920792 and took 2784173ns
+test_columnar took 294356676ns
+avg_columnar = None and took 32421ns
+test_no_logging took 222709ns
+avg_no_logging = 0 and took 1473ns
+ 60%|██████████████████████████████████████████████████████████████████████▊                                               | 30/50 [05:00<02:48,  8.45s/it]test_sqlite took 2354963282ns
+avg_sqlite = 1424.6447141488343 and took 2630103ns
+test_columnar took 296315627ns
+avg_columnar = None and took 16100ns
+test_no_logging took 198803ns
+avg_no_logging = 0 and took 1673ns
+ 62%|█████████████████████████████████████████████████████████████████████████▏                                            | 31/50 [05:07<02:30,  7.91s/it]test_sqlite took 2365193729ns
+avg_sqlite = 1423.7295482673267 and took 2651714ns
+test_columnar took 300061147ns
+avg_columnar = None and took 26861ns
+test_no_logging took 208031ns
+avg_no_logging = 0 and took 1353ns
+ 64%|███████████████████████████████████████████████████████████████████████████▌                                          | 32/50 [05:14<02:15,  7.54s/it]test_sqlite took 2366026043ns
+avg_sqlite = 1422.1338433843384 and took 3073075ns
+test_columnar took 308092721ns
+avg_columnar = None and took 19256ns
+test_no_logging took 209214ns
+avg_no_logging = 0 and took 1853ns
+ 66%|█████████████████████████████████████████████████████████████████████████████▉                                        | 33/50 [05:20<02:03,  7.28s/it]test_sqlite took 2369248780ns
+avg_sqlite = 1420.460163075131 and took 3107119ns
+test_columnar took 308370664ns
+avg_columnar = None and took 31089ns
+test_no_logging took 227047ns
+avg_no_logging = 0 and took 1674ns
+ 68%|████████████████████████████████████████████████████████████████████████████████▏                                     | 34/50 [05:27<01:53,  7.10s/it]test_sqlite took 2371653910ns
+avg_sqlite = 1420.48099009901 and took 2996081ns
+test_columnar took 305451166ns
+avg_columnar = None and took 33634ns
+test_no_logging took 210165ns
+avg_no_logging = 0 and took 1783ns
+ 70%|██████████████████████████████████████████████████████████████████████████████████▌                                   | 35/50 [05:34<01:44,  6.97s/it]test_sqlite took 2373787340ns
+avg_sqlite = 1421.0297854785479 and took 3503204ns
+test_columnar took 314985975ns
+avg_columnar = None and took 17403ns
+test_no_logging took 188765ns
+avg_no_logging = 0 and took 2174ns
+ 72%|████████████████████████████████████████████████████████████████████████████████████▉                                 | 36/50 [05:41<01:36,  6.89s/it]test_sqlite took 2385702393ns
+avg_sqlite = 1421.1383462670592 and took 2787609ns
+test_columnar took 301233741ns
+avg_columnar = None and took 17643ns
+test_no_logging took 204243ns
+avg_no_logging = 0 and took 1513ns
+ 74%|███████████████████████████████████████████████████████████████████████████████████████▎                              | 37/50 [05:47<01:28,  6.83s/it]test_sqlite took 2387527292ns
+avg_sqlite = 1420.846951537259 and took 3124321ns
+test_columnar took 304795955ns
+avg_columnar = None and took 18254ns
+test_no_logging took 204284ns
+avg_no_logging = 0 and took 1532ns
+ 76%|█████████████████████████████████████████████████████████████████████████████████████████▋                            | 38/50 [05:54<01:21,  6.79s/it]test_sqlite took 2382146589ns
+avg_sqlite = 1419.6501650165017 and took 3502222ns
+test_columnar took 314234253ns
+avg_columnar = None and took 30818ns
+test_no_logging took 197131ns
+avg_no_logging = 0 and took 1674ns
+ 78%|████████████████████████████████████████████████████████████████████████████████████████████                          | 39/50 [06:01<01:14,  6.76s/it]test_sqlite took 2363781134ns
+avg_sqlite = 1419.9727722772277 and took 3074498ns
+test_columnar took 306215693ns
+avg_columnar = None and took 30127ns
+test_no_logging took 196299ns
+avg_no_logging = 0 and took 1072ns
+ 80%|██████████████████████████████████████████████████████████████████████████████████████████████▍                       | 40/50 [06:07<01:07,  6.74s/it]test_sqlite took 2372287801ns
+avg_sqlite = 1419.9453272156484 and took 3693081ns
+test_columnar took 308675987ns
+avg_columnar = None and took 15699ns
+test_no_logging took 209965ns
+avg_no_logging = 0 and took 1312ns
+ 82%|████████████████████████████████████████████████████████████████████████████████████████████████▊                     | 41/50 [06:14<01:00,  6.72s/it]test_sqlite took 5504994863ns
+avg_sqlite = 1420.2456624233853 and took 3572034ns
+test_columnar took 4330746123ns
+avg_columnar = None and took 17604ns
+test_no_logging took 209944ns
+avg_no_logging = 0 and took 1773ns
+ 84%|███████████████████████████████████████████████████████████████████████████████████████████████████                   | 42/50 [06:28<01:10,  8.86s/it]test_sqlite took 26714007298ns
+avg_sqlite = 1426.8972369329956 and took 3726072ns
+test_columnar took 2241205239ns
+avg_columnar = None and took 18915ns
+test_no_logging took 208271ns
+avg_no_logging = 0 and took 1232ns
+ 86%|█████████████████████████████████████████████████████████████████████████████████████████████████████▍                | 43/50 [07:01<01:52, 16.09s/it]test_sqlite took 11654587405ns
+avg_sqlite = 1428.9416516651665 and took 3331762ns
+test_columnar took 299159192ns
+avg_columnar = None and took 24917ns
+test_no_logging took 213301ns
+avg_no_logging = 0 and took 1653ns
+ 88%|███████████████████████████████████████████████████████████████████████████████████████████████████████▊              | 44/50 [07:17<01:36, 16.05s/it]test_sqlite took 2376486041ns
+avg_sqlite = 1427.7327612761276 and took 4121125ns
+test_columnar took 300159251ns
+avg_columnar = None and took 31589ns
+test_no_logging took 199635ns
+avg_no_logging = 0 and took 1823ns
+ 90%|██████████████████████████████████████████████████████████████████████████████████████████████████████████▏           | 45/50 [07:23<01:06, 13.24s/it]test_sqlite took 2346406962ns
+avg_sqlite = 1426.8590400344383 and took 3893176ns
+test_columnar took 308998743ns
+avg_columnar = None and took 15469ns
+test_no_logging took 190107ns
+avg_no_logging = 0 and took 1694ns
+ 92%|████████████████████████████████████████████████████████████████████████████████████████████████████████████▌         | 46/50 [07:30<00:45, 11.27s/it]test_sqlite took 2370275409ns
+avg_sqlite = 1426.2796924373288 and took 4006450ns
+test_columnar took 308095536ns
+avg_columnar = None and took 30157ns
+test_no_logging took 168167ns
+avg_no_logging = 0 and took 1061ns
+ 94%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████▉       | 47/50 [07:37<00:29,  9.89s/it]test_sqlite took 2357344588ns
+avg_sqlite = 1425.5202351485148 and took 3936548ns
+test_columnar took 286887528ns
+avg_columnar = None and took 15860ns
+test_no_logging took 198673ns
+avg_no_logging = 0 and took 1252ns
+ 96%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████▎    | 48/50 [07:43<00:17,  8.92s/it]test_sqlite took 2369708865ns
+avg_sqlite = 1423.9708021822591 and took 4179515ns
+test_columnar took 288538060ns
+avg_columnar = None and took 30909ns
+test_no_logging took 197221ns
+avg_no_logging = 0 and took 1573ns
+ 98%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████▋  | 49/50 [07:50<00:08,  8.24s/it]test_sqlite took 2359804881ns
+avg_sqlite = 1422.9331287128714 and took 3888518ns
+test_columnar took 300816706ns
+avg_columnar = None and took 20568ns
+test_no_logging took 277382ns
+avg_no_logging = 0 and took 1132ns
+100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 50/50 [07:57<00:00,  9.54s/it]
+[amortized-const-stats 7d76bf3] automated checkpoint after simple_concurrent
+ 2 files changed, 2 insertions(+), 2 deletions(-)
++ rm ./database.db
++ rm -r ./.kronicler_data
