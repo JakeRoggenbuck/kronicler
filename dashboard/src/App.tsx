@@ -71,9 +71,9 @@ const App = () => {
       setRawData(transformed);
       if (!selectedFunction && transformed.length > 0) {
         const uniqueFuncs = [
-          ...new Set(transformed.map((d) => d.functionName)),
+			...new Set(transformed.map((d: any) => d.functionName)),
         ];
-        setSelectedFunction(uniqueFuncs[0]);
+			setSelectedFunction(uniqueFuncs[0] as string);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
