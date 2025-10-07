@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   LineChart,
   Line,
@@ -10,15 +10,12 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
-  ScatterChart,
-  Scatter,
   Cell,
 } from "recharts";
 import {
   Activity,
   Clock,
   TrendingUp,
-  AlertTriangle,
   BarChart3,
   Filter,
   Calendar,
@@ -26,19 +23,27 @@ import {
   Settings,
 } from "lucide-react";
 
+interface LogData {
+  id: number;
+  functionName: string;
+  startTime: number;
+  endTime: number;
+  duration: number;
+  date: Date;
+}
+
 const App = () => {
-  const [rawData, setRawData] = useState([]);
+  const [rawData, setRawData] = useState<LogData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [selectedFunction, setSelectedFunction] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedFunction, setSelectedFunction] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState("7d");
   const [viewMode, setViewMode] = useState("overview");
-  const [granularity, setGranularity] = useState("hour"); // 'minute', 'hour', 'day'
+  const [granularity, setGranularity] = useState("hour");
   const [apiUrl, setApiUrl] = useState("http://127.0.0.1:8000/logs");
   const [showSettings, setShowSettings] = useState(false);
   const [tempApiUrl, setTempApiUrl] = useState("http://127.0.0.1:8000/logs");
 
-  // Fetch data from API
   const fetchData = async () => {
     setLoading(true);
     setError(null);
@@ -47,9 +52,7 @@ const App = () => {
       if (!response.ok) throw new Error("Failed to fetch data");
       const data = await response.json();
 
-      // Transform API data to internal format
-      // Expected format: [{id: 0, fields: [{type: "Name", value: "foo"}, {type: "Epoch", value: 123}, ...]}]
-      const transformed = data.map((row) => {
+      const transformed = data.map((row: any) => {
         const functionName = row.fields[0].value;
         const startTime = row.fields[1].value;
         const endTime = row.fields[2].value;
@@ -60,20 +63,20 @@ const App = () => {
           functionName: functionName,
           startTime: startTime,
           endTime: endTime,
-          duration: duration / 1000, // Convert nanoseconds to microseconds
-          date: new Date(startTime / 1000000), // Convert nanoseconds to milliseconds for Date
+          duration: duration / 1000,
+          date: new Date(startTime / 1000000),
         };
       });
 
       setRawData(transformed);
       if (!selectedFunction && transformed.length > 0) {
         const uniqueFuncs = [
-          ...new Set(transformed.map((d) => d.functionName)),
+			...new Set(transformed.map((d: any) => d.functionName)),
         ];
-        setSelectedFunction(uniqueFuncs[0]);
+			setSelectedFunction(uniqueFuncs[0] as string);
       }
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : String(err));
       setRawData([]);
     } finally {
       setLoading(false);
@@ -83,7 +86,6 @@ const App = () => {
   const handleSaveApiUrl = () => {
     setApiUrl(tempApiUrl);
     setShowSettings(false);
-    // Fetch data with new URL
     fetchData();
   };
 
@@ -91,31 +93,25 @@ const App = () => {
     fetchData();
   }, []);
 
-  // Get unique function names
   const functions = useMemo(() => {
     const uniqueFuncs = [...new Set(rawData.map((d) => d.functionName))];
     return uniqueFuncs.sort();
   }, [rawData]);
 
-  // Process data for time series
   const processedData = useMemo(() => {
     if (!rawData.length) return [];
 
-    // Group by selected granularity and function
-    const grouped = {};
+    const grouped: Record<string, Record<string, number[]>> = {};
 
     rawData.forEach((row) => {
       const date = new Date(row.date);
       let key;
 
       if (granularity === "minute") {
-        // YYYY-MM-DD HH:MM
         key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
       } else if (granularity === "hour") {
-        // YYYY-MM-DD HH:00
         key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:00`;
       } else {
-        // YYYY-MM-DD (day)
         key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
       }
 
@@ -128,11 +124,13 @@ const App = () => {
       grouped[key][row.functionName].push(row.duration);
     });
 
-    // Calculate statistics for each time period and function
     const result = Object.keys(grouped)
       .sort()
       .map((key) => {
-        const timeData = { date: key, timestamp: new Date(key).getTime() };
+        const timeData: Record<string, any> = {
+          date: key,
+          timestamp: new Date(key).getTime(),
+        };
 
         functions.forEach((funcName) => {
           const durations = grouped[key][funcName] || [];
@@ -177,14 +175,14 @@ const App = () => {
     return processedData.slice(-periods);
   }, [processedData, timeRange, granularity]);
 
-  const getCurrentStats = (funcName) => {
+  const getCurrentStats = (funcName: string) => {
     let recentPeriods;
     if (granularity === "minute") {
-      recentPeriods = 7 * 24 * 60; // Last 7 days of minutes
+      recentPeriods = 7 * 24 * 60;
     } else if (granularity === "hour") {
-      recentPeriods = 7 * 24; // Last 7 days of hours
+      recentPeriods = 7 * 24;
     } else {
-      recentPeriods = 7; // Last 7 days
+      recentPeriods = 7;
     }
 
     const recent = filteredData.slice(-recentPeriods);
@@ -208,7 +206,7 @@ const App = () => {
     };
   };
 
-  const getHealthStatus = (funcName) => {
+  const getHealthStatus = (funcName: string) => {
     const stats = getCurrentStats(funcName);
     const avgResponseTime = parseFloat(stats.mean);
     if (avgResponseTime > 400) return "critical";
@@ -226,7 +224,7 @@ const App = () => {
     "#14B8A6",
   ];
 
-  const formatXAxisLabel = (value) => {
+  const formatXAxisLabel = (value: string) => {
     const date = new Date(value);
     if (granularity === "minute") {
       return `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
@@ -237,7 +235,7 @@ const App = () => {
     }
   };
 
-  const formatTooltipLabel = (value) => {
+  const formatTooltipLabel = (value: string) => {
     const date = new Date(value);
     if (granularity === "minute") {
       return `${date.toLocaleDateString()} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
@@ -261,7 +259,6 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-slate-900 text-white p-6">
-      {/* Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -330,7 +327,6 @@ const App = () => {
         )}
       </div>
 
-      {/* Settings Modal */}
       {showSettings && (
         <div
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
@@ -392,9 +388,8 @@ const App = () => {
         </div>
       )}
 
-      {/* Stats Cards */}
       <div className="flex justify-between gap-4 mb-6">
-        {functions.map((funcName, index) => {
+        {functions.map((funcName) => {
           const stats = getCurrentStats(funcName);
           const health = getHealthStatus(funcName);
           const healthColor =
@@ -440,9 +435,7 @@ const App = () => {
         })}
       </div>
 
-      {/* Main Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Performance Over Time */}
         <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
           <h3 className="text-xl font-semibold mb-4 flex items-center">
             <TrendingUp className="w-5 h-5 mr-2 text-green-500" />
@@ -483,7 +476,6 @@ const App = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* Percentile Analysis */}
         <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
           <h3 className="text-xl font-semibold mb-4 flex items-center">
             <BarChart3 className="w-5 h-5 mr-2 text-green-500" />
@@ -551,7 +543,6 @@ const App = () => {
         </div>
       </div>
 
-      {/* Detailed Stats Table */}
       {viewMode === "detailed" && (
         <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 mb-8">
           <h3 className="text-xl font-semibold mb-4">Detailed Statistics</h3>
@@ -580,7 +571,7 @@ const App = () => {
                 </tr>
               </thead>
               <tbody>
-                {functions.map((funcName, index) => {
+                {functions.map((funcName) => {
                   const stats = getCurrentStats(funcName);
                   const health = getHealthStatus(funcName);
 
@@ -622,7 +613,6 @@ const App = () => {
         </div>
       )}
 
-      {/* Performance Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
           <h3 className="text-xl font-semibold mb-4">Average Response Times</h3>
