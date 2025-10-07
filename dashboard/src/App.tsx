@@ -77,9 +77,9 @@ const App = () => {
       setRawData(transformed);
       if (!selectedFunction && transformed.length > 0) {
         const uniqueFuncs = [
-			...new Set(transformed.map((d: any) => d.functionName)),
+          ...new Set(transformed.map((d: any) => d.functionName)),
         ];
-			setSelectedFunction(uniqueFuncs[0] as string);
+        setSelectedFunction(uniqueFuncs[0] as string);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -329,7 +329,9 @@ const App = () => {
         </p>
         {error && (
           <div className="mt-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
-            API Error: {error}. Please ensure the API is running at {apiUrl}
+            API Error: {error.replace(/\.$/, "")}. Please ensure the API is
+            running at {apiUrl ? `'${apiUrl}'` : "the configured URL"}. If
+            that's not the correct URL, change the URL in the settings.
           </div>
         )}
       </div>
