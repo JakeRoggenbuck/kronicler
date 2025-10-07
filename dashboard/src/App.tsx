@@ -40,9 +40,15 @@ const App = () => {
   const [timeRange, setTimeRange] = useState("7d");
   const [viewMode, setViewMode] = useState("overview");
   const [granularity, setGranularity] = useState("hour");
-  const [apiUrl, setApiUrl] = useState("http://127.0.0.1:8000/logs");
+  const [apiUrl, setApiUrl] = useState(() => {
+    const saved = localStorage.getItem("kronicler_api_url");
+    return saved || "http://127.0.0.1:8000/logs";
+  });
   const [showSettings, setShowSettings] = useState(false);
-  const [tempApiUrl, setTempApiUrl] = useState("http://127.0.0.1:8000/logs");
+  const [tempApiUrl, setTempApiUrl] = useState(() => {
+    const saved = localStorage.getItem("kronicler_api_url");
+    return saved || "http://127.0.0.1:8000/logs";
+  });
 
   const fetchData = async () => {
     setLoading(true);
@@ -84,6 +90,7 @@ const App = () => {
   };
 
   const handleSaveApiUrl = () => {
+    localStorage.setItem("kronicler_api_url", tempApiUrl);
     setApiUrl(tempApiUrl);
     setShowSettings(false);
     fetchData();
