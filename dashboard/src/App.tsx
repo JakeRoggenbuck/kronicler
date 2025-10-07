@@ -63,7 +63,7 @@ const App = () => {
           functionName: functionName,
           startTime: startTime,
           endTime: endTime,
-          duration: duration / 1000,
+          duration: duration / 1000000,
           date: new Date(startTime / 1000000),
         };
       });
