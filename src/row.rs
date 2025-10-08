@@ -169,3 +169,26 @@ impl Row {
         self.__str__()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn row_to_string_test() {
+        let r = Row {
+            id: 1000,
+            fields: vec![
+                FieldType::Epoch(1),
+                FieldType::Epoch(1),
+                FieldType::Epoch(1),
+                FieldType::Epoch(1),
+            ],
+        };
+
+        assert_eq!(
+            r.to_string(),
+            "Row { id: 1000, fields: [\"1\", Epoch(1), Epoch(1), Epoch(1)]}".to_string()
+        );
+    }
+}
