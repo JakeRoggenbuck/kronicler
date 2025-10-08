@@ -178,7 +178,246 @@ mod tests {
         println!("{:?}", index);
 
         assert_eq!(fetched_rows_2[0], 1);
-
         assert_eq!(fetched_rows_2[1], 2);
+    }
+
+    #[test]
+    fn get_nonexistent_key_test() {
+        let index = Index::new();
+
+        let mut name_bytes = [0u8; 64];
+        let name_str = "NonExistent".as_bytes();
+        name_bytes[..name_str.len()].copy_from_slice(name_str);
+
+        let result = index.get(FieldType::Name(name_bytes));
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn index_on_epoch_column_test() {
+        let mut index = Index::new();
+
+        let mut name_bytes = [0u8; 64];
+        let name_str = "Test".as_bytes();
+        name_bytes[..name_str.len()].copy_from_slice(name_str);
+
+        let row_1 = Row::new(
+            0,
+            vec![
+                FieldType::Name(name_bytes),
+                FieldType::Epoch(100),
+                FieldType::Epoch(200),
+                FieldType::Epoch(100),
+            ],
+        );
+        let row_2 = Row::new(
+            1,
+            vec![
+                FieldType::Name(name_bytes),
+                FieldType::Epoch(100),
+                FieldType::Epoch(300),
+                FieldType::Epoch(200),
+            ],
+        );
+
+        // Index on column 1 (first Epoch field)
+        index.insert(row_1, 1);
+        index.insert(row_2, 1);
+
+        let fetched_rows = index.get(FieldType::Epoch(100));
+        assert_eq!(fetched_rows.unwrap().len(), 2);
+    }
+
+    #[test]
+    fn average_calculation_single_row_test() {
+        let mut index = Index::new();
+
+        let mut name_bytes = [0u8; 64];
+        let name_str = "Jake".as_bytes();
+        name_bytes[..name_str.len()].copy_from_slice(name_str);
+
+        let row = Row::new(
+            0,
+            vec![
+                FieldType::Name(name_bytes),
+                FieldType::Epoch(10),
+                FieldType::Epoch(20),
+                FieldType::Epoch(10),
+            ],
+        );
+
+        index.insert(row, 0);
+
+        let avg = index.get_average(FieldType::Name(name_bytes));
+        assert!(avg.is_some());
+        assert_eq!(avg.unwrap(), 10.0);
+    }
+
+    #[test]
+    fn average_calculation_multiple_rows_test() {
+        let mut index = Index::new();
+
+        let mut name_bytes = [0u8; 64];
+        let name_str = "Test".as_bytes();
+        name_bytes[..name_str.len()].copy_from_slice(name_str);
+
+        let row_1 = Row::new(
+            0,
+            vec![
+                FieldType::Name(name_bytes),
+                FieldType::Epoch(10),
+                FieldType::Epoch(20),
+                FieldType::Epoch(10),
+            ],
+        );
+        let row_2 = Row::new(
+            1,
+            vec![
+                FieldType::Name(name_bytes),
+                FieldType::Epoch(10),
+                FieldType::Epoch(30),
+                FieldType::Epoch(20),
+            ],
+        );
+        let row_3 = Row::new(
+            2,
+            vec![
+                FieldType::Name(name_bytes),
+                FieldType::Epoch(10),
+                FieldType::Epoch(40),
+                FieldType::Epoch(30),
+            ],
+        );
+
+        index.insert(row_1, 0);
+        index.insert(row_2, 0);
+        index.insert(row_3, 0);
+
+        let avg = index.get_average(FieldType::Name(name_bytes));
+        assert!(avg.is_some());
+        // Deltas are: 10, 20, 30. Average = 20.0
+        assert_eq!(avg.unwrap(), 20.0);
+    }
+
+    #[test]
+    fn average_nonexistent_key_test() {
+        let index = Index::new();
+
+        let mut name_bytes = [0u8; 64];
+        let name_str = "Missing".as_bytes();
+        name_bytes[..name_str.len()].copy_from_slice(name_str);
+
+        let avg = index.get_average(FieldType::Name(name_bytes));
+        assert!(avg.is_none());
+    }
+
+    #[test]
+    fn multiple_keys_test() {
+        let mut index = Index::new();
+
+        let mut name_bytes_1 = [0u8; 64];
+        let name_str_1 = "Alice".as_bytes();
+        name_bytes_1[..name_str_1.len()].copy_from_slice(name_str_1);
+
+        let mut name_bytes_2 = [0u8; 64];
+        let name_str_2 = "Bob".as_bytes();
+        name_bytes_2[..name_str_2.len()].copy_from_slice(name_str_2);
+
+        let row_1 = Row::new(
+            0,
+            vec![
+                FieldType::Name(name_bytes_1),
+                FieldType::Epoch(10),
+                FieldType::Epoch(20),
+                FieldType::Epoch(10),
+            ],
+        );
+        let row_2 = Row::new(
+            1,
+            vec![
+                FieldType::Name(name_bytes_2),
+                FieldType::Epoch(15),
+                FieldType::Epoch(30),
+                FieldType::Epoch(15),
+            ],
+        );
+        let row_3 = Row::new(
+            2,
+            vec![
+                FieldType::Name(name_bytes_1),
+                FieldType::Epoch(20),
+                FieldType::Epoch(40),
+                FieldType::Epoch(20),
+            ],
+        );
+
+        index.insert(row_1, 0);
+        index.insert(row_2, 0);
+        index.insert(row_3, 0);
+
+        let alice_rows = index.get(FieldType::Name(name_bytes_1));
+        let bob_rows = index.get(FieldType::Name(name_bytes_2));
+
+        assert_eq!(alice_rows.unwrap().len(), 2);
+        assert_eq!(bob_rows.unwrap().len(), 1);
+    }
+
+    #[test]
+    fn empty_index_test() {
+        let index = Index::new();
+        assert_eq!(index.index.len(), 0);
+    }
+
+    #[test]
+    fn large_batch_insert_test() {
+        let mut index = Index::new();
+
+        let mut name_bytes = [0u8; 64];
+        let name_str = "Batch".as_bytes();
+        name_bytes[..name_str.len()].copy_from_slice(name_str);
+
+        // Insert 100 rows with the same key
+        for i in 0..100 {
+            let row = Row::new(
+                i,
+                vec![
+                    FieldType::Name(name_bytes),
+                    FieldType::Epoch(i as u128 * 10),
+                    FieldType::Epoch(i as u128 * 20),
+                    FieldType::Epoch(i as u128 * 10),
+                ],
+            );
+            index.insert(row, 0);
+        }
+
+        let fetched_rows = index.get(FieldType::Name(name_bytes));
+        assert_eq!(fetched_rows.unwrap().len(), 100);
+    }
+
+    #[test]
+    fn index_preserves_insertion_order_test() {
+        let mut index = Index::new();
+
+        let mut name_bytes = [0u8; 64];
+        let name_str = "Order".as_bytes();
+        name_bytes[..name_str.len()].copy_from_slice(name_str);
+
+        for i in 0..5 {
+            let row = Row::new(
+                i,
+                vec![
+                    FieldType::Name(name_bytes),
+                    FieldType::Epoch(100),
+                    FieldType::Epoch(200),
+                    FieldType::Epoch(100),
+                ],
+            );
+            index.insert(row, 0);
+        }
+
+        let fetched_rows = index.get(FieldType::Name(name_bytes)).unwrap();
+        for i in 0..5 {
+            assert_eq!(fetched_rows[i], i as RID);
+        }
     }
 }
