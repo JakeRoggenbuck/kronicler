@@ -41,13 +41,19 @@ const App = () => {
   const [viewMode, setViewMode] = useState("overview");
   const [granularity, setGranularity] = useState("hour");
   const [apiUrl, setApiUrl] = useState(() => {
-    const saved = localStorage.getItem("kronicler_api_url");
-    return saved || "http://127.0.0.1:8000/logs";
+    if (typeof window !== "undefined" && window.localStorage) {
+      const saved = window.localStorage.getItem("kronicler_api_url");
+      return saved || "https://api.algoboard.org/logs";
+    }
+    return "https://api.algoboard.org/logs";
   });
   const [showSettings, setShowSettings] = useState(false);
   const [tempApiUrl, setTempApiUrl] = useState(() => {
-    const saved = localStorage.getItem("kronicler_api_url");
-    return saved || "http://127.0.0.1:8000/logs";
+    if (typeof window !== "undefined" && window.localStorage) {
+      const saved = window.localStorage.getItem("kronicler_api_url");
+      return saved || "https://api.algoboard.org/logs";
+    }
+    return "https://api.algoboard.org/logs";
   });
 
   const fetchData = async () => {
@@ -90,7 +96,9 @@ const App = () => {
   };
 
   const handleSaveApiUrl = () => {
-    localStorage.setItem("kronicler_api_url", tempApiUrl);
+    if (typeof window !== "undefined" && window.localStorage) {
+      window.localStorage.setItem("kronicler_api_url", tempApiUrl);
+    }
     setApiUrl(tempApiUrl);
     setShowSettings(false);
     fetchData();
@@ -324,9 +332,21 @@ const App = () => {
             </div>
           </div>
         </div>
-        <p className="text-gray-400 mt-2">
-          Python Function Performance Monitor • {rawData.length} total logs
-        </p>
+        <div className="mt-3 space-y-2">
+          <div className="flex items-center space-x-2 text-sm">
+            <span className="text-gray-400">Using URL:</span>
+            <code className="bg-slate-800 px-2 py-1 rounded text-green-400 border border-slate-700">
+              {apiUrl}
+            </code>
+          </div>
+          <p className="text-gray-400 text-sm">
+            Python Function Performance Monitor • {rawData.length} total logs •{" "}
+            <span className="text-gray-500">
+              Running Kronicler on your own server? Click Settings to configure
+              your custom endpoint
+            </span>
+          </p>
+        </div>
         {error && (
           <div className="mt-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
             API Error: {error.replace(/\.$/, "")}. Please ensure the API is
@@ -368,10 +388,14 @@ const App = () => {
                   value={tempApiUrl}
                   onChange={(e) => setTempApiUrl(e.target.value)}
                   className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-green-500 focus:outline-none"
-                  placeholder="http://0.0.0.0:8000/logs"
+                  placeholder="https://api.algoboard.org/logs"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Current: <span className="text-green-400">{apiUrl}</span>
+                <p className="text-xs text-gray-500 mt-2">
+                  Example: https://api.algoboard.org/logs
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  If you're running Kronicler on your own server, enter your
+                  endpoint URL here (e.g., http://localhost:8000/logs)
                 </p>
               </div>
 
