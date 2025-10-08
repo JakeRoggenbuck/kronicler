@@ -21,7 +21,7 @@ View Kronicler on [PyPi.org](https://pypi.org/project/kronicler), [Crates.io](ht
 - One Python dependency
 - Works out-of-the-box without configuration 
 
-\* concurrency is in development but not fully implemented as of version 0.1.1. Track concurrency in [issue #41](https://github.com/JakeRoggenbuck/kronicler/issues/41).
+\* concurrency is in development but not fully implemented as of version 0.1.1. Track concurrency in [issue #123](https://github.com/JakeRoggenbuck/kronicler/issues/123).
 
 ## Why use Kronicler?
 
