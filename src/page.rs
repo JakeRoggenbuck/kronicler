@@ -223,7 +223,7 @@ mod tests {
     #[test]
     fn test_new_page_creation() {
         let page = Page::new(0, 0, 16);
-        
+
         assert_eq!(page.pid, 0);
         assert_eq!(page.column_index, 0);
         assert_eq!(page.field_type_size, 16);
@@ -235,7 +235,7 @@ mod tests {
     fn test_page_path_generation() {
         let page = Page::new(5, 3, 16);
         let path = page.get_page_path();
-        
+
         assert!(path.to_string_lossy().contains("page_3_5.data"));
     }
 
@@ -243,12 +243,12 @@ mod tests {
     fn test_open_creates_file_if_not_exists() {
         ensure_data_directory();
         let mut page = Page::new(100, 0, 16);
-        
+
         page.open();
-        
+
         assert!(page.get_page_path().exists());
         assert!(page.data.is_some());
-        
+
         cleanup_test_page(&page);
     }
 
@@ -256,13 +256,13 @@ mod tests {
     fn test_set_and_get_epoch_value() {
         let mut page = Page::new(0, 0, 16);
         page.data = Some([0u8; PAGE_SIZE]);
-        
+
         let epoch_value = FieldType::Epoch(12345);
         page.set_value(0, epoch_value);
-        
+
         let retrieved = page.get_value(0);
         assert!(retrieved.is_some());
-        
+
         if let Some(FieldType::Epoch(val)) = retrieved {
             assert_eq!(val, 12345);
         } else {
@@ -274,17 +274,17 @@ mod tests {
     fn test_set_and_get_name_value() {
         let mut page = Page::new(0, 0, 64);
         page.data = Some([0u8; PAGE_SIZE]);
-        
+
         let mut name_bytes = [0u8; 64];
         let name_str = "TestName";
         let bytes = name_str.as_bytes();
         name_bytes[..bytes.len()].copy_from_slice(bytes);
-        
+
         page.set_value(0, FieldType::Name(name_bytes));
-        
+
         let retrieved = page.get_value(0);
         assert!(retrieved.is_some());
-        
+
         if let Some(FieldType::Name(val)) = retrieved {
             assert_eq!(&val[..bytes.len()], bytes);
         } else {
@@ -296,12 +296,12 @@ mod tests {
     fn test_multiple_epoch_values() {
         let mut page = Page::new(0, 0, 16);
         page.data = Some([0u8; PAGE_SIZE]);
-        
+
         // Set multiple epoch values
         page.set_value(0, FieldType::Epoch(100));
         page.set_value(16, FieldType::Epoch(200));
         page.set_value(32, FieldType::Epoch(300));
-        
+
         // Retrieve and verify
         assert_eq!(page.get_value(0), Some(FieldType::Epoch(100)));
         assert_eq!(page.get_value(16), Some(FieldType::Epoch(200)));
@@ -312,14 +312,14 @@ mod tests {
     fn test_set_all_values() {
         let mut page = Page::new(0, 0, 16);
         let mut test_data = [0u8; PAGE_SIZE];
-        
+
         // Set some known pattern
         for i in 0..100 {
             test_data[i] = (i % 256) as u8;
         }
-        
+
         page.set_all_values(test_data);
-        
+
         assert!(page.data.is_some());
         if let Some(data) = page.data {
             for i in 0..100 {
@@ -332,12 +332,12 @@ mod tests {
     fn test_page_size_tracking() {
         let mut page = Page::new(0, 0, 16);
         page.data = Some([0u8; PAGE_SIZE]);
-        
+
         assert_eq!(page.size(), 0);
-        
+
         page.set_value(0, FieldType::Epoch(100));
         assert_eq!(page.size(), 16);
-        
+
         page.set_value(16, FieldType::Epoch(200));
         assert_eq!(page.size(), 32);
     }
@@ -353,19 +353,19 @@ mod tests {
         ensure_data_directory();
         let mut page = Page::new(200, 1, 16);
         let mut test_data = [0u8; PAGE_SIZE];
-        
+
         // Create a pattern to verify
         for i in 0..1000 {
             test_data[i] = ((i * 7) % 256) as u8;
         }
-        
+
         page.set_all_values(test_data);
         page.write_page();
-        
+
         // Create a new page and read from disk
         let mut page2 = Page::new(200, 1, 16);
         page2.open();
-        
+
         if let Some(read_data) = page2.data {
             for i in 0..1000 {
                 assert_eq!(read_data[i], ((i * 7) % 256) as u8);
@@ -373,7 +373,7 @@ mod tests {
         } else {
             panic!("Expected data to be loaded");
         }
-        
+
         cleanup_test_page(&page);
     }
 
@@ -389,19 +389,19 @@ mod tests {
         ensure_data_directory();
         let mut page = Page::new(300, 2, 16);
         page.data = Some([0u8; PAGE_SIZE]);
-        
+
         // Set multiple epoch values
         let values = vec![12345u128, 67890, 11111, 22222, 33333];
         for (i, &val) in values.iter().enumerate() {
             page.set_value(i * 16, FieldType::Epoch(val));
         }
-        
+
         page.write_page();
-        
+
         // Read back from disk
         let mut page2 = Page::new(300, 2, 16);
         page2.open();
-        
+
         // Verify all values
         for (i, &expected) in values.iter().enumerate() {
             if let Some(FieldType::Epoch(val)) = page2.get_value(i * 16) {
@@ -410,7 +410,7 @@ mod tests {
                 panic!("Expected Epoch value at index {}", i);
             }
         }
-        
+
         cleanup_test_page(&page);
     }
 
@@ -419,22 +419,22 @@ mod tests {
         ensure_data_directory();
         let mut page = Page::new(400, 3, 64);
         page.data = Some([0u8; PAGE_SIZE]);
-        
+
         let names = vec!["Alice", "Bob", "Charlie", "Diana"];
-        
+
         for (i, &name) in names.iter().enumerate() {
             let mut name_bytes = [0u8; 64];
             let bytes = name.as_bytes();
             name_bytes[..bytes.len()].copy_from_slice(bytes);
             page.set_value(i * 64, FieldType::Name(name_bytes));
         }
-        
+
         page.write_page();
-        
+
         // Read back from disk
         let mut page2 = Page::new(400, 3, 64);
         page2.open();
-        
+
         // Verify all names
         for (i, &expected_name) in names.iter().enumerate() {
             if let Some(FieldType::Name(val)) = page2.get_value(i * 64) {
@@ -444,7 +444,7 @@ mod tests {
                 panic!("Expected Name value at index {}", i);
             }
         }
-        
+
         cleanup_test_page(&page);
     }
 
@@ -453,21 +453,21 @@ mod tests {
         ensure_data_directory();
         let mut page1 = Page::new(500, 0, 16);
         let mut page2 = Page::new(500, 1, 16);
-        
+
         page1.data = Some([1u8; PAGE_SIZE]);
         page2.data = Some([2u8; PAGE_SIZE]);
-        
+
         page1.write_page();
         page2.write_page();
-        
+
         // Verify different files were created
         let path1 = page1.get_page_path();
         let path2 = page2.get_page_path();
-        
+
         assert_ne!(path1, path2);
         assert!(path1.exists());
         assert!(path2.exists());
-        
+
         cleanup_test_page(&page1);
         cleanup_test_page(&page2);
     }
@@ -476,10 +476,10 @@ mod tests {
     fn test_large_epoch_values() {
         let mut page = Page::new(0, 0, 16);
         page.data = Some([0u8; PAGE_SIZE]);
-        
+
         let max_value = u128::MAX;
         page.set_value(0, FieldType::Epoch(max_value));
-        
+
         if let Some(FieldType::Epoch(val)) = page.get_value(0) {
             assert_eq!(val, max_value);
         } else {
@@ -491,10 +491,10 @@ mod tests {
     fn test_empty_name_value() {
         let mut page = Page::new(0, 0, 64);
         page.data = Some([0u8; PAGE_SIZE]);
-        
+
         let name_bytes = [0u8; 64];
         page.set_value(0, FieldType::Name(name_bytes));
-        
+
         if let Some(FieldType::Name(val)) = page.get_value(0) {
             assert_eq!(val, name_bytes);
         } else {
@@ -506,15 +506,15 @@ mod tests {
     fn test_sequential_writes() {
         let mut page = Page::new(0, 0, 16);
         page.data = Some([0u8; PAGE_SIZE]);
-        
+
         let initial_size = page.size();
-        
+
         // Write several values sequentially
         for i in 0..10 {
             let current_index = page.index;
             page.set_value(current_index, FieldType::Epoch(i as u128));
         }
-        
+
         assert_eq!(page.size(), initial_size + (10 * 16));
     }
 
@@ -523,20 +523,20 @@ mod tests {
         ensure_data_directory();
         let mut page = Page::new(600, 4, 16);
         page.data = Some([0u8; PAGE_SIZE]);
-        
+
         page.set_value(0, FieldType::Epoch(999));
         page.write_page();
-        
+
         // Open the same page again
         let mut page2 = Page::new(600, 4, 16);
         page2.open();
-        
+
         if let Some(FieldType::Epoch(val)) = page2.get_value(0) {
             assert_eq!(val, 999);
         } else {
             panic!("Expected Epoch value");
         }
-        
+
         cleanup_test_page(&page);
     }
 }
