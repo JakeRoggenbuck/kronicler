@@ -32,7 +32,7 @@ impl DatabaseInner {
             eprintln!(
                 "Async Consume not fully supported yet in v0.1.1. Please set `sync_consume=True`."
             );
-            std::process::exit(0);
+            // std::process::exit(0);
         }
 
         Database::create_data_dir();
