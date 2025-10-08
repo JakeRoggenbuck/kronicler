@@ -42,12 +42,12 @@ const App = () => {
   const [granularity, setGranularity] = useState("hour");
   const [apiUrl, setApiUrl] = useState(() => {
     const saved = localStorage.getItem("kronicler_api_url");
-    return saved || "http://127.0.0.1:8000/logs";
+	return saved || "https://api.algoboard.org/logs";
   });
   const [showSettings, setShowSettings] = useState(false);
   const [tempApiUrl, setTempApiUrl] = useState(() => {
     const saved = localStorage.getItem("kronicler_api_url");
-    return saved || "http://127.0.0.1:8000/logs";
+    return saved || "https://api.algoboard.org/logs";
   });
 
   const fetchData = async () => {
