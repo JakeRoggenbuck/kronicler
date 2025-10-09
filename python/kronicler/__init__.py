@@ -9,8 +9,8 @@ DB = Database(sync_consume=True)
 def capture(func):
     def wrapper(*args, **krawgs):
         # Use nano seconds because it's an int
-        # def time_ns() -> int: ...
-        start: int = time.time_ns()
+        # def perf_counter_ns() -> int: ...
+        start: int = time.perf_counter_ns()
 
         # TODO: Should I go through args manually here and only share ones that
         # are string, float, and int? This way I can actually store them
@@ -22,7 +22,7 @@ def capture(func):
         #       strings.append(a)
         value = func(*args, **krawgs)
 
-        end: int = time.time_ns()
+        end: int = time.perf_counter_ns()
 
         DB.capture(func.__name__, args, start, end)
 
