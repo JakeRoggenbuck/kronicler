@@ -1,9 +1,8 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 import uvicorn
 import kronicler
 import random
 from fastapi.middleware.cors import CORSMiddleware
-import time
 
 app = FastAPI()
 
@@ -14,14 +13,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-@app.middleware("http")
-async def add_process_time_header(request: Request, call_next):
-    call_next()
-
-    response = await call_next(request)
-    return response
-
 
 DB = kronicler.Database(sync_consume=True)
 
