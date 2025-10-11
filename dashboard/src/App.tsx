@@ -1,8 +1,45 @@
-import { Activity, Terminal, Zap, Database, ArrowRight } from "lucide-react";
+import {
+  Activity,
+  Terminal,
+  Zap,
+  Database,
+  ArrowRight,
+  BarChart3,
+} from "lucide-react";
 
 const App = () => {
   return (
     <div className="min-h-screen bg-slate-900 text-white">
+      {/* Navigation Bar */}
+      <nav className="border-b border-slate-700 bg-slate-900">
+        <div className="max-w-4xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <a
+              href="/"
+              className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+            >
+              <Activity className="w-6 h-6 text-green-500" />
+              <span className="text-xl font-bold">Kronicler</span>
+            </a>
+            <div className="flex items-center space-x-6">
+              <a
+                href="https://github.com/JakeRoggenbuck/kronicler"
+                className="text-gray-400 hover:text-white transition-colors text-sm"
+              >
+                GitHub
+              </a>
+              <a
+                href="/dashboard"
+                className="flex items-center space-x-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium"
+              >
+                <BarChart3 className="w-4 h-4" />
+                <span>Dashboard</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </nav>
+
       <div className="max-w-4xl mx-auto px-6 py-16">
         {/* Header */}
         <div className="mb-16">
