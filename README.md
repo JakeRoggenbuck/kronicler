@@ -111,14 +111,45 @@ def foo():
 
 With just two lines of code, you can add Kronicler to your [FastAPI](https://fastapi.tiangolo.com) server.
 
+For FastAPI, to capture each route, you can use the `KroniclerMiddleware` that will be included in `v0.1.2`. This allows you to capture every route that gets called.
+
 ```python
 from fastapi import FastAPI
 import uvicorn
 import kronicler
 
 app = FastAPI()
+app.add_middleware(kronicler.KroniclerMiddleware)
 
-# Used only for optionally returning logs
+# Used only for the /logs route
+DB = kronicler.Database(sync_consume=True)
+
+
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
+
+
+@app.get("/logs")
+def read_logs():
+    return DB.logs()
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+```
+
+If you want to capture functions manually, you can still do that with `@kronicler.capture` as normal. This is helpful if you want to benchmark functions that are not routes.
+
+```python
+from fastapi import FastAPI
+import uvicorn
+import kronicler
+
+app = FastAPI()
+app.add_middleware(kronicler.KroniclerMiddleware)
+
+# Used only for the /logs route
 DB = kronicler.Database(sync_consume=True)
 
 
