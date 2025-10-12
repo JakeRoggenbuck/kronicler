@@ -43,7 +43,7 @@ def get_value():
 
 @app.get("/logs")
 def read_logs():
-    return DB.fetch_all_as_dict()
+    return DB.logs()
 
 
 if __name__ == "__main__":
