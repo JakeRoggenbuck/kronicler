@@ -1,4 +1,4 @@
-use super::row::{Epoch, FieldType, Row, RID};
+use super::row::{create_function_name, Epoch, FieldType, Row, RID};
 use pyo3::prelude::*;
 
 #[derive(Debug)]
@@ -12,9 +12,7 @@ pub struct Capture {
 
 impl Capture {
     pub fn to_row(&self, id: RID) -> Row {
-        let mut name_bytes = [0u8; 64];
-        let name_str = self.name.as_bytes();
-        name_bytes[..name_str.len()].copy_from_slice(name_str);
+        let name_bytes = create_function_name(&self.name);
 
         Row {
             id,
