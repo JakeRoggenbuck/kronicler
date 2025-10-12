@@ -57,7 +57,7 @@ Kronicler provides a Python decorator called `capture` that will calculate the t
 ```python
 import kronicler
 
-@kronicler.capture()
+@kronicler.capture
 def my_function():
 	pass
 ```
