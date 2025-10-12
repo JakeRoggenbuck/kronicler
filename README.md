@@ -9,7 +9,7 @@ Automatic performance capture and analytics for production applications in Pytho
 [![Crates Version](https://img.shields.io/crates/v/kronicler?style=for-the-badge)](https://crates.io/crates/kronicler)
 [![Downloads](https://img.shields.io/crates/d/kronicler?style=for-the-badge)](https://crates.io/crates/kronicler)
 
-View Kronicler on [PyPi.org](https://pypi.org/project/kronicler), [Crates.io](https://crates.io/crates/kronicler) and [GitHub](https://github.com/JakeRoggenbuck/kronicler).
+View Kronicler on [UseKronicler.com](https://usekronicler.com), [PyPi.org](https://pypi.org/project/kronicler), [Crates.io](https://crates.io/crates/kronicler) and [GitHub](https://github.com/JakeRoggenbuck/kronicler).
 
 > [!IMPORTANT]
 > Kronicler is still early in development.
