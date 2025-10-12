@@ -12,7 +12,19 @@ on:
       - master
     tags:
       - '*'
+    paths-ignore:
+      - 'README.md'
+      - '**/README.md'
+      - 'dashboard/**'
+      - 'images/**'
+      - 'tests/**'
   pull_request:
+    paths-ignore:
+      - 'README.md'
+      - '**/README.md'
+      - 'dashboard/**'
+      - 'images/**'
+      - 'tests/**'
   workflow_dispatch:
 
 permissions:
