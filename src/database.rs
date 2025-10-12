@@ -4,7 +4,7 @@ use super::column::Column;
 use super::constants::{DATA_DIRECTORY, DB_WRITE_BUFFER_SIZE};
 use super::index::Index;
 use super::queue::KQueue;
-use super::row::{Epoch, FieldType, Row, create_function_name};
+use super::row::{create_function_name, Epoch, FieldType, Row};
 use log::{debug, info, warn};
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
