@@ -136,7 +136,7 @@ def read_root():
 # Return the logs to the user (optional)
 @app.get("/logs")
 def read_logs():
-    return DB.fetch_all_as_dict()
+    return DB.logs()
 
 
 if __name__ == "__main__":

@@ -312,6 +312,10 @@ impl Database {
         rows_dict
     }
 
+    pub fn logs<'py>(&mut self, py: Python<'py>) -> Vec<Bound<'py, PyDict>> {
+        self.fetch_all_as_dict(py)
+    }
+
     pub fn get_function_names(&mut self) -> HashSet<String> {
         let db_instance = self.get_instance();
 

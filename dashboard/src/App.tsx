@@ -160,7 +160,7 @@ const App = () => {
                 {"\n"}
                 {"    "}
                 <span className="text-purple-400">return</span>{" "}
-                DB.fetch_all_as_dict()
+                DB.logs()
               </code>
             </pre>
           </div>
