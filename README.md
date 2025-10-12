@@ -463,6 +463,10 @@ def my_function():
 	pass
 ```
 
+### Disable kronicler with env var
+
+To temporarily turn off logging, you can set `KRONICLER_ENABLED=false`. The default for `KRONICLER_ENABLED` is `true`, so it does not need to be set to make logging work.
+
 ## Development
 
 #### Building the Python package
