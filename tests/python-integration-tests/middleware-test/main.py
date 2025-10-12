@@ -10,7 +10,7 @@ app.add_middleware(kronicler.KroniclerMiddleware)
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
+    return {"Hello": "World - middleware"}
 
 
 @app.get("/logs")
