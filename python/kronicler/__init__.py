@@ -3,6 +3,8 @@ from .kronicler import Database, database_init
 from typing import Final
 import time
 from os import getenv
+from starlette.requests import Request
+from starlette.middleware.base import BaseHTTPMiddleware
 
 
 # Create an ENV var for kronicler to be unset
@@ -49,6 +51,32 @@ def decorator_example(func):
         print("Kronicler end...")
 
     return wrapper
+
+
+class KroniclerMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app):
+        super().__init__(app)
+
+    async def dispatch(self, request: Request, call_next):
+        endpoint = request.scope.get("endpoint")
+        func_name = None
+
+        if endpoint:
+            func_name = endpoint.__name__
+        else:
+            func_name = request.url.path
+
+        # Use nano seconds because it's an int
+        # def perf_counter_ns() -> int: ...
+        start: int = time.perf_counter_ns()
+
+        response = await call_next(request)
+
+        end: int = time.perf_counter_ns()
+
+        DB.capture(func_name, [], start, end)
+
+        return response
 
 
 __all__: Final[list[str]] = ["kronicler"]
