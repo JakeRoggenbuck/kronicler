@@ -33,11 +33,9 @@ impl Index {
     /// use kronicler::index::*;
     /// use kronicler::row::FieldType;
     /// use kronicler::row::Row;
+    /// use kronicler::row::create_function_name;
     ///
-    /// let mut name_bytes = [0u8; 64];
-    /// let name_str = "Jake";
-    /// let bytes = name_str.as_bytes();
-    /// name_bytes[..bytes.len()].copy_from_slice(bytes);
+    /// let name_bytes = create_function_name("Jake");
     ///
     /// let mut index = Index::new();
     /// let row1 = Row::new(0, vec![
@@ -116,14 +114,14 @@ impl Index {
 mod tests {
     use super::*;
 
+    use crate::row::create_function_name;
+
     #[test]
     fn basic_insert_test() {
         let mut rows = Vec::new();
         let mut index = Index::new();
 
-        let mut name_bytes = [0u8; 64];
-        let name_str = "Jake".as_bytes();
-        name_bytes[..name_str.len()].copy_from_slice(name_str);
+        let name_bytes = create_function_name("Jake");
 
         let row_1 = Row::new(
             0,
@@ -147,9 +145,7 @@ mod tests {
     fn duplicate_insert_test() {
         let mut index = Index::new();
 
-        let mut name_bytes = [0u8; 64];
-        let name_str = "Foo".as_bytes();
-        name_bytes[..name_str.len()].copy_from_slice(name_str);
+        let name_bytes = create_function_name("Foo");
 
         let row_2 = Row::new(
             1,
@@ -185,9 +181,7 @@ mod tests {
     fn get_nonexistent_key_test() {
         let index = Index::new();
 
-        let mut name_bytes = [0u8; 64];
-        let name_str = "NonExistent".as_bytes();
-        name_bytes[..name_str.len()].copy_from_slice(name_str);
+        let name_bytes = create_function_name("NonExistent");
 
         let result = index.get(FieldType::Name(name_bytes));
         assert!(result.is_none());
@@ -197,9 +191,7 @@ mod tests {
     fn index_on_epoch_column_test() {
         let mut index = Index::new();
 
-        let mut name_bytes = [0u8; 64];
-        let name_str = "Test".as_bytes();
-        name_bytes[..name_str.len()].copy_from_slice(name_str);
+        let name_bytes = create_function_name("Test");
 
         let row_1 = Row::new(
             0,
@@ -232,9 +224,7 @@ mod tests {
     fn average_calculation_single_row_test() {
         let mut index = Index::new();
 
-        let mut name_bytes = [0u8; 64];
-        let name_str = "Jake".as_bytes();
-        name_bytes[..name_str.len()].copy_from_slice(name_str);
+        let name_bytes = create_function_name("Jake");
 
         let row = Row::new(
             0,
@@ -257,9 +247,7 @@ mod tests {
     fn average_calculation_multiple_rows_test() {
         let mut index = Index::new();
 
-        let mut name_bytes = [0u8; 64];
-        let name_str = "Test".as_bytes();
-        name_bytes[..name_str.len()].copy_from_slice(name_str);
+        let name_bytes = create_function_name("Test");
 
         let row_1 = Row::new(
             0,
@@ -303,9 +291,7 @@ mod tests {
     fn average_nonexistent_key_test() {
         let index = Index::new();
 
-        let mut name_bytes = [0u8; 64];
-        let name_str = "Missing".as_bytes();
-        name_bytes[..name_str.len()].copy_from_slice(name_str);
+        let name_bytes = create_function_name("Missing");
 
         let avg = index.get_average(FieldType::Name(name_bytes));
         assert!(avg.is_none());
@@ -315,13 +301,8 @@ mod tests {
     fn multiple_keys_test() {
         let mut index = Index::new();
 
-        let mut name_bytes_1 = [0u8; 64];
-        let name_str_1 = "Alice".as_bytes();
-        name_bytes_1[..name_str_1.len()].copy_from_slice(name_str_1);
-
-        let mut name_bytes_2 = [0u8; 64];
-        let name_str_2 = "Bob".as_bytes();
-        name_bytes_2[..name_str_2.len()].copy_from_slice(name_str_2);
+        let name_bytes_1 = create_function_name("Alice");
+        let name_bytes_2 = create_function_name("Bob");
 
         let row_1 = Row::new(
             0,
@@ -372,9 +353,7 @@ mod tests {
     fn large_batch_insert_test() {
         let mut index = Index::new();
 
-        let mut name_bytes = [0u8; 64];
-        let name_str = "Batch".as_bytes();
-        name_bytes[..name_str.len()].copy_from_slice(name_str);
+        let name_bytes = create_function_name("Batch");
 
         // Insert 100 rows with the same key
         for i in 0..100 {
@@ -398,9 +377,7 @@ mod tests {
     fn index_preserves_insertion_order_test() {
         let mut index = Index::new();
 
-        let mut name_bytes = [0u8; 64];
-        let name_str = "Order".as_bytes();
-        name_bytes[..name_str.len()].copy_from_slice(name_str);
+        let name_bytes = create_function_name("Order");
 
         for i in 0..5 {
             let row = Row::new(

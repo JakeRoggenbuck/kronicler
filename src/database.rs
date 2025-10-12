@@ -4,7 +4,7 @@ use super::column::Column;
 use super::constants::{DATA_DIRECTORY, DB_WRITE_BUFFER_SIZE};
 use super::index::Index;
 use super::queue::KQueue;
-use super::row::{Epoch, FieldType, Row};
+use super::row::{create_function_name, Epoch, FieldType, Row};
 use log::{debug, info, warn};
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
@@ -333,9 +333,7 @@ impl Database {
 
     /// Find the average time a function took to run
     pub fn average(&mut self, function_name: &str) -> Option<f64> {
-        let mut name_bytes = [0u8; 64];
-        let bytes = function_name.as_bytes();
-        name_bytes[..bytes.len()].copy_from_slice(bytes);
+        let name_bytes = create_function_name(function_name);
 
         let db_instance = self.get_instance();
 

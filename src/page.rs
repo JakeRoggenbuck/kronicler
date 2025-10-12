@@ -206,6 +206,8 @@ mod tests {
     use super::*;
     use std::fs;
 
+    use crate::row::create_function_name;
+
     fn cleanup_test_page(page: &Page) {
         let path = page.get_page_path();
         if path.exists() {
@@ -423,9 +425,7 @@ mod tests {
         let names = vec!["Alice", "Bob", "Charlie", "Diana"];
 
         for (i, &name) in names.iter().enumerate() {
-            let mut name_bytes = [0u8; 64];
-            let bytes = name.as_bytes();
-            name_bytes[..bytes.len()].copy_from_slice(bytes);
+            let name_bytes = create_function_name(name);
             page.set_value(i * 64, FieldType::Name(name_bytes));
         }
 
