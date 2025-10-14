@@ -178,7 +178,7 @@ Code from [tests/fastapi-test/main.py](https://github.com/JakeRoggenbuck/kronicl
 
 ## Using Kronicler manually
 
-It's recommended to first use Kronicler's build-in `capture` decorator. However, if you want to write your own capture statements and fetch data yourself, you can use the functions in that come with the Python library.
+It's recommended to first use Kronicler's built-in `capture` decorator. However, if you want to write your own capture statements and fetch data yourself, you can use the functions in that come with the Python library.
 
 ```python
 import kronicler
@@ -214,7 +214,7 @@ Add as a dependency in your `Cargo.toml`.
 kronicler = "0.1.1"
 ```
 
-To get a good idea of how to use Kronicler's internal Rust database, I'd recommended looking at some of the tests in the Rust files. You can also look at the source code for the `kr` binary in [main.rs](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/bin/main.rs).
+To get a good idea of how to use Kronicler's internal Rust database, I'd recommend looking at some of the tests in the Rust files. You can also look at the source code for the `kr` binary in [main.rs](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/bin/main.rs).
 
 Here is an example of a function that fetches data based on index. It creates a `Database` from the `new_reader` trait.
 
@@ -516,7 +516,7 @@ You will need maturin installed, see [Install Maturin](https://github.com/JakeRo
 pip install --force-reinstall target/wheels/kronicler-*
 ```
 
-#### Testing Python scrips
+#### Testing Python scripts
 
 You can run the scripts in [tests/](https://github.com/JakeRoggenbuck/kronicler/tree/main/tests) to test out the functionality of Kronicler.
 
