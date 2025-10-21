@@ -159,8 +159,7 @@ const App = () => {
                 <span className="text-yellow-400">read_logs</span>():
                 {"\n"}
                 {"    "}
-                <span className="text-purple-400">return</span>{" "}
-                DB.logs()
+                <span className="text-purple-400">return</span> DB.logs()
               </code>
             </pre>
           </div>
