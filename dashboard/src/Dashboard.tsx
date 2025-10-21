@@ -422,6 +422,31 @@ const Dashboard = () => {
       )}
 
       <div className="flex justify-between gap-4 mb-6">
+        {/* Function Call Count Card */}
+        <div className="bg-slate-800 rounded-lg p-4 border border-slate-700 hover:border-blue-500/50 transition-colors cursor-pointer flex-1 h-32 flex flex-col justify-between min-w-0">
+          <div className="flex items-center justify-between">
+            <Activity className="w-4 h-4 text-blue-500" />
+            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+          </div>
+          <div className="text-center flex-1 flex flex-col justify-center">
+            <h3 className="text-sm font-semibold mb-2">Total Calls</h3>
+            <div className="space-y-1">
+              <div className="flex justify-center items-center space-x-2">
+                <span className="text-gray-400 text-xs">All Functions</span>
+                <span className="text-white text-lg font-bold">
+                  {rawData.length.toLocaleString()}
+                </span>
+              </div>
+              <div className="flex justify-center items-center space-x-2">
+                <span className="text-gray-400 text-xs">Functions</span>
+                <span className="text-blue-500 text-sm font-medium">
+                  {functions.length}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {functions.map((funcName) => {
           const stats = getCurrentStats(funcName);
           const health = getHealthStatus(funcName);
@@ -431,6 +456,11 @@ const Dashboard = () => {
               : health === "warning"
                 ? "text-yellow-500"
                 : "text-red-500";
+
+          // Calculate call count for this specific function
+          const callCount = rawData.filter(
+            (d) => d.functionName === funcName,
+          ).length;
 
           return (
             <div
@@ -445,10 +475,16 @@ const Dashboard = () => {
                 ></div>
               </div>
               <div className="text-center flex-1 flex flex-col justify-center">
-                <h3 className="text-sm font-semibold mb-2 truncate">
+                <h3 className="text-sm font-semibold mb-1 truncate">
                   {funcName}
                 </h3>
                 <div className="space-y-1">
+                  <div className="flex justify-center items-center space-x-2">
+                    <span className="text-gray-400 text-xs">Calls</span>
+                    <span className="text-blue-500 text-sm font-bold">
+                      {callCount.toLocaleString()}
+                    </span>
+                  </div>
                   <div className="flex justify-center items-center space-x-2">
                     <span className="text-gray-400 text-xs">Mean</span>
                     <span className="text-white text-sm font-medium">
