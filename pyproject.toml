@@ -11,6 +11,9 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dynamic = ["version"]
+dependencies = [
+    "starlette",
+]
 authors = [
   {name = "Jake Roggenbuck", email = "jakeroggenbuck2@gmail.com"},
 ]
