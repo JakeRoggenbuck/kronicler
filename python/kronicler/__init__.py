@@ -70,7 +70,6 @@ class KroniclerMiddleware(BaseHTTPMiddleware):
             endpoint = getattr(route, "endpoint", None)
             if endpoint:
                 func_name = endpoint.__name__
-                print(func_name)
 
         # Fallback to path if no route found
         if not func_name:
