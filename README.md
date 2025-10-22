@@ -566,6 +566,26 @@ cargo publish
 
 #### Publishing to PyPi.org
 
+##### 1. Publish with CI
+
+The CI publishes the packages automatically and it's super easy to use. You just have to get a PyPi token and put it into the repo's secrets.
+
+Set it as `PYPI_API_TOKEN` in the secrets for the repository and then it should all be set up.
+
+Then you have to tag the commit you want to publish and push both the commit and the tags.
+
+```sh
+git tag v0.1.2
+
+git push origin main --tags
+```
+
+After the build runs, it should all be uploaded.
+
+Before I used this method, I was only publishing the linuxmany build and the source. This made it try to build from source most places.
+
+##### 2. Publish Manually
+
 Use maturin to publish the package
 
 ```
