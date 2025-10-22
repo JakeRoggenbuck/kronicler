@@ -21,7 +21,7 @@ View Kronicler on [UseKronicler.com](https://usekronicler.com), [PyPi.org](https
 - One Python dependency
 - Works out-of-the-box without configuration 
 
-\* concurrency is in development but not fully implemented as of version 0.1.1. Track concurrency in [issue #123](https://github.com/JakeRoggenbuck/kronicler/issues/123).
+\* concurrency is in development but not fully implemented as of version 0.1.2. Track concurrency in [issue #123](https://github.com/JakeRoggenbuck/kronicler/issues/123).
 
 ## Why use Kronicler?
 
@@ -211,7 +211,7 @@ Add as a dependency in your `Cargo.toml`.
 
 ```toml
 [dependencies]
-kronicler = "0.1.1"
+kronicler = "0.1.2"
 ```
 
 To get a good idea of how to use Kronicler's internal Rust database, I'd recommend looking at some of the tests in the Rust files. You can also look at the source code for the `kr` binary in [main.rs](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/bin/main.rs).
@@ -255,7 +255,7 @@ Kronicler is designed to be as lightweight as possible. By adding logs to a queu
 
 For accessing logs and running calculations, Kronicler uses a columnar database design to optimize file operations when looking at lots of data from only a few columns typical of analytics tasks.
 
-\* concurrency is in development but not fully implemented as of version 0.1.1. Track concurrency in [issue #123](https://github.com/JakeRoggenbuck/kronicler/issues/123).
+\* concurrency is in development but not fully implemented as of version 0.1.2. Track concurrency in [issue #123](https://github.com/JakeRoggenbuck/kronicler/issues/123).
 
 ### Kronicler DB vs. SQLite
 
