@@ -6,7 +6,6 @@ DB = kronicler.Database(sync_consume=True)
 
 
 def mean(data: list):
-
     return sum(data) / len(data)
 
 

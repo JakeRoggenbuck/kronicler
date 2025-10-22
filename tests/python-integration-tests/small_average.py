@@ -12,7 +12,6 @@ ground_truth_data = []
 
 
 def mean(data: list):
-
     return sum(data) / len(data)
 
 

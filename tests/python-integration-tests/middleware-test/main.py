@@ -13,6 +13,11 @@ def read_root():
     return {"Hello": "World - middleware"}
 
 
+@app.get("/ret/{value}")
+def ret_value(value: int):
+    return value
+
+
 @app.post("/print")
 async def print_data(request: Request):
     data = await request.json()

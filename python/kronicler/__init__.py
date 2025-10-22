@@ -58,24 +58,24 @@ class KroniclerMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
 
     async def dispatch(self, request: Request, call_next):
-        endpoint = request.scope.get("endpoint")
-        func_name = None
-
-        if endpoint:
-            func_name = endpoint.__name__
-        else:
-            func_name = request.url.path
-
-        # Use nano seconds because it's an int
-        # def perf_counter_ns() -> int: ...
         start: int = time.perf_counter_ns()
-
         response = await call_next(request)
-
         end: int = time.perf_counter_ns()
 
-        DB.capture(func_name, [], start, end)
+        # After call_next, the route has been matched
+        route = request.scope.get("route")
+        func_name = None
 
+        if route:
+            endpoint = getattr(route, "endpoint", None)
+            if endpoint:
+                func_name = endpoint.__name__
+
+        # Fallback to path if no route found
+        if not func_name:
+            func_name = request.url.path
+
+        DB.capture(func_name, [], start, end)
         return response
 
 
