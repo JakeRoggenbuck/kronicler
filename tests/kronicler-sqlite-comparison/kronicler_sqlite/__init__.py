@@ -23,21 +23,27 @@ class Database:
         delta = end_ns - start_ns
 
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 INSERT INTO function_calls
                 (function_name, args, start_time, end_time, delta)
                 VALUES (?, ?, ?, ?, ?)
-            """, (func_name, "", start_ns, end_ns, delta))
+            """,
+                (func_name, "", start_ns, end_ns, delta),
+            )
             conn.commit()
 
     def average(self, function_name: str) -> float:
         """Return the average delta in nanoseconds for a specific function."""
         with sqlite3.connect(self.db_path) as conn:
-            result = conn.execute("""
+            result = conn.execute(
+                """
                 SELECT AVG(delta)
                 FROM function_calls
                 WHERE function_name = ?
-            """, (function_name,)).fetchone()[0]
+            """,
+                (function_name,),
+            ).fetchone()[0]
             return result if result is not None else 0.0
 
 

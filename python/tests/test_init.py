@@ -6,7 +6,8 @@ def test_wrapper(capsys):
     from kronicler import decorator_example
 
     @decorator_example
-    def foo(): pass
+    def foo():
+        pass
 
     foo()
 
@@ -22,7 +23,8 @@ def test_capture():
     # KQ = KQueue()
 
     @capture
-    def foo(): pass
+    def foo():
+        pass
 
     # KQ.drop()
 
