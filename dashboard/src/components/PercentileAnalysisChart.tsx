@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { BarChart3 } from "lucide-react";
-import { Granularity } from "../types";
+import type { Granularity } from "../types";
 
 interface PercentileAnalysisChartProps {
   data: any[];
