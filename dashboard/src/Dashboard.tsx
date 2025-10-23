@@ -49,6 +49,11 @@ const Dashboard = () => {
   });
   const [showSettings, setShowSettings] = useState(false);
 
+  const truncateFunctionName = (functionName: string): string => {
+    const parts = functionName.split('/').filter(part => part.length > 0);
+    return '/' + parts.slice(0, 2).join('/');
+  };
+
   const fetchData = async () => {
     setLoading(true);
     setError(null);
@@ -65,7 +70,7 @@ const Dashboard = () => {
 
         return {
           id: row.id,
-          functionName: functionName,
+          functionName: truncateFunctionName(functionName),
           startTime: startTime,
           endTime: endTime,
           duration: duration / 1000000,
