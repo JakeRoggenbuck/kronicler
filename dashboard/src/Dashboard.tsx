@@ -47,6 +47,13 @@ const Dashboard = () => {
     }
     return [];
   });
+  const [truncateFunctionNames, setTruncateFunctionNames] = useState(() => {
+    if (typeof window !== "undefined" && window.localStorage) {
+      const saved = window.localStorage.getItem("kronicler_truncate_functions");
+      return saved === "true";
+    }
+    return true; // Default to truncated
+  });
   const [showSettings, setShowSettings] = useState(false);
 
   const truncateFunctionName = (functionName: string): string => {
@@ -70,7 +77,7 @@ const Dashboard = () => {
 
         return {
           id: row.id,
-          functionName: truncateFunctionName(functionName),
+          functionName: truncateFunctionNames ? truncateFunctionName(functionName) : functionName,
           startTime: startTime,
           endTime: endTime,
           duration: duration / 1000000,
@@ -128,6 +135,15 @@ const Dashboard = () => {
     setApiUrl(newApiUrl);
     addToUrlHistory(newApiUrl);
     setShowSettings(false);
+    fetchData();
+  };
+
+  const handleTruncateToggle = (truncate: boolean) => {
+    setTruncateFunctionNames(truncate);
+    if (typeof window !== "undefined" && window.localStorage) {
+      window.localStorage.setItem("kronicler_truncate_functions", truncate.toString());
+    }
+    // Refresh data with new truncate setting
     fetchData();
   };
 
@@ -300,6 +316,8 @@ const Dashboard = () => {
         onSave={handleSaveApiUrl}
         urlHistory={urlHistory}
         onRemoveFromHistory={removeFromUrlHistory}
+        truncateFunctionNames={truncateFunctionNames}
+        onTruncateToggle={handleTruncateToggle}
       />
 
       <StatsCards
