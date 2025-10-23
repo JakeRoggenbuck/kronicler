@@ -139,7 +139,7 @@ const SettingsModal = ({
               <div>
                 <p className="text-sm text-white">Truncate Function Names</p>
                 <p className="text-xs text-gray-400">
-                  Show only first two path segments (e.g., /api/professor)
+                  Show only first two path segments (e.g., /api/services)
                 </p>
               </div>
               <button
