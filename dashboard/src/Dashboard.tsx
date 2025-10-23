@@ -47,7 +47,19 @@ const Dashboard = () => {
     }
     return [];
   });
+  const [truncateFunctionNames, setTruncateFunctionNames] = useState(() => {
+    if (typeof window !== "undefined" && window.localStorage) {
+      const saved = window.localStorage.getItem("kronicler_truncate_functions");
+      return saved === "true";
+    }
+    return true; // Default to truncated
+  });
   const [showSettings, setShowSettings] = useState(false);
+
+  const truncateFunctionName = (functionName: string): string => {
+    const parts = functionName.split("/").filter((part) => part.length > 0);
+    return parts.slice(0, 2).join("/");
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -65,7 +77,9 @@ const Dashboard = () => {
 
         return {
           id: row.id,
-          functionName: functionName,
+          functionName: truncateFunctionNames
+            ? truncateFunctionName(functionName)
+            : functionName,
           startTime: startTime,
           endTime: endTime,
           duration: duration / 1000000,
@@ -94,25 +108,31 @@ const Dashboard = () => {
       url: url,
       timestamp: Date.now(),
     };
-    
+
     const updatedHistory = [
       newItem,
-      ...urlHistory.filter(item => item.url !== url) // Remove duplicates
+      ...urlHistory.filter((item) => item.url !== url), // Remove duplicates
     ].slice(0, 10); // Keep only last 10 URLs
-    
+
     setUrlHistory(updatedHistory);
-    
+
     if (typeof window !== "undefined" && window.localStorage) {
-      window.localStorage.setItem("kronicler_url_history", JSON.stringify({ urls: updatedHistory }));
+      window.localStorage.setItem(
+        "kronicler_url_history",
+        JSON.stringify({ urls: updatedHistory }),
+      );
     }
   };
 
   const removeFromUrlHistory = (id: string) => {
-    const updatedHistory = urlHistory.filter(item => item.id !== id);
+    const updatedHistory = urlHistory.filter((item) => item.id !== id);
     setUrlHistory(updatedHistory);
-    
+
     if (typeof window !== "undefined" && window.localStorage) {
-      window.localStorage.setItem("kronicler_url_history", JSON.stringify({ urls: updatedHistory }));
+      window.localStorage.setItem(
+        "kronicler_url_history",
+        JSON.stringify({ urls: updatedHistory }),
+      );
     }
   };
 
@@ -123,6 +143,18 @@ const Dashboard = () => {
     setApiUrl(newApiUrl);
     addToUrlHistory(newApiUrl);
     setShowSettings(false);
+    fetchData();
+  };
+
+  const handleTruncateToggle = (truncate: boolean) => {
+    setTruncateFunctionNames(truncate);
+    if (typeof window !== "undefined" && window.localStorage) {
+      window.localStorage.setItem(
+        "kronicler_truncate_functions",
+        truncate.toString(),
+      );
+    }
+    // Refresh data with new truncate setting
     fetchData();
   };
 
@@ -295,6 +327,8 @@ const Dashboard = () => {
         onSave={handleSaveApiUrl}
         urlHistory={urlHistory}
         onRemoveFromHistory={removeFromUrlHistory}
+        truncateFunctionNames={truncateFunctionNames}
+        onTruncateToggle={handleTruncateToggle}
       />
 
       <StatsCards
