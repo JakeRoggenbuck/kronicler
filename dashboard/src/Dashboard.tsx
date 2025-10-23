@@ -58,7 +58,7 @@ const Dashboard = () => {
 
   const truncateFunctionName = (functionName: string): string => {
     const parts = functionName.split("/").filter((part) => part.length > 0);
-    return "/" + parts.slice(0, 2).join("/");
+    return parts.slice(0, 2).join("/");
   };
 
   const fetchData = async () => {
