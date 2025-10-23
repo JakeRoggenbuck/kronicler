@@ -23,3 +23,13 @@ export type ViewMode = "overview" | "detailed";
 export interface DashboardProps {
   // This will be used for any props passed to the main Dashboard component
 }
+
+export interface UrlHistoryItem {
+  id: string;
+  url: string;
+  timestamp: number;
+}
+
+export interface UrlHistory {
+  urls: UrlHistoryItem[];
+}

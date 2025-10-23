@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Settings } from "lucide-react";
+import { Settings, Trash2, Clock } from "lucide-react";
+import type { UrlHistoryItem } from "../types";
 
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentApiUrl: string;
   onSave: (newApiUrl: string) => void;
+  urlHistory: UrlHistoryItem[];
+  onRemoveFromHistory: (id: string) => void;
 }
 
 const SettingsModal = ({
@@ -13,6 +16,8 @@ const SettingsModal = ({
   onClose,
   currentApiUrl,
   onSave,
+  urlHistory,
+  onRemoveFromHistory,
 }: SettingsModalProps) => {
   const [tempApiUrl, setTempApiUrl] = useState(currentApiUrl);
 
@@ -26,6 +31,23 @@ const SettingsModal = ({
     onClose();
   };
 
+  const handleUrlSelect = (url: string) => {
+    setTempApiUrl(url);
+  };
+
+  const formatTimestamp = (timestamp: number) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInHours = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60),
+    );
+
+    if (diffInHours < 1) return "Just now";
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    if (diffInHours < 168) return `${Math.floor(diffInHours / 24)}d ago`;
+    return date.toLocaleDateString();
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -34,7 +56,7 @@ const SettingsModal = ({
       onClick={onClose}
     >
       <div
-        className="bg-slate-800 rounded-xl p-6 border border-slate-700 max-w-md w-full mx-4"
+        className="bg-slate-800 rounded-xl p-6 border border-slate-700 max-w-lg w-full mx-4"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
@@ -67,6 +89,43 @@ const SettingsModal = ({
               endpoint URL here (e.g., http://localhost:8000/logs)
             </p>
           </div>
+
+          {urlHistory.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium text-gray-400 mb-2">
+                <Clock className="w-4 h-4 inline mr-1" />
+                URL History
+              </label>
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {urlHistory.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between bg-slate-700 rounded-lg px-3 py-2 border border-slate-600 hover:border-slate-500 transition-colors"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <button
+                        onClick={() => handleUrlSelect(item.url)}
+                        className="text-left text-sm text-white hover:text-green-400 transition-colors truncate w-full"
+                        title={item.url}
+                      >
+                        {item.url}
+                      </button>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {formatTimestamp(item.timestamp)}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => onRemoveFromHistory(item.id)}
+                      className="ml-2 p-1 text-gray-400 hover:text-red-400 transition-colors"
+                      title="Remove from history"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="flex space-x-3 pt-2">
             <button

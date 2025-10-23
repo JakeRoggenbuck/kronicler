@@ -7,6 +7,7 @@ import type {
   ViewMode,
   HealthStatus,
   FunctionStats,
+  UrlHistoryItem,
 } from "./types";
 import SettingsModal from "./components/SettingsModal";
 import DashboardHeader from "./components/DashboardHeader";
@@ -31,6 +32,20 @@ const Dashboard = () => {
       return saved || "https://api.algoboard.org/logs";
     }
     return "https://api.algoboard.org/logs";
+  });
+  const [urlHistory, setUrlHistory] = useState<UrlHistoryItem[]>(() => {
+    if (typeof window !== "undefined" && window.localStorage) {
+      const saved = window.localStorage.getItem("kronicler_url_history");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          return parsed.urls || [];
+        } catch {
+          return [];
+        }
+      }
+    }
+    return [];
   });
   const [showSettings, setShowSettings] = useState(false);
 
@@ -73,11 +88,40 @@ const Dashboard = () => {
     }
   };
 
+  const addToUrlHistory = (url: string) => {
+    const newItem: UrlHistoryItem = {
+      id: Date.now().toString(),
+      url: url,
+      timestamp: Date.now(),
+    };
+    
+    const updatedHistory = [
+      newItem,
+      ...urlHistory.filter(item => item.url !== url) // Remove duplicates
+    ].slice(0, 10); // Keep only last 10 URLs
+    
+    setUrlHistory(updatedHistory);
+    
+    if (typeof window !== "undefined" && window.localStorage) {
+      window.localStorage.setItem("kronicler_url_history", JSON.stringify({ urls: updatedHistory }));
+    }
+  };
+
+  const removeFromUrlHistory = (id: string) => {
+    const updatedHistory = urlHistory.filter(item => item.id !== id);
+    setUrlHistory(updatedHistory);
+    
+    if (typeof window !== "undefined" && window.localStorage) {
+      window.localStorage.setItem("kronicler_url_history", JSON.stringify({ urls: updatedHistory }));
+    }
+  };
+
   const handleSaveApiUrl = (newApiUrl: string) => {
     if (typeof window !== "undefined" && window.localStorage) {
       window.localStorage.setItem("kronicler_api_url", newApiUrl);
     }
     setApiUrl(newApiUrl);
+    addToUrlHistory(newApiUrl);
     setShowSettings(false);
     fetchData();
   };
@@ -249,6 +293,8 @@ const Dashboard = () => {
         onClose={() => setShowSettings(false)}
         currentApiUrl={apiUrl}
         onSave={handleSaveApiUrl}
+        urlHistory={urlHistory}
+        onRemoveFromHistory={removeFromUrlHistory}
       />
 
       <StatsCards
