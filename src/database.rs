@@ -7,7 +7,7 @@ use super::queue::KQueue;
 use super::row::{create_function_name, Epoch, FieldType, Row};
 use log::{debug, info, warn};
 use pyo3::prelude::*;
-use pyo3::types::PyDict;
+use pyo3::types::PyList;
 use std::collections::HashSet;
 use std::collections::VecDeque;
 use std::fs;
@@ -306,14 +306,14 @@ impl Database {
         all
     }
 
-    pub fn fetch_all_as_dict<'py>(&mut self, py: Python<'py>) -> Vec<Bound<'py, PyDict>> {
-        let a = self.fetch_all().into_iter().map(|x| x.__dict__(py));
-        let rows_dict: Vec<Bound<'py, PyDict>> = a.collect();
+    pub fn fetch_all_as_list<'py>(&mut self, py: Python<'py>) -> Vec<Bound<'py, PyList>> {
+        let a = self.fetch_all().into_iter().map(|x| x.to_list(py));
+        let rows_dict: Vec<Bound<'py, PyList>> = a.collect();
         rows_dict
     }
 
-    pub fn logs<'py>(&mut self, py: Python<'py>) -> Vec<Bound<'py, PyDict>> {
-        self.fetch_all_as_dict(py)
+    pub fn logs<'py>(&mut self, py: Python<'py>) -> Vec<Bound<'py, PyList>> {
+        self.fetch_all_as_list(py)
     }
 
     pub fn get_function_names(&mut self) -> HashSet<String> {

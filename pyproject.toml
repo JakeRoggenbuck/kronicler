@@ -12,7 +12,7 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
-    "starlette",
+    "starlette<0.48.0,>=0.40.0",
 ]
 authors = [
   {name = "Jake Roggenbuck", email = "jakeroggenbuck2@gmail.com"},
