@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Settings, Trash2, Clock } from "lucide-react";
 import type { UrlHistoryItem } from "../types";
 
@@ -11,6 +11,8 @@ interface SettingsModalProps {
   onRemoveFromHistory: (id: string) => void;
   truncateFunctionNames: boolean;
   onTruncateToggle: (truncate: boolean) => void;
+  minCallThreshold: number;
+  onMinCallThresholdChange: (threshold: number) => void;
 }
 
 const SettingsModal = ({
@@ -22,16 +24,33 @@ const SettingsModal = ({
   onRemoveFromHistory,
   truncateFunctionNames,
   onTruncateToggle,
+  minCallThreshold,
+  onMinCallThresholdChange,
 }: SettingsModalProps) => {
   const [tempApiUrl, setTempApiUrl] = useState(currentApiUrl);
+  const [tempMinCallThreshold, setTempMinCallThreshold] = useState(
+    minCallThreshold.toString(),
+  );
+
+  useEffect(() => {
+    if (isOpen) {
+      setTempApiUrl(currentApiUrl);
+      setTempMinCallThreshold(minCallThreshold.toString());
+    }
+  }, [isOpen, currentApiUrl, minCallThreshold]);
 
   const handleSave = () => {
     onSave(tempApiUrl);
+    const threshold = parseInt(tempMinCallThreshold, 10);
+    if (!isNaN(threshold) && threshold >= 0) {
+      onMinCallThresholdChange(threshold);
+    }
     onClose();
   };
 
   const handleCancel = () => {
     setTempApiUrl(currentApiUrl);
+    setTempMinCallThreshold(minCallThreshold.toString());
     onClose();
   };
 
@@ -135,25 +154,47 @@ const SettingsModal = ({
             <label className="block text-sm font-medium text-gray-400 mb-3">
               Display Options
             </label>
-            <div className="flex items-center justify-between bg-slate-700 rounded-lg px-3 py-2 border border-slate-600">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between bg-slate-700 rounded-lg px-3 py-2 border border-slate-600">
+                <div>
+                  <p className="text-sm text-white">Truncate Function Names</p>
+                  <p className="text-xs text-gray-400">
+                    Show only first two path segments (e.g., /api/services)
+                  </p>
+                </div>
+                <button
+                  onClick={() => onTruncateToggle(!truncateFunctionNames)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    truncateFunctionNames ? "bg-green-500" : "bg-slate-600"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      truncateFunctionNames ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+              </div>
               <div>
-                <p className="text-sm text-white">Truncate Function Names</p>
-                <p className="text-xs text-gray-400">
-                  Show only first two path segments (e.g., /api/services)
+                <label className="block text-sm font-medium text-gray-400 mb-2">
+                  Minimum Call Threshold
+                </label>
+                <input
+                  type="number"
+                  value={tempMinCallThreshold}
+                  onChange={(e) => setTempMinCallThreshold(e.target.value)}
+                  min="0"
+                  className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-green-500 focus:outline-none"
+                  placeholder="1"
+                />
+                <p className="text-xs text-gray-500 mt-2">
+                  Functions with fewer calls than this threshold will be hidden
+                  from the top bar and bar chart
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Only functions with at least this many calls will be displayed
                 </p>
               </div>
-              <button
-                onClick={() => onTruncateToggle(!truncateFunctionNames)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  truncateFunctionNames ? "bg-green-500" : "bg-slate-600"
-                }`}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    truncateFunctionNames ? "translate-x-6" : "translate-x-1"
-                  }`}
-                />
-              </button>
             </div>
           </div>
 
