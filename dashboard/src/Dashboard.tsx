@@ -69,62 +69,66 @@ const Dashboard = () => {
       if (!response.ok) throw new Error("Failed to fetch data");
       const data = await response.json();
 
-      const transformed = data.map((row: any) => {
-        let functionName: string;
-        let startTime: number;
-        let delta: number;
-        let rowId: number;
+      const transformed = data
+        .map((row: any) => {
+          let functionName: string;
+          let startTime: number;
+          let delta: number;
+          let rowId: number;
 
-        // Check if it's an array format: [id, name, start, delta]
-        if (Array.isArray(row)) {
-          if (row.length < 4) {
-            console.warn("Invalid array row format:", row);
+          // Check if it's an array format: [id, name, start, delta]
+          if (Array.isArray(row)) {
+            if (row.length < 4) {
+              console.warn("Invalid array row format:", row);
+              return null;
+            }
+            rowId = row[0];
+            functionName = row[1] || "";
+            startTime = row[2] || 0;
+            delta = row[3] || 0;
+          }
+          // Check if it's an object format with fields
+          else if (row.fields && Array.isArray(row.fields)) {
+            rowId = row.id;
+
+            // New format: Name field, then start (Epoch), then delta (Epoch)
+            // Find Name field and Epoch fields
+            const nameField = row.fields.find((f: any) => f?.type === "Name");
+            const epochFields = row.fields.filter(
+              (f: any) => f?.type === "Epoch",
+            );
+
+            if (epochFields.length < 2) {
+              console.warn("Insufficient Epoch fields in row:", row);
+              return null;
+            }
+
+            functionName = nameField?.value || row.fields[0]?.value || "";
+            // First Epoch field is start time, last Epoch field is delta (duration)
+            startTime = epochFields[0]?.value || 0;
+            delta = epochFields[epochFields.length - 1]?.value || 0;
+          }
+          // Invalid format
+          else {
+            console.warn("Invalid row format:", row);
             return null;
           }
-          rowId = row[0];
-          functionName = row[1] || "";
-          startTime = row[2] || 0;
-          delta = row[3] || 0;
-        } 
-        // Check if it's an object format with fields
-        else if (row.fields && Array.isArray(row.fields)) {
-          rowId = row.id;
-          
-          // New format: Name field, then start (Epoch), then delta (Epoch)
-          // Find Name field and Epoch fields
-          const nameField = row.fields.find((f: any) => f?.type === "Name");
-          const epochFields = row.fields.filter((f: any) => f?.type === "Epoch");
-          
-          if (epochFields.length < 2) {
-            console.warn("Insufficient Epoch fields in row:", row);
-            return null;
-          }
-          
-          functionName = nameField?.value || row.fields[0]?.value || "";
-          // First Epoch field is start time, last Epoch field is delta (duration)
-          startTime = epochFields[0]?.value || 0;
-          delta = epochFields[epochFields.length - 1]?.value || 0;
-        } 
-        // Invalid format
-        else {
-          console.warn("Invalid row format:", row);
-          return null;
-        }
-        
-        // Compute endTime from startTime + delta
-        const endTime = startTime + delta;
 
-        return {
-          id: rowId,
-          functionName: truncateFunctionNames
-            ? truncateFunctionName(functionName)
-            : functionName,
-          startTime: startTime,
-          endTime: endTime,
-          duration: delta / 1000000, // Convert nanoseconds to milliseconds
-          date: new Date(startTime / 1000000), // Convert nanoseconds to milliseconds for Date
-        };
-      }).filter((row: any) => row !== null); // Filter out null entries
+          // Compute endTime from startTime + delta
+          const endTime = startTime + delta;
+
+          return {
+            id: rowId,
+            functionName: truncateFunctionNames
+              ? truncateFunctionName(functionName)
+              : functionName,
+            startTime: startTime,
+            endTime: endTime,
+            duration: delta / 1000000, // Convert nanoseconds to milliseconds
+            date: new Date(startTime / 1000000), // Convert nanoseconds to milliseconds for Date
+          };
+        })
+        .filter((row: any) => row !== null); // Filter out null entries
 
       setRawData(transformed);
       if (!selectedFunction && transformed.length > 0) {
