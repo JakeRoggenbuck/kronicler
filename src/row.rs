@@ -1,5 +1,4 @@
 use pyo3::prelude::*;
-use pyo3::types::PyDict;
 use serde::{Deserialize, Serialize};
 use serde_big_array::BigArray;
 
@@ -41,29 +40,6 @@ impl FieldType {
 
             FieldType::Epoch(e) => e.to_string(),
         }
-    }
-
-    fn __dict__<'py>(&self, py: Python<'py>) -> Bound<'py, PyDict> {
-        let dict = PyDict::new(py);
-
-        match self {
-            FieldType::Name(arr) => {
-                let name: String = arr
-                    .iter()
-                    .take_while(|&&c| c != 0)
-                    .map(|&c| c as char)
-                    .collect();
-
-                dict.set_item("type", "Name").unwrap();
-                dict.set_item("value", name).unwrap();
-            }
-            FieldType::Epoch(e) => {
-                dict.set_item("type", "Epoch").unwrap();
-                dict.set_item("value", *e).unwrap();
-            }
-        }
-
-        dict
     }
 }
 
@@ -149,16 +125,32 @@ impl Row {
 
 #[pymethods]
 impl Row {
-    pub fn __dict__<'py>(&self, py: Python<'py>) -> Bound<'py, PyDict> {
-        let dict = PyDict::new(py);
+    pub fn to_list<'py>(&self, py: Python<'py>) -> Bound<'py, pyo3::types::PyList> {
+        let list = pyo3::types::PyList::empty(py);
+        list.append(self.id).unwrap();
 
-        let field_dicts: Vec<Bound<'py, PyDict>> =
-            self.fields.iter().map(|f| f.__dict__(py)).collect();
+        let mut epoch_count = 0;
+        for field in &self.fields {
+            match field {
+                FieldType::Name(arr) => {
+                    let name: String = arr
+                        .iter()
+                        .take_while(|&&c| c != 0)
+                        .map(|&c| c as char)
+                        .collect();
+                    list.append(name).unwrap();
+                }
+                FieldType::Epoch(e) => {
+                    epoch_count += 1;
+                    if epoch_count != 2 {
+                        // Skip the 2nd epoch (end time)
+                        list.append(*e).unwrap();
+                    }
+                }
+            }
+        }
 
-        dict.set_item("id", self.id).unwrap();
-        dict.set_item("fields", field_dicts).unwrap();
-
-        dict
+        list
     }
 
     fn __str__(&self) -> String {
