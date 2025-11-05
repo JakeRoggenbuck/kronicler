@@ -54,6 +54,13 @@ const Dashboard = () => {
     }
     return true; // Default to truncated
   });
+  const [minCallThreshold, setMinCallThreshold] = useState(() => {
+    if (typeof window !== "undefined" && window.localStorage) {
+      const saved = window.localStorage.getItem("kronicler_min_call_threshold");
+      return saved ? parseInt(saved, 10) : 1;
+    }
+    return 1;
+  });
   const [showSettings, setShowSettings] = useState(false);
 
   const truncateFunctionName = (functionName: string): string => {
@@ -158,14 +165,36 @@ const Dashboard = () => {
     fetchData();
   };
 
+  const handleMinCallThresholdChange = (threshold: number) => {
+    if (typeof window !== "undefined" && window.localStorage) {
+      window.localStorage.setItem(
+        "kronicler_min_call_threshold",
+        threshold.toString(),
+      );
+    }
+    setMinCallThreshold(threshold);
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
 
-  const functions = useMemo(() => {
+  const allFunctions = useMemo(() => {
     const uniqueFuncs = [...new Set(rawData.map((d) => d.functionName))];
     return uniqueFuncs.sort();
   }, [rawData]);
+
+  const functions = useMemo(() => {
+    if (minCallThreshold <= 0) {
+      return allFunctions;
+    }
+    return allFunctions.filter((funcName) => {
+      const callCount = rawData.filter(
+        (d) => d.functionName === funcName,
+      ).length;
+      return callCount >= minCallThreshold;
+    });
+  }, [allFunctions, rawData, minCallThreshold]);
 
   const processedData = useMemo(() => {
     if (!rawData.length) return [];
@@ -329,6 +358,8 @@ const Dashboard = () => {
         onRemoveFromHistory={removeFromUrlHistory}
         truncateFunctionNames={truncateFunctionNames}
         onTruncateToggle={handleTruncateToggle}
+        minCallThreshold={minCallThreshold}
+        onMinCallThresholdChange={handleMinCallThresholdChange}
       />
 
       <StatsCards
