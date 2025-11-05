@@ -454,9 +454,9 @@ took `2.1696090698242188e-05` seconds but the ground truth written in Python
 
 ## Analytics Web Dashboard
 
-The Analytics Web Dashboard is still under construction. This feature will let you remotely view the logs collected from Kronicler.
+The analytics dashboard lets you remotely view the performance of your server from [usekronicler.com](https://usekronicler.com/).
 
-<img width="1904" height="944" alt="image" src="https://github.com/user-attachments/assets/cc2b7b32-cbde-4a05-a630-a4cc4ab83444" />
+<img width="1904" height="944" alt="image" src="https://github.com/user-attachments/assets/287e786e-2369-4cf2-96f0-54d0795270c4" />
 
 ## Analytics CLI
 
