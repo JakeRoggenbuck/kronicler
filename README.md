@@ -109,13 +109,10 @@ def foo():
 
 #### Using Kronicler with FastAPI
 
-With just two lines of code, you can add Kronicler to your [FastAPI](https://fastapi.tiangolo.com) server.
-
-For FastAPI, to capture each route, you can use the `KroniclerMiddleware` that will be included in `v0.1.2`. This allows you to capture every route that gets called.
+With just two lines of code, you can add Kronicler to your [FastAPI](https://fastapi.tiangolo.com) server. The `KroniclerMiddleware` automatically captures performance data for all your routes.
 
 ```python
 from fastapi import FastAPI
-import uvicorn
 import kronicler
 
 app = FastAPI()
@@ -127,54 +124,47 @@ DB = kronicler.Database(sync_consume=True)
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
+    return {"status": "success"}
 
 
 @app.get("/logs")
 def read_logs():
     return DB.logs()
-
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
 ```
 
-If you want to capture functions manually, you can still do that with `@kronicler.capture` as normal. This is helpful if you want to benchmark functions that are not routes.
+That's it! The middleware automatically captures the performance of every route without needing to manually decorate functions.
+
+**Optional: Manual Function Capture**
+
+If you want to capture functions manually (e.g., helper functions that aren't routes), you can still use `@kronicler.capture` as normal:
 
 ```python
 from fastapi import FastAPI
-import uvicorn
 import kronicler
 
 app = FastAPI()
 app.add_middleware(kronicler.KroniclerMiddleware)
 
-# Used only for the /logs route
 DB = kronicler.Database(sync_consume=True)
 
 
-# You need to wrap helper functions
+# Manually capture helper functions
 @kronicler.capture
-def foo():
-    return {"Hello": "World"}
+def process_data():
+    return {"status": "success"}
 
 
-# You cannot wrap routes right now
 @app.get("/")
 def read_root():
-    return foo()
+    return process_data()
 
-# Return the logs to the user (optional)
+
 @app.get("/logs")
 def read_logs():
     return DB.logs()
-
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
 ```
 
-Code from [tests/fastapi-test/main.py](https://github.com/JakeRoggenbuck/kronicler/blob/main/tests/fastapi-test/main.py).
+Code from [tests/fastapi-test/main.py](https://github.com/JakeRoggenbuck/kronicler/blob/main/tests/fastapi-test/main.py) and [tests/middleware-test/main.py](https://github.com/JakeRoggenbuck/kronicler/blob/main/tests/python-integration-tests/middleware-test/main.py).
 
 ## Using Kronicler manually
 
