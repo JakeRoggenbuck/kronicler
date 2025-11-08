@@ -109,7 +109,7 @@ def foo():
 
 #### Using Kronicler with FastAPI
 
-With just one line of code, you can add Kronicler to your [FastAPI](https://fastapi.tiangolo.com) server. The `KroniclerMiddleware` automatically captures performance data for all your routes.
+With just two lines of code, you can add Kronicler to your [FastAPI](https://fastapi.tiangolo.com) server. The `KroniclerMiddleware` automatically captures performance data for all your routes.
 
 ```python
 from fastapi import FastAPI
