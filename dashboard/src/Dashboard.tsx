@@ -68,11 +68,13 @@ const Dashboard = () => {
     return parts.slice(0, 2).join("/");
   };
 
-  const fetchData = async () => {
+  const fetchData = async (url?: string) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(apiUrl);
+      // Ensure url is a string, not an object (e.g., from event handlers)
+      const urlToFetch = (typeof url === "string" ? url : apiUrl);
+      const response = await fetch(urlToFetch);
       if (!response.ok) throw new Error("Failed to fetch data");
       const data = await response.json();
 
@@ -193,7 +195,7 @@ const Dashboard = () => {
     setApiUrl(newApiUrl);
     addToUrlHistory(newApiUrl);
     setShowSettings(false);
-    fetchData();
+    fetchData(newApiUrl);
   };
 
   const handleTruncateToggle = (truncate: boolean) => {
@@ -381,7 +383,7 @@ const Dashboard = () => {
       <DashboardHeader
         apiUrl={apiUrl}
         rawDataLength={rawData.length}
-        onRefresh={fetchData}
+        onRefresh={() => fetchData()}
         onSettingsClick={() => setShowSettings(!showSettings)}
         granularity={granularity}
         onGranularityChange={setGranularity}
