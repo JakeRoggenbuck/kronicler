@@ -120,6 +120,10 @@ const App = () => {
         {/* FastAPI Example */}
         <div className="mb-16">
           <h2 className="text-2xl font-semibold mb-6">FastAPI Example</h2>
+          <p className="text-gray-400 mb-4 text-sm">
+            Add Kronicler to your FastAPI server with just one line. The
+            middleware automatically captures performance for all routes.
+          </p>
           <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
             <pre className="text-sm font-mono overflow-x-auto">
               <code>
@@ -132,26 +136,22 @@ const App = () => {
                 {"\n\n"}
                 app = FastAPI()
                 {"\n"}
+                app.add_middleware(kronicler.KroniclerMiddleware)
+                {"\n\n"}
+                <span className="text-gray-500"># Used only for the /logs route</span>
+                {"\n"}
                 DB = kronicler.Database(sync_consume=
                 <span className="text-orange-400">True</span>){"\n\n"}
-                <span className="text-gray-500">@kronicler.capture</span>
-                {"\n"}
-                <span className="text-purple-400">def</span>{" "}
-                <span className="text-yellow-400">process_data</span>():
-                {"\n"}
-                {"    "}
-                <span className="text-purple-400">return</span> {"{"}
-                <span className="text-green-400">"status"</span>:{" "}
-                <span className="text-green-400">"success"</span>
-                {"}"}
-                {"\n\n"}
                 <span className="text-gray-500">@app.get("/")</span>
                 {"\n"}
                 <span className="text-purple-400">def</span>{" "}
                 <span className="text-yellow-400">read_root</span>():
                 {"\n"}
                 {"    "}
-                <span className="text-purple-400">return</span> process_data()
+                <span className="text-purple-400">return</span> {"{"}
+                <span className="text-green-400">"status"</span>:{" "}
+                <span className="text-green-400">"success"</span>
+                {"}"}
                 {"\n\n"}
                 <span className="text-gray-500">@app.get("/logs")</span>
                 {"\n"}
