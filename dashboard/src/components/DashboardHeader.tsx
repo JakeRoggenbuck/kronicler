@@ -38,26 +38,27 @@ const DashboardHeader = ({
   return (
     <div className="mb-8">
       {/* Row 1: Title and Info */}
-      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+      <div className="flex items-center mb-4 flex-wrap gap-3">
         <div className="flex items-center space-x-3">
           <Activity className="w-8 h-8 text-green-500 flex-shrink-0" />
           <div>
             <h1 className="text-3xl font-bold">Kronicler</h1>
-            <div className="flex items-center gap-4 mt-1 text-sm text-gray-400">
+            <div className="flex items-center gap-4 mt-1 text-sm text-gray-400 flex-wrap">
               <span>Python Function Performance Monitor</span>
               <span className="text-gray-600">•</span>
               <span>
                 <span className="text-gray-500">Total logs:</span>{" "}
                 <span className="text-white font-medium">{rawDataLength.toLocaleString()}</span>
               </span>
+              <span className="text-gray-600">•</span>
+              <div className="flex items-center gap-2">
+                <span className="text-gray-400">API:</span>
+                <code className="bg-slate-800 px-2 py-1 rounded text-green-400 border border-slate-700 text-xs">
+                  {apiUrl}
+                </code>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2 text-sm">
-          <span className="text-gray-400">API:</span>
-          <code className="bg-slate-800 px-2 py-1 rounded text-green-400 border border-slate-700 text-xs">
-            {apiUrl}
-          </code>
         </div>
       </div>
 
@@ -100,22 +101,20 @@ const DashboardHeader = ({
             <option value="detailed">Detailed Analysis</option>
           </select>
         </div>
-        <div className="flex items-center gap-2 ml-auto">
-          <button
-            onClick={onSettingsClick}
-            className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
-            title="Settings"
-          >
-            <Settings className="w-5 h-5" />
-          </button>
-          <button
-            onClick={onRefresh}
-            className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
-            title="Refresh"
-          >
-            <RefreshCw className="w-5 h-5" />
-          </button>
-        </div>
+        <button
+          onClick={onSettingsClick}
+          className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+          title="Settings"
+        >
+          <Settings className="w-5 h-5" />
+        </button>
+        <button
+          onClick={onRefresh}
+          className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
+          title="Refresh"
+        >
+          <RefreshCw className="w-5 h-5" />
+        </button>
       </div>
 
       {/* Error Message */}
