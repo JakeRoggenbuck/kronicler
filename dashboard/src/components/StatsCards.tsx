@@ -64,7 +64,8 @@ const StatsCards = ({
           ).length;
 
           // Check if function is enabled (default to enabled if not in set)
-          const isEnabled = enabledFunctions.size === 0 || enabledFunctions.has(funcName);
+          const isEnabled =
+            enabledFunctions.size === 0 || enabledFunctions.has(funcName);
 
           return (
             <div
@@ -84,7 +85,9 @@ const StatsCards = ({
                   }}
                   className="flex items-center space-x-2 hover:opacity-80 transition-opacity cursor-pointer"
                 >
-                  <Clock className={`w-4 h-4 ${isEnabled ? "text-green-500" : "text-gray-300"}`} />
+                  <Clock
+                    className={`w-4 h-4 ${isEnabled ? "text-green-500" : "text-gray-300"}`}
+                  />
                 </button>
                 <div
                   className={`w-2 h-2 rounded-full ${health === "healthy" ? "bg-green-500" : health === "warning" ? "bg-yellow-500" : "bg-red-500"} ${!isEnabled ? "opacity-50" : ""}`}
@@ -94,25 +97,33 @@ const StatsCards = ({
                 className="text-center flex-1 flex flex-col justify-center"
                 onClick={() => onFunctionSelect(funcName)}
               >
-                <h3 className={`text-sm font-semibold mb-1 truncate ${!isEnabled ? "text-gray-500" : ""}`}>
+                <h3
+                  className={`text-sm font-semibold mb-1 truncate ${!isEnabled ? "text-gray-500" : ""}`}
+                >
                   {funcName}
                 </h3>
                 <div className="space-y-1">
                   <div className="flex justify-center items-center space-x-2">
                     <span className="text-gray-400 text-xs">Calls</span>
-                    <span className={`text-sm font-bold ${isEnabled ? "text-blue-500" : "text-gray-500"}`}>
+                    <span
+                      className={`text-sm font-bold ${isEnabled ? "text-blue-500" : "text-gray-500"}`}
+                    >
                       {callCount.toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-center items-center space-x-2">
                     <span className="text-gray-400 text-xs">Mean</span>
-                    <span className={`text-sm font-medium ${isEnabled ? "text-white" : "text-gray-500"}`}>
+                    <span
+                      className={`text-sm font-medium ${isEnabled ? "text-white" : "text-gray-500"}`}
+                    >
                       {stats.mean}ms
                     </span>
                   </div>
                   <div className="flex justify-center items-center space-x-2">
                     <span className="text-gray-400 text-xs">P95</span>
-                    <span className={`${isEnabled ? healthColor : "text-gray-500"} text-sm font-medium`}>
+                    <span
+                      className={`${isEnabled ? healthColor : "text-gray-500"} text-sm font-medium`}
+                    >
                       {stats.p95}ms
                     </span>
                   </div>

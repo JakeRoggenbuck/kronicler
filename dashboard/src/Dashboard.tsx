@@ -76,7 +76,7 @@ const Dashboard = () => {
     setError(null);
     try {
       // Ensure url is a string, not an object (e.g., from event handlers)
-      const urlToFetch = (typeof url === "string" ? url : apiUrl);
+      const urlToFetch = typeof url === "string" ? url : apiUrl;
       const response = await fetch(urlToFetch);
       if (!response.ok) throw new Error("Failed to fetch data");
       const data = await response.json();

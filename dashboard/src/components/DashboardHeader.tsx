@@ -48,7 +48,9 @@ const DashboardHeader = ({
               <span className="text-gray-600">•</span>
               <span>
                 <span className="text-gray-500">Total logs:</span>{" "}
-                <span className="text-white font-medium">{rawDataLength.toLocaleString()}</span>
+                <span className="text-white font-medium">
+                  {rawDataLength.toLocaleString()}
+                </span>
               </span>
               <span className="text-gray-600">•</span>
               <div className="flex items-center gap-2">
@@ -68,9 +70,7 @@ const DashboardHeader = ({
           <BarChart3 className="w-4 h-4 text-gray-400" />
           <select
             value={granularity}
-            onChange={(e) =>
-              onGranularityChange(e.target.value as Granularity)
-            }
+            onChange={(e) => onGranularityChange(e.target.value as Granularity)}
             className="bg-transparent text-white text-sm border-none outline-none cursor-pointer"
           >
             <option value="minute">By Minute</option>
