@@ -37,8 +37,8 @@ const DashboardHeader = ({
 }: DashboardHeaderProps) => {
   return (
     <div className="mb-8">
-      {/* Main Header Row */}
-      <div className="flex items-start justify-between mb-4">
+      {/* Row 1: Title and Info */}
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div className="flex items-center space-x-3">
           <Activity className="w-8 h-8 text-green-500 flex-shrink-0" />
           <div>
@@ -53,7 +53,54 @@ const DashboardHeader = ({
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-gray-400">API:</span>
+          <code className="bg-slate-800 px-2 py-1 rounded text-green-400 border border-slate-700 text-xs">
+            {apiUrl}
+          </code>
+        </div>
+      </div>
+
+      {/* Row 2: Filters, Settings, and Refresh */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2 bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-700">
+          <BarChart3 className="w-4 h-4 text-gray-400" />
+          <select
+            value={granularity}
+            onChange={(e) =>
+              onGranularityChange(e.target.value as Granularity)
+            }
+            className="bg-transparent text-white text-sm border-none outline-none cursor-pointer"
+          >
+            <option value="minute">By Minute</option>
+            <option value="hour">By Hour</option>
+            <option value="day">By Day</option>
+          </select>
+        </div>
+        <div className="flex items-center gap-2 bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-700">
+          <Calendar className="w-4 h-4 text-gray-400" />
+          <select
+            value={timeRange}
+            onChange={(e) => onTimeRangeChange(e.target.value as TimeRange)}
+            className="bg-transparent text-white text-sm border-none outline-none cursor-pointer"
+          >
+            <option value="7d">Last 7 days</option>
+            <option value="30d">Last 30 days</option>
+            <option value="60d">Last 60 days</option>
+          </select>
+        </div>
+        <div className="flex items-center gap-2 bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-700">
+          <Filter className="w-4 h-4 text-gray-400" />
+          <select
+            value={viewMode}
+            onChange={(e) => onViewModeChange(e.target.value as ViewMode)}
+            className="bg-transparent text-white text-sm border-none outline-none cursor-pointer"
+          >
+            <option value="overview">Overview</option>
+            <option value="detailed">Detailed Analysis</option>
+          </select>
+        </div>
+        <div className="flex items-center gap-2 ml-auto">
           <button
             onClick={onSettingsClick}
             className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
@@ -68,55 +115,6 @@ const DashboardHeader = ({
           >
             <RefreshCw className="w-5 h-5" />
           </button>
-        </div>
-      </div>
-
-      {/* Controls and Info Row */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-2 bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-700">
-            <BarChart3 className="w-4 h-4 text-gray-400" />
-            <select
-              value={granularity}
-              onChange={(e) =>
-                onGranularityChange(e.target.value as Granularity)
-              }
-              className="bg-transparent text-white text-sm border-none outline-none cursor-pointer"
-            >
-              <option value="minute">By Minute</option>
-              <option value="hour">By Hour</option>
-              <option value="day">By Day</option>
-            </select>
-          </div>
-          <div className="flex items-center gap-2 bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-700">
-            <Calendar className="w-4 h-4 text-gray-400" />
-            <select
-              value={timeRange}
-              onChange={(e) => onTimeRangeChange(e.target.value as TimeRange)}
-              className="bg-transparent text-white text-sm border-none outline-none cursor-pointer"
-            >
-              <option value="7d">Last 7 days</option>
-              <option value="30d">Last 30 days</option>
-              <option value="60d">Last 60 days</option>
-            </select>
-          </div>
-          <div className="flex items-center gap-2 bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-700">
-            <Filter className="w-4 h-4 text-gray-400" />
-            <select
-              value={viewMode}
-              onChange={(e) => onViewModeChange(e.target.value as ViewMode)}
-              className="bg-transparent text-white text-sm border-none outline-none cursor-pointer"
-            >
-              <option value="overview">Overview</option>
-              <option value="detailed">Detailed Analysis</option>
-            </select>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 text-sm">
-          <span className="text-gray-400">API:</span>
-          <code className="bg-slate-800 px-2 py-1 rounded text-green-400 border border-slate-700 text-xs">
-            {apiUrl}
-          </code>
         </div>
       </div>
 
