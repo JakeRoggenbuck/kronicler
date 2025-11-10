@@ -76,19 +76,16 @@ const StatsCards = ({
               }`}
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Clock className={`w-4 h-4 ${isEnabled ? "text-green-500" : "text-gray-500"}`} />
-                  <input
-                    type="checkbox"
-                    checked={isEnabled}
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      onToggleFunctionVisibility(funcName);
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                    className="w-4 h-4 rounded border-slate-600 bg-slate-700 text-green-500 focus:ring-green-500 focus:ring-2 cursor-pointer"
-                  />
-                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleFunctionVisibility(funcName);
+                  }}
+                  className="flex items-center space-x-2 hover:opacity-80 transition-opacity cursor-pointer"
+                >
+                  <Clock className={`w-4 h-4 ${isEnabled ? "text-green-500" : "text-gray-300"}`} />
+                </button>
                 <div
                   className={`w-2 h-2 rounded-full ${health === "healthy" ? "bg-green-500" : health === "warning" ? "bg-yellow-500" : "bg-red-500"} ${!isEnabled ? "opacity-50" : ""}`}
                 ></div>
