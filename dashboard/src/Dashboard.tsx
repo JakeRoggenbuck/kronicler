@@ -62,6 +62,9 @@ const Dashboard = () => {
     return 1;
   });
   const [showSettings, setShowSettings] = useState(false);
+  const [enabledFunctions, setEnabledFunctions] = useState<Set<string>>(
+    () => new Set(),
+  );
 
   const truncateFunctionName = (functionName: string): string => {
     const parts = functionName.split("/").filter((part) => part.length > 0);
@@ -229,7 +232,8 @@ const Dashboard = () => {
     return uniqueFuncs.sort();
   }, [rawData]);
 
-  const functions = useMemo(() => {
+  // Functions that pass the minimum call threshold (shown in StatsCards for toggling)
+  const functionsAfterThreshold = useMemo(() => {
     if (minCallThreshold <= 0) {
       return allFunctions;
     }
@@ -240,6 +244,52 @@ const Dashboard = () => {
       return callCount >= minCallThreshold;
     });
   }, [allFunctions, rawData, minCallThreshold]);
+
+  // Functions that are both above threshold AND enabled (shown in graphs)
+  const functions = useMemo(() => {
+    return functionsAfterThreshold.filter((funcName) => {
+      // If function is not in enabledFunctions set, it's disabled
+      // If enabledFunctions is empty, all are enabled by default
+      return enabledFunctions.size === 0 || enabledFunctions.has(funcName);
+    });
+  }, [functionsAfterThreshold, enabledFunctions]);
+
+  // Initialize enabled functions when allFunctions changes
+  useEffect(() => {
+    setEnabledFunctions((prev) => {
+      const newSet = new Set(prev);
+      // If this is the first load (prev is empty), add all functions
+      if (prev.size === 0) {
+        allFunctions.forEach((func) => newSet.add(func));
+      } else {
+        // Add any new functions that appear (they should be enabled by default)
+        allFunctions.forEach((func) => {
+          if (!newSet.has(func)) {
+            newSet.add(func);
+          }
+        });
+        // Remove functions that no longer exist
+        newSet.forEach((func) => {
+          if (!allFunctions.includes(func)) {
+            newSet.delete(func);
+          }
+        });
+      }
+      return newSet;
+    });
+  }, [allFunctions]);
+
+  const toggleFunctionVisibility = (funcName: string) => {
+    setEnabledFunctions((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(funcName)) {
+        newSet.delete(funcName);
+      } else {
+        newSet.add(funcName);
+      }
+      return newSet;
+    });
+  };
 
   const processedData = useMemo(() => {
     if (!rawData.length) return [];
@@ -409,8 +459,10 @@ const Dashboard = () => {
 
       <StatsCards
         rawData={rawData}
-        functions={functions}
+        functions={functionsAfterThreshold}
+        enabledFunctions={enabledFunctions}
         onFunctionSelect={setSelectedFunction}
+        onToggleFunctionVisibility={toggleFunctionVisibility}
         getCurrentStats={getCurrentStats}
         getHealthStatus={getHealthStatus}
       />
