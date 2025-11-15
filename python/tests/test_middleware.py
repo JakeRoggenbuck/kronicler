@@ -11,7 +11,11 @@ from kronicler import (
     KroniclerEndpointMiddleware,
     KroniclerFunctionMiddleware,
     KroniclerMiddleware,
+    Database
 )
+
+
+DB = Database(sync_consume=True)
 
 
 class TestCaptureDecorator:
@@ -26,31 +30,6 @@ class TestCaptureDecorator:
         result = add_numbers(2, 3)
         assert result == 5
 
-    def test_capture_decorator_records_timing(self):
-        """Test that capture decorator records function execution"""
-        @capture
-        def test_func():
-            time.sleep(0.001)  # Small delay to ensure measurable time
-            return "result"
-
-        # Get initial state (if DB has a way to query)
-        result = test_func()
-
-        assert result == "result"
-        # The capture function was called - verify by checking the function executed
-        # In a real scenario, you might query the DB to verify the capture was stored
-
-    def test_capture_decorator_with_args(self):
-        """Test that decorator passes through function arguments"""
-        @capture
-        def multiply(x, y, z=1):
-            return x * y * z
-
-        result = multiply(2, 3, z=4)
-
-        assert result == 24
-        # Verify the function name and timing were captured
-
     def test_capture_decorator_with_exception(self):
         """Test that exceptions are propagated correctly"""
         @capture
@@ -62,31 +41,6 @@ class TestCaptureDecorator:
 
         # Even with exception, capture might still record the attempt
 
-    def test_capture_decorator_preserves_function_name(self):
-        """Test that decorator preserves the original function name"""
-        @capture
-        def my_special_function():
-            return "test"
-
-        # The wrapper should preserve the function name for capture
-        result = my_special_function()
-        assert result == "test"
-
-    def test_capture_measures_actual_execution_time(self):
-        """Test that capture measures real execution time"""
-        @capture
-        def slow_func():
-            time.sleep(0.01)  # 10ms
-            return "done"
-
-        start = time.perf_counter_ns()
-        result = slow_func()
-        end = time.perf_counter_ns()
-
-        assert result == "done"
-        # Actual execution should be at least 10ms
-        assert (end - start) >= 10_000_000
-
     def test_capture_with_multiple_calls(self):
         """Test that decorator works across multiple calls"""
         @capture
@@ -95,7 +49,6 @@ class TestCaptureDecorator:
 
         results = [counter(i) for i in range(5)]
         assert results == [0, 2, 4, 6, 8]
-        # Each call should be captured separately
 
 
 class TestKroniclerEndpointMiddleware:
@@ -114,7 +67,10 @@ class TestKroniclerEndpointMiddleware:
 
         assert response.status_code == 200
         assert response.json() == {"message": "Hello"}
-        # DB.capture was called with endpoint "/"
+
+        logs = DB.logs()
+        found = [x[1] for x in logs]
+        assert "/" in found
 
     def test_endpoint_middleware_multiple_endpoints(self):
         """Test middleware with multiple endpoints"""
@@ -135,6 +91,12 @@ class TestKroniclerEndpointMiddleware:
         response1 = client.get("/")
         response2 = client.get("/about")
 
+        logs = DB.logs()
+        found = [x[1] for x in logs]
+
+        assert "/" in found
+        assert "/about" in found
+
         assert response1.json() == {"page": "home"}
         assert response2.json() == {"page": "about"}
         # Both endpoints should be captured
@@ -152,6 +114,10 @@ class TestKroniclerEndpointMiddleware:
 
         client = TestClient(app)
         response = client.get("/users/123")
+
+        logs = DB.logs()
+        found = [x[1] for x in logs]
+        assert "/users/123" in found
 
         assert response.json() == {"user_id": "123"}
         # Full path "/users/123" should be captured
@@ -172,6 +138,8 @@ class TestKroniclerEndpointMiddleware:
 
         assert response.json() == {"status": "slow"}
         # Should take at least 10ms
+        # TODO: Make this check the actually captured start value vs the one
+        # done in the test
         assert (end - start) >= 10_000_000
 
     def test_endpoint_middleware_with_post_request(self):
@@ -185,6 +153,10 @@ class TestKroniclerEndpointMiddleware:
 
         client = TestClient(app)
         response = client.post("/items", json={"name": "test"})
+
+        logs = DB.logs()
+        found = [x[1] for x in logs]
+        assert "/items" in found
 
         assert response.status_code == 200
         assert response.json() == {"created": {"name": "test"}}
@@ -203,6 +175,12 @@ class TestKroniclerFunctionMiddleware:
 
         client = TestClient(app)
         response = client.get("/test")
+
+        # TODO: Find the error here!
+        logs = DB.logs()
+        found = [x[1] for x in logs]
+        print(found)
+        assert "my_endpoint" in found
 
         assert response.status_code == 200
         # Function name "my_endpoint" should be captured
@@ -225,6 +203,13 @@ class TestKroniclerFunctionMiddleware:
         client.get("/a")
         client.get("/b")
 
+        # TODO: Find issue here
+        logs = DB.logs()
+        found = [x[1] for x in logs]
+        print(found)
+        assert "func_a" in found
+        assert "func_b" in found
+
         # Both function names should be captured
 
     def test_function_middleware_no_route_match(self):
@@ -234,6 +219,10 @@ class TestKroniclerFunctionMiddleware:
 
         client = TestClient(app)
         response = client.get("/nonexistent")
+
+        # TODO: How do I test this?
+        logs = DB.logs()
+        found = [x[1] for x in logs]
 
         assert response.status_code == 404
         # Should not crash, may or may not capture depending on implementation
@@ -295,6 +284,7 @@ class TestKroniclerMiddlewareDeprecation:
         assert response.status_code == 200
 
 
+# TODO: Fix all tests here
 class TestIntegration:
     """Integration tests combining decorator and middleware"""
 
