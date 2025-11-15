@@ -241,7 +241,7 @@ impl Database {
 
         info!("Removed data directory at '{}'!", DATA_DIRECTORY);
     }
-    
+
     #[staticmethod]
     fn create_data_dir() {
         fs::create_dir_all(DATA_DIRECTORY)
@@ -249,7 +249,6 @@ impl Database {
 
         info!("Created data directory at '{}'!", DATA_DIRECTORY);
     }
-
 
     /// Capture a function and write it to the queue
     pub fn capture(&mut self, name: String, args: Vec<PyObject>, start: Epoch, end: Epoch) {
