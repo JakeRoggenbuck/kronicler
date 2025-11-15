@@ -400,6 +400,22 @@ class TestKroniclerDisabled:
 class TestEdgeCases:
     """Tests for edge cases and error conditions"""
 
+    def test_remove_data_dir(self):
+        @capture
+        def foo():
+            pass
+
+        foo()
+
+        logs = DB.logs()
+        found = [x[1] for x in logs]
+
+        assert len(found) > 0
+
+        DB.remove_data_dir()
+
+        assert len(found) == 0
+
     def test_capture_with_generator_function(self):
         """Test decorator with generator functions"""
         @capture

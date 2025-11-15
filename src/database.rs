@@ -239,8 +239,7 @@ impl Database {
         Database::new(sync_consume)
     }
 
-    #[staticmethod]
-    fn remove_data_dir() {
+    fn remove_data_dir(&mut self) {
         // Should match the hard coded value
         assert_eq!(DATA_DIRECTORY, ".kronicler_data");
 
