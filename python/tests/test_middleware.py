@@ -6,6 +6,7 @@ from starlette.routing import Route
 import time
 import warnings
 import shutil
+from pathlib import Path
 
 from kronicler import (
     capture,
@@ -17,7 +18,8 @@ from kronicler import (
 
 DB = Database(sync_consume=True)
 
-shutil.rmtree(".kronicler_data")
+if Path(".kronicler_data").exists():
+    shutil.rmtree(".kronicler_data")
 
 
 class TestCaptureDecorator:
@@ -61,18 +63,18 @@ class TestKroniclerEndpointMiddleware:
         async def homepage(request):
             return JSONResponse({"message": "Hello"})
 
-        app = Starlette(routes=[Route("/", homepage)])
+        app = Starlette(routes=[Route("/onetwo", homepage)])
         app.add_middleware(KroniclerEndpointMiddleware)
 
         client = TestClient(app)
-        response = client.get("/")
+        response = client.get("/onetwo")
 
         assert response.status_code == 200
         assert response.json() == {"message": "Hello"}
 
         logs = DB.logs()
         found = [x[1] for x in logs]
-        assert "/" in found
+        assert "/onetwo" in found
 
     def test_endpoint_middleware_multiple_endpoints(self):
         """Test middleware with multiple endpoints"""
@@ -178,10 +180,18 @@ class TestKroniclerFunctionMiddleware:
         client = TestClient(app)
         response = client.get("/test")
 
+        @capture
+        def foobaz():
+            pass
+
+        foobaz()
+
         # TODO: Find the error here!
         logs = DB.logs()
         found = [x[1] for x in logs]
-        print(found)
+
+        assert "foobaz" in found
+        # For some reason 'my_endpoint' is not found
         assert "my_endpoint" in found
 
         assert response.status_code == 200
@@ -208,7 +218,6 @@ class TestKroniclerFunctionMiddleware:
         # TODO: Find issue here
         logs = DB.logs()
         found = [x[1] for x in logs]
-        print(found)
         assert "func_a" in found
         assert "func_b" in found
 
