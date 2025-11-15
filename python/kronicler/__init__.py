@@ -5,6 +5,7 @@ import time
 from os import getenv
 from starlette.requests import Request
 from starlette.middleware.base import BaseHTTPMiddleware
+import warnings
 
 
 # Create an ENV var for kronicler to be unset
@@ -53,7 +54,23 @@ def decorator_example(func):
     return wrapper
 
 
-class KroniclerMiddleware(BaseHTTPMiddleware):
+class KroniclerEndpointMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app):
+        super().__init__(app)
+
+    async def dispatch(self, request: Request, call_next):
+        start: int = time.perf_counter_ns()
+        response = await call_next(request)
+        end: int = time.perf_counter_ns()
+
+        # After call_next, the route has been matched
+        endpoint = request.url.path
+
+        DB.capture(endpoint, [], start, end)
+        return response
+
+
+class KroniclerFunctionMiddleware(BaseHTTPMiddleware):
     def __init__(self, app):
         super().__init__(app)
 
@@ -68,15 +85,25 @@ class KroniclerMiddleware(BaseHTTPMiddleware):
 
         if route:
             endpoint = getattr(route, "endpoint", None)
+
             if endpoint:
                 func_name = endpoint.__name__
 
-        # Fallback to path if no route found
-        if not func_name:
-            func_name = request.url.path
+                DB.capture(func_name, [], start, end)
 
-        DB.capture(func_name, [], start, end)
         return response
+
+
+class KroniclerMiddleware(KroniclerFunctionMiddleware):
+    def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "KroniclerMiddleware is deprecated and will be removed in a future version. "
+            "Use KroniclerFunctionMiddleware or KroniclerEndpointMiddleware instead.",
+            category=DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)
+
 
 
 __all__: Final[list[str]] = ["kronicler"]
