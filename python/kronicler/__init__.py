@@ -7,8 +7,6 @@ from starlette.requests import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 import warnings
 
-assert getattr(Database, "remove_data_dir") == 0
-
 
 # Create an ENV var for kronicler to be unset
 KRONICLER_ENABLED = getenv("KRONICLER_ENABLED", "true").lower() in ("true", "1")

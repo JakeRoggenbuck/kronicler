@@ -171,13 +171,6 @@ impl Database {
         }
     }
 
-    fn create_data_dir() {
-        fs::create_dir_all(DATA_DIRECTORY)
-            .expect(&format!("Could not create directory '{}'.", DATA_DIRECTORY));
-
-        info!("Created data directory at '{}'!", DATA_DIRECTORY);
-    }
-
     fn check_for_data() {
         if !Database::exists() {
             eprintln!("Database does not exist at \"{}\".", &DATA_DIRECTORY);
@@ -239,7 +232,7 @@ impl Database {
         Database::new(sync_consume)
     }
 
-    fn remove_data_dir(&mut self) {
+    fn clear(&mut self) {
         // Should match the hard coded value
         assert_eq!(DATA_DIRECTORY, ".kronicler_data");
 
@@ -248,6 +241,15 @@ impl Database {
 
         info!("Removed data directory at '{}'!", DATA_DIRECTORY);
     }
+    
+    #[staticmethod]
+    fn create_data_dir() {
+        fs::create_dir_all(DATA_DIRECTORY)
+            .expect(&format!("Could not create directory '{}'.", DATA_DIRECTORY));
+
+        info!("Created data directory at '{}'!", DATA_DIRECTORY);
+    }
+
 
     /// Capture a function and write it to the queue
     pub fn capture(&mut self, name: String, args: Vec<PyObject>, start: Epoch, end: Epoch) {

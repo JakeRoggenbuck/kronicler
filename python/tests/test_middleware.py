@@ -5,6 +5,8 @@ from starlette.testclient import TestClient
 from starlette.routing import Route
 import time
 import warnings
+import shutil
+import os
 
 from kronicler import (
     capture,
@@ -14,9 +16,18 @@ from kronicler import (
     Database
 )
 
-
 DB = Database(sync_consume=True)
 
+
+@pytest.fixture(autouse=True)
+def setup_and_teardown():
+    print("Setup")
+
+    DB.clear()
+    DB.create_data_dir()
+
+    yield
+    print("Teardown")
 
 class TestCaptureDecorator:
     """Tests for the @capture decorator"""
@@ -401,6 +412,13 @@ class TestEdgeCases:
     """Tests for edge cases and error conditions"""
 
     def test_remove_data_dir(self):
+        logs = DB.logs()
+        found = [x[1] for x in logs]
+
+        print(logs)
+
+        assert len(found) == 0
+
         @capture
         def foo():
             pass
@@ -411,10 +429,6 @@ class TestEdgeCases:
         found = [x[1] for x in logs]
 
         assert len(found) > 0
-
-        DB.remove_data_dir()
-
-        assert len(found) == 0
 
     def test_capture_with_generator_function(self):
         """Test decorator with generator functions"""
@@ -485,7 +499,3 @@ def test_app():
 def test_client(test_app):
     """Fixture to provide a test client"""
     return TestClient(test_app)
-
-
-# Run tests with: pytest test_kronicler.py -v
-# Run with coverage: pytest test_kronicler.py --cov=kronicler --cov-report=html
