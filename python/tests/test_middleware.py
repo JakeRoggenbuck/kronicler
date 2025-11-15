@@ -304,6 +304,10 @@ class TestIntegration:
         client = TestClient(app)
         response = client.get("/process")
 
+        logs = DB.logs()
+        found = [x[1] for x in logs]
+        assert "/process" in found
+
         assert response.json() == {"result": "HELLO"}
         # Both decorator and middleware should have captured timing
 
@@ -320,6 +324,11 @@ class TestIntegration:
         result = outer_func(5)
         assert result == 11  # (5 * 2) + 1
         # Both function calls should be captured
+
+        logs = DB.logs()
+        found = [x[1] for x in logs]
+        assert "inner_func" in found
+        assert "outer_func" in found
 
     def test_performance_overhead_minimal(self):
         """Test that Kronicler adds minimal overhead"""
