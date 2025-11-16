@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { RefreshCw } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
+import { useSearchParams } from "react-router-dom";
 import type {
   LogData,
   TimeRange,
@@ -19,8 +20,20 @@ import AverageResponseTimesChart from "./components/AverageResponseTimesChart";
 import SystemHealthOverview from "./components/SystemHealthOverview";
 import DetailedStatisticsTable from "./components/DetailedStatisticsTable";
 
+// Helper function to normalize API URL from share parameter
+const normalizeShareUrl = (url: string): string => {
+  // Remove quotes if present
+  let normalized = url.replace(/^["']|["']$/g, "");
+  // Add https:// if no protocol is present
+  if (!normalized.match(/^https?:\/\//i)) {
+    normalized = `https://${normalized}`;
+  }
+  return normalized;
+};
+
 const Dashboard = () => {
   const posthog = usePostHog();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [rawData, setRawData] = useState<LogData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,10 +41,12 @@ const Dashboard = () => {
   const [timeRange, setTimeRange] = useState<TimeRange>("7d");
   const [viewMode, setViewMode] = useState<ViewMode>("overview");
   const [granularity, setGranularity] = useState<Granularity>("hour");
+
   const [apiUrl, setApiUrl] = useState(() => {
+    // Check localStorage first
     if (typeof window !== "undefined" && window.localStorage) {
       const saved = window.localStorage.getItem("kronicler_api_url");
-      return saved || "https://api.algoboard.org/logs";
+      if (saved) return saved;
     }
     return "https://api.algoboard.org/logs";
   });
@@ -227,8 +242,54 @@ const Dashboard = () => {
     setMinCallThreshold(threshold);
   };
 
+  // Handle share parameter on mount
   useEffect(() => {
-    fetchData();
+    const shareParam = searchParams.get("share");
+    if (shareParam) {
+      const normalizedUrl = normalizeShareUrl(shareParam);
+      // Always update when share parameter is present (even if same URL, to ensure it's saved)
+      setApiUrl(normalizedUrl);
+      // Save to localStorage
+      if (typeof window !== "undefined" && window.localStorage) {
+        window.localStorage.setItem("kronicler_api_url", normalizedUrl);
+        // Add to URL history in localStorage
+        const saved = window.localStorage.getItem("kronicler_url_history");
+        let history: UrlHistoryItem[] = [];
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            history = parsed.urls || [];
+          } catch {
+            history = [];
+          }
+        }
+        const newItem: UrlHistoryItem = {
+          id: Date.now().toString(),
+          url: normalizedUrl,
+          timestamp: Date.now(),
+        };
+        const updatedHistory = [
+          newItem,
+          ...history.filter((item) => item.url !== normalizedUrl),
+        ].slice(0, 10);
+        setUrlHistory(updatedHistory);
+        window.localStorage.setItem(
+          "kronicler_url_history",
+          JSON.stringify({ urls: updatedHistory }),
+        );
+      }
+      // Fetch data with new URL
+      fetchData(normalizedUrl);
+      // Remove share parameter from URL to clean it up
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete("share");
+      setSearchParams(newSearchParams, { replace: true });
+      posthog?.capture("share_link_used", { api_url: normalizedUrl });
+    } else {
+      // Only fetch on initial load if no share parameter
+      fetchData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const allFunctions = useMemo(() => {
