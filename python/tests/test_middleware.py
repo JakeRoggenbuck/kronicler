@@ -34,6 +34,17 @@ class TestCaptureDecorator:
         result = add_numbers(2, 3)
         assert result == 5
 
+    def test_contains_name_method(self):
+        @capture
+        def something_that_exists(a, b):
+            return a + b
+
+        result = something_that_exists(2, 3)
+        assert result == 5
+
+        assert DB.contains_name("something_that_exists")
+        assert not DB.contains_name("something_that_does_not_exist")
+
     def test_capture_decorator_with_exception(self):
         """Test that exceptions are propagated correctly"""
         @capture
@@ -72,9 +83,7 @@ class TestKroniclerEndpointMiddleware:
         assert response.status_code == 200
         assert response.json() == {"message": "Hello"}
 
-        logs = DB.logs()
-        found = [x[1] for x in logs]
-        assert "/onetwo" in found
+        assert DB.contains_name("/onetwo")
 
     def test_endpoint_middleware_multiple_endpoints(self):
         """Test middleware with multiple endpoints"""
@@ -95,11 +104,8 @@ class TestKroniclerEndpointMiddleware:
         response1 = client.get("/")
         response2 = client.get("/about")
 
-        logs = DB.logs()
-        found = [x[1] for x in logs]
-
-        assert "/" in found
-        assert "/about" in found
+        assert DB.contains_name("/")
+        assert DB.contains_name("/about")
 
         assert response1.json() == {"page": "home"}
         assert response2.json() == {"page": "about"}
@@ -119,9 +125,7 @@ class TestKroniclerEndpointMiddleware:
         client = TestClient(app)
         response = client.get("/users/123")
 
-        logs = DB.logs()
-        found = [x[1] for x in logs]
-        assert "/users/123" in found
+        assert DB.contains_name("/users/123")
 
         assert response.json() == {"user_id": "123"}
         # Full path "/users/123" should be captured
@@ -158,9 +162,7 @@ class TestKroniclerEndpointMiddleware:
         client = TestClient(app)
         response = client.post("/items", json={"name": "test"})
 
-        logs = DB.logs()
-        found = [x[1] for x in logs]
-        assert "/items" in found
+        assert DB.contains_name("/items")
 
         assert response.status_code == 200
         assert response.json() == {"created": {"name": "test"}}
@@ -187,10 +189,7 @@ class TestKroniclerFunctionMiddleware:
         foobaz()
 
         # TODO: Find the error here!
-        logs = DB.logs()
-        found = [x[1] for x in logs]
-
-        assert "foobaz" in found
+        assert DB.contains_name("foobaz")
         # For some reason 'my_endpoint' is not found
         # TODO: Fix this issue
         # assert "my_endpoint" in found
@@ -219,10 +218,8 @@ class TestKroniclerFunctionMiddleware:
         print(res)
 
         # TODO: Find issue here - this does not work
-        logs = DB.logs()
-        found = [x[1] for x in logs]
-        # assert "func_a" in found
-        # assert "func_b" in found
+        # assert DB.contains_name("func_a")
+        # assert DB.contains_name("func_b")
 
         # Both function names should be captured
 
@@ -235,8 +232,6 @@ class TestKroniclerFunctionMiddleware:
         response = client.get("/nonexistent")
 
         # TODO: How do I test this?
-        logs = DB.logs()
-        found = [x[1] for x in logs]
 
         assert response.status_code == 404
         # Should not crash, may or may not capture depending on implementation
@@ -318,8 +313,7 @@ class TestIntegration:
         client = TestClient(app)
         response = client.get("/process")
 
-        names = [log[1] for log in DB.logs()]
-        assert "/process" in names
+        assert DB.contains_name("/process")
 
         assert response.json() == {"result": "HELLO"}
         # Both decorator and middleware should have captured timing
@@ -338,9 +332,8 @@ class TestIntegration:
         assert result == 11  # (5 * 2) + 1
         # Both function calls should be captured
 
-        names = [log[1] for log in DB.logs()]
-        assert "inner_func" in names
-        assert "outer_func" in names
+        assert DB.contains_name("inner_func")
+        assert DB.contains_name("outer_func")
 
     def test_performance_overhead_minimal(self):
         """Test that Kronicler adds minimal overhead"""
@@ -467,9 +460,7 @@ class TestEdgeCases:
         result = long_running_func()
         end = time.perf_counter_ns()
 
-        logs = DB.logs()
-        names = [log[1] for log in logs]
-        assert "long_running_func" in names
+        assert DB.contains_name("long_running_func")
 
         assert result == "complete"
         assert (end - start) >= 100_000_000  # At least 100ms in nanoseconds
