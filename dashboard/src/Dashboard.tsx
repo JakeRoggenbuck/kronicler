@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { RefreshCw } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
 import type {
   LogData,
   TimeRange,
@@ -19,6 +20,7 @@ import SystemHealthOverview from "./components/SystemHealthOverview";
 import DetailedStatisticsTable from "./components/DetailedStatisticsTable";
 
 const Dashboard = () => {
+  const posthog = usePostHog();
   const [rawData, setRawData] = useState<LogData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -192,6 +194,7 @@ const Dashboard = () => {
   };
 
   const handleSaveApiUrl = (newApiUrl: string) => {
+    posthog?.capture("settings_save_clicked", { api_url: newApiUrl });
     if (typeof window !== "undefined" && window.localStorage) {
       window.localStorage.setItem("kronicler_api_url", newApiUrl);
     }
@@ -202,6 +205,7 @@ const Dashboard = () => {
   };
 
   const handleTruncateToggle = (truncate: boolean) => {
+    posthog?.capture("truncate_functions_toggled", { enabled: truncate });
     setTruncateFunctionNames(truncate);
     if (typeof window !== "undefined" && window.localStorage) {
       window.localStorage.setItem(
@@ -282,11 +286,16 @@ const Dashboard = () => {
   const toggleFunctionVisibility = (funcName: string) => {
     setEnabledFunctions((prev) => {
       const newSet = new Set(prev);
-      if (newSet.has(funcName)) {
+      const isEnabled = newSet.has(funcName);
+      if (isEnabled) {
         newSet.delete(funcName);
       } else {
         newSet.add(funcName);
       }
+      posthog?.capture("function_visibility_toggled", {
+        function_name: funcName,
+        enabled: !isEnabled,
+      });
       return newSet;
     });
   };
@@ -433,14 +442,29 @@ const Dashboard = () => {
       <DashboardHeader
         apiUrl={apiUrl}
         rawDataLength={rawData.length}
-        onRefresh={() => fetchData()}
-        onSettingsClick={() => setShowSettings(!showSettings)}
+        onRefresh={() => {
+          posthog?.capture("data_refresh_clicked");
+          fetchData();
+        }}
+        onSettingsClick={() => {
+          posthog?.capture("settings_clicked");
+          setShowSettings(!showSettings);
+        }}
         granularity={granularity}
-        onGranularityChange={setGranularity}
+        onGranularityChange={(newGranularity) => {
+          posthog?.capture("granularity_changed", { value: newGranularity });
+          setGranularity(newGranularity);
+        }}
         timeRange={timeRange}
-        onTimeRangeChange={setTimeRange}
+        onTimeRangeChange={(newTimeRange) => {
+          posthog?.capture("time_range_changed", { value: newTimeRange });
+          setTimeRange(newTimeRange);
+        }}
         viewMode={viewMode}
-        onViewModeChange={setViewMode}
+        onViewModeChange={(newViewMode) => {
+          posthog?.capture("view_mode_changed", { value: newViewMode });
+          setViewMode(newViewMode);
+        }}
         error={error}
       />
 
@@ -461,7 +485,10 @@ const Dashboard = () => {
         rawData={rawData}
         functions={functionsAfterThreshold}
         enabledFunctions={enabledFunctions}
-        onFunctionSelect={setSelectedFunction}
+        onFunctionSelect={(funcName) => {
+          posthog?.capture("function_selected", { function_name: funcName });
+          setSelectedFunction(funcName);
+        }}
         onToggleFunctionVisibility={toggleFunctionVisibility}
         getCurrentStats={getCurrentStats}
         getHealthStatus={getHealthStatus}
