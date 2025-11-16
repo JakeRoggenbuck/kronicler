@@ -34,6 +34,17 @@ class TestCaptureDecorator:
         result = add_numbers(2, 3)
         assert result == 5
 
+    def test_contains_name_method(self):
+        @capture
+        def something_that_exists(a, b):
+            return a + b
+
+        result = something_that_exists(2, 3)
+        assert result == 5
+
+        assert DB.contains_name("something_that_exists")
+        assert not DB.contains_name("something_that_does_not_exist")
+
     def test_capture_decorator_with_exception(self):
         """Test that exceptions are propagated correctly"""
         @capture
