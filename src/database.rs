@@ -250,6 +250,16 @@ impl Database {
         info!("Created data directory at '{}'!", DATA_DIRECTORY);
     }
 
+    pub fn contains_name(&mut self, name: String) -> bool {
+        let db_instance = self.get_instance();
+        let db = db_instance.write().unwrap();
+
+        let found = db
+            .name_index
+            .get(FieldType::Name(create_function_name(&name)));
+        found.is_some()
+    }
+
     /// Capture a function and write it to the queue
     pub fn capture(&mut self, name: String, args: Vec<PyObject>, start: Epoch, end: Epoch) {
         let db_instance = self.get_instance();
