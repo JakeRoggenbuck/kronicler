@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Activity,
   Terminal,
@@ -8,6 +10,19 @@ import {
 } from "lucide-react";
 
 const App = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Redirect to dashboard if share parameter is present
+  useEffect(() => {
+    const shareParam = searchParams.get("share");
+    if (shareParam) {
+      navigate(`/dashboard?share=${encodeURIComponent(shareParam)}`, {
+        replace: true,
+      });
+    }
+  }, [searchParams, navigate]);
+
   return (
     <div className="min-h-screen bg-slate-900 text-white">
       {/* Navigation Bar */}
