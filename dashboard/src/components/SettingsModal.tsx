@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Settings, Trash2, Clock } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
 import type { UrlHistoryItem } from "../types";
 
 interface SettingsModalProps {
@@ -27,6 +28,7 @@ const SettingsModal = ({
   minCallThreshold,
   onMinCallThresholdChange,
 }: SettingsModalProps) => {
+  const posthog = usePostHog();
   const [tempApiUrl, setTempApiUrl] = useState(currentApiUrl);
   const [tempMinCallThreshold, setTempMinCallThreshold] = useState(
     minCallThreshold.toString(),
@@ -49,12 +51,14 @@ const SettingsModal = ({
   };
 
   const handleCancel = () => {
+    posthog?.capture("settings_cancel_clicked");
     setTempApiUrl(currentApiUrl);
     setTempMinCallThreshold(minCallThreshold.toString());
     onClose();
   };
 
   const handleUrlSelect = (url: string) => {
+    posthog?.capture("settings_url_history_selected", { url });
     setTempApiUrl(url);
   };
 
@@ -138,7 +142,12 @@ const SettingsModal = ({
                       </p>
                     </div>
                     <button
-                      onClick={() => onRemoveFromHistory(item.id)}
+                      onClick={() => {
+                        posthog?.capture("settings_url_history_removed", {
+                          url: item.url,
+                        });
+                        onRemoveFromHistory(item.id);
+                      }}
                       className="ml-2 p-1 text-gray-400 hover:text-red-400 transition-colors"
                       title="Remove from history"
                     >
