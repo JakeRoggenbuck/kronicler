@@ -7,7 +7,9 @@ Automatic performance capture and analytics for production applications in Pytho
 [![Rust](https://img.shields.io/github/actions/workflow/status/jakeroggenbuck/kronicler/CI.yml?branch=main&style=for-the-badge)](https://github.com/JakeRoggenbuck/kronicler/actions)
 [![Version](https://img.shields.io/pypi/v/kronicler?style=for-the-badge)](https://pypi.org/project/kronicler)
 [![Crates Version](https://img.shields.io/crates/v/kronicler?style=for-the-badge)](https://crates.io/crates/kronicler)
-[![Downloads](https://img.shields.io/crates/d/kronicler?style=for-the-badge)](https://crates.io/crates/kronicler)
+[![Rust Downloads](https://img.shields.io/crates/d/kronicler?style=for-the-badge&label=Crates%20Downloads)](https://crates.io/crates/kronicler)
+[![PyPi Downloads](https://img.shields.io/pepy/dt/kronicler?style=for-the-badge&label=PyPi%20Downloads)]([https://crates.io/crates/kronicler](https://pypi.org/project/kronicler))
+
 
 View Kronicler on [UseKronicler.com](https://usekronicler.com), [PyPi.org](https://pypi.org/project/kronicler), [Crates.io](https://crates.io/crates/kronicler) and [GitHub](https://github.com/JakeRoggenbuck/kronicler).
 
