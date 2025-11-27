@@ -438,7 +438,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-6">
+    <div className="min-h-screen bg-slate-900 text-white px-6 pt-3">
       <DashboardHeader
         apiUrl={apiUrl}
         rawDataLength={rawData.length}

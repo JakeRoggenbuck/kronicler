@@ -44,7 +44,7 @@ const DashboardHeader = ({
           <div>
             <h1 className="text-3xl font-bold">Kronicler</h1>
             <div className="flex items-center gap-4 mt-1 text-sm text-gray-400 flex-wrap">
-              <span>Python Function Performance Monitor</span>
+              <span>Python Performance Monitor</span>
               <span className="text-gray-600">•</span>
               <span>
                 <span className="text-gray-500">Total logs:</span>{" "}
