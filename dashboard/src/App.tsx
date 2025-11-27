@@ -138,7 +138,9 @@ const App = () => {
                 {"\n"}
                 app.add_middleware(kronicler.KroniclerMiddleware)
                 {"\n\n"}
-                <span className="text-gray-500"># Used only for the /logs route</span>
+                <span className="text-gray-500">
+                  # Used only for the /logs route
+                </span>
                 {"\n"}
                 DB = kronicler.Database(sync_consume=
                 <span className="text-orange-400">True</span>){"\n\n"}
