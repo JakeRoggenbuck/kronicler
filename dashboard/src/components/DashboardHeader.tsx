@@ -2,6 +2,7 @@ import {
   Activity,
   BarChart3,
   Calendar,
+  Download,
   Filter,
   RefreshCw,
   Settings,
@@ -13,6 +14,8 @@ interface DashboardHeaderProps {
   rawDataLength: number;
   onRefresh: () => void;
   onSettingsClick: () => void;
+  onDownloadJson: () => void;
+  hasJsonData: boolean;
   granularity: Granularity;
   onGranularityChange: (granularity: Granularity) => void;
   timeRange: TimeRange;
@@ -27,6 +30,8 @@ const DashboardHeader = ({
   rawDataLength,
   onRefresh,
   onSettingsClick,
+  onDownloadJson,
+  hasJsonData,
   granularity,
   onGranularityChange,
   timeRange,
@@ -107,6 +112,14 @@ const DashboardHeader = ({
           title="Settings"
         >
           <Settings className="w-5 h-5" />
+        </button>
+        <button
+          onClick={onDownloadJson}
+          disabled={!hasJsonData}
+          className="p-2 bg-blue-500 hover:bg-blue-600 disabled:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+          title="Download JSON"
+        >
+          <Download className="w-5 h-5" />
         </button>
         <button
           onClick={onRefresh}
