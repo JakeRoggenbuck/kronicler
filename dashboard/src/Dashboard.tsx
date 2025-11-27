@@ -531,6 +531,33 @@ const Dashboard = () => {
           getHealthStatus={getHealthStatus}
         />
       </div>
+
+      <div className="py-8">
+        {/* Links */}
+        <div className="border-t border-slate-700 pt-8">
+          <div className="flex gap-6 text-sm">
+            <a
+              href="https://github.com/JakeRoggenbuck/kronicler"
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              GitHub
+            </a>
+            <a
+              href="https://pypi.org/project/kronicler/"
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              PyPI
+            </a>
+            <a
+              href="https://crates.io/crates/kronicler"
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              Crates.io
+            </a>
+          </div>
+          <p className="text-gray-500 text-sm mt-4">MIT License</p>
+        </div>
+      </div>
     </div>
   );
 };
