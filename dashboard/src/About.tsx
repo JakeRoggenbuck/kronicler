@@ -8,6 +8,34 @@ import {
   Zap,
 } from "lucide-react";
 
+const faqItems = [
+  {
+    question: "What is Kronicler?",
+    answer:
+      "Kronicler is a Python decorator that captures production performance data and stores it in a Rust-powered columnar database for fast analytics.",
+  },
+  {
+    question: "Why use Kronicler?",
+    answer:
+      "It works out-of-the-box with one dependency, lets you track mean, median, and percentile stats, and surfaces functions that occasionally run much slower than expected.",
+  },
+  {
+    question: "Does Kronicler support concurrency?",
+    answer:
+      "Concurrency is in development; follow progress in issue #123 while using the current lightweight capture flows.",
+  },
+  {
+    question: "How do I install Kronicler?",
+    answer:
+      "Install the Python package with pip, add the @kronicler.capture decorator to the functions you want to monitor, and view analytics in the CLI or web dashboard.",
+  },
+  {
+    question: "Can I use the database directly?",
+    answer:
+      "Yes. A Rust library exposes the columnar database so you can build custom logging or analytics pipelines without the decorator.",
+  },
+];
+
 const About = () => {
   return (
     <div className="min-h-screen bg-slate-900 text-white">
@@ -226,6 +254,26 @@ const About = () => {
           </div>
         </section>
 
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <Info className="w-5 h-5 text-green-500" />
+            <h2 className="text-2xl font-semibold">Q&A</h2>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            {faqItems.map((item) => (
+              <div
+                key={item.question}
+                className="bg-slate-800 rounded-lg p-5 border border-slate-700"
+              >
+                <h3 className="font-semibold mb-2">{item.question}</h3>
+                <p className="text-gray-400 text-sm leading-relaxed">
+                  {item.answer}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
         <section className="border-t border-slate-800 pt-10">
           <div className="flex flex-wrap gap-6 text-sm">
             <a
@@ -258,6 +306,24 @@ const About = () => {
           </p>
         </section>
       </div>
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: faqItems.map((item) => ({
+              "@type": "Question",
+              name: item.question,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: item.answer,
+              },
+            })),
+          }),
+        }}
+      />
     </div>
   );
 };
