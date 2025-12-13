@@ -23,6 +23,12 @@ const App = () => {
             </a>
             <div className="flex items-center space-x-6">
               <a
+                href="/about"
+                className="text-gray-200 hover:text-white transition-colors text-sm font-medium"
+              >
+                About
+              </a>
+              <a
                 href="https://github.com/JakeRoggenbuck/kronicler"
                 className="text-gray-400 hover:text-white transition-colors text-sm"
               >
