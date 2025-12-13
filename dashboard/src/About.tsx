@@ -2,7 +2,7 @@ import {
   Activity,
   ArrowRight,
   Database,
-  Globe2,
+  BarChart3,
   Info,
   Terminal,
   Zap,
@@ -38,7 +38,7 @@ const About = () => {
                 href="/dashboard"
                 className="flex items-center space-x-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium"
               >
-                <Globe2 className="w-4 h-4" />
+                <BarChart3 className="w-4 h-4" />
                 <span>Dashboard</span>
               </a>
             </div>
@@ -172,7 +172,7 @@ const About = () => {
 
             <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
               <div className="flex items-center gap-3 mb-3">
-                <Globe2 className="w-5 h-5 text-green-500" />
+                <BarChart3 className="w-5 h-5 text-green-500" />
                 <h3 className="font-semibold text-lg">Interfaces</h3>
               </div>
               <ul className="space-y-2 text-sm text-gray-300">
