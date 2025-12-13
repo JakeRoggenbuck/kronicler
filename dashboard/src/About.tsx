@@ -85,7 +85,8 @@ const About = () => {
               <div>
                 <h3 className="font-semibold mb-2">Automatic capture</h3>
                 <p className="text-gray-400 text-sm">
-                  Decorate functions with <code className="text-green-400">@kronicler.capture</code> to
+                  Decorate functions with{" "}
+                  <code className="text-green-400">@kronicler.capture</code> to
                   log performance instantly.
                 </p>
               </div>
@@ -124,7 +125,9 @@ const About = () => {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-6">What makes up Kronicler</h2>
+          <h2 className="text-2xl font-semibold mb-6">
+            What makes up Kronicler
+          </h2>
           <div className="space-y-4">
             <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
               <div className="flex items-center gap-3 mb-3">
@@ -132,23 +135,25 @@ const About = () => {
                 <h3 className="font-semibold text-lg">Capture</h3>
               </div>
               <p className="text-gray-400 text-sm mb-4">
-                The Python decorator <code className="text-green-400">@kronicler.capture</code> records
-                function runtimes, shipping them directly into the database.
+                The Python decorator{" "}
+                <code className="text-green-400">@kronicler.capture</code>{" "}
+                records function runtimes, shipping them directly into the
+                database.
               </p>
               <div className="bg-slate-900 rounded-lg p-4 border border-slate-800 text-sm font-mono text-gray-200 overflow-x-auto">
                 <span className="text-purple-400">import</span>{" "}
                 <span className="text-blue-400">kronicler</span>
-				<br />
-				<br />
+                <br />
+                <br />
                 <span className="text-gray-500">@kronicler.capture</span>
-				<br />
+                <br />
                 <span className="text-purple-400">def</span>{" "}
                 <span className="text-yellow-400">process</span>():
-				<br />
-				<span className="pl-4">
-				  <span className="text-purple-400">return</span>{" "}
-				  <span className="text-green-400">"ok"</span>
-				</span>
+                <br />
+                <span className="pl-4">
+                  <span className="text-purple-400">return</span>{" "}
+                  <span className="text-green-400">"ok"</span>
+                </span>
               </div>
             </div>
 
