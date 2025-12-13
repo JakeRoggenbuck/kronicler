@@ -18,6 +18,7 @@ import PercentileAnalysisChart from "./components/PercentileAnalysisChart";
 import AverageResponseTimesChart from "./components/AverageResponseTimesChart";
 import SystemHealthOverview from "./components/SystemHealthOverview";
 import DetailedStatisticsTable from "./components/DetailedStatisticsTable";
+import TopNav from "./components/TopNav";
 
 const Dashboard = () => {
   const posthog = usePostHog();
@@ -428,134 +429,140 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center">
-        <div className="text-center">
-          <RefreshCw className="w-12 h-12 text-green-500 animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">Loading performance data...</p>
+      <div className="min-h-screen bg-slate-900 text-white">
+        <TopNav />
+        <div className="flex items-center justify-center py-16 px-6">
+          <div className="text-center">
+            <RefreshCw className="w-12 h-12 text-green-500 animate-spin mx-auto mb-4" />
+            <p className="text-gray-400">Loading performance data...</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white px-6 pt-3">
-      <DashboardHeader
-        apiUrl={apiUrl}
-        rawDataLength={rawData.length}
-        onRefresh={() => {
-          posthog?.capture("data_refresh_clicked");
-          fetchData();
-        }}
-        onSettingsClick={() => {
-          posthog?.capture("settings_clicked");
-          setShowSettings(!showSettings);
-        }}
-        granularity={granularity}
-        onGranularityChange={(newGranularity) => {
-          posthog?.capture("granularity_changed", { value: newGranularity });
-          setGranularity(newGranularity);
-        }}
-        timeRange={timeRange}
-        onTimeRangeChange={(newTimeRange) => {
-          posthog?.capture("time_range_changed", { value: newTimeRange });
-          setTimeRange(newTimeRange);
-        }}
-        viewMode={viewMode}
-        onViewModeChange={(newViewMode) => {
-          posthog?.capture("view_mode_changed", { value: newViewMode });
-          setViewMode(newViewMode);
-        }}
-        error={error}
-      />
-
-      <SettingsModal
-        isOpen={showSettings}
-        onClose={() => setShowSettings(false)}
-        currentApiUrl={apiUrl}
-        onSave={handleSaveApiUrl}
-        urlHistory={urlHistory}
-        onRemoveFromHistory={removeFromUrlHistory}
-        truncateFunctionNames={truncateFunctionNames}
-        onTruncateToggle={handleTruncateToggle}
-        minCallThreshold={minCallThreshold}
-        onMinCallThresholdChange={handleMinCallThresholdChange}
-      />
-
-      <StatsCards
-        rawData={rawData}
-        functions={functionsAfterThreshold}
-        enabledFunctions={enabledFunctions}
-        onFunctionSelect={(funcName) => {
-          posthog?.capture("function_selected", { function_name: funcName });
-          setSelectedFunction(funcName);
-        }}
-        onToggleFunctionVisibility={toggleFunctionVisibility}
-        getCurrentStats={getCurrentStats}
-        getHealthStatus={getHealthStatus}
-      />
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <PerformanceTrendsChart
-          data={filteredData}
-          functions={functions}
-          selectedFunction={selectedFunction}
+    <div className="min-h-screen bg-slate-900 text-white">
+      <TopNav />
+      <div className="px-6 pt-3">
+        <DashboardHeader
+          apiUrl={apiUrl}
+          rawDataLength={rawData.length}
+          onRefresh={() => {
+            posthog?.capture("data_refresh_clicked");
+            fetchData();
+          }}
+          onSettingsClick={() => {
+            posthog?.capture("settings_clicked");
+            setShowSettings(!showSettings);
+          }}
           granularity={granularity}
-          functionColors={functionColors}
+          onGranularityChange={(newGranularity) => {
+            posthog?.capture("granularity_changed", { value: newGranularity });
+            setGranularity(newGranularity);
+          }}
+          timeRange={timeRange}
+          onTimeRangeChange={(newTimeRange) => {
+            posthog?.capture("time_range_changed", { value: newTimeRange });
+            setTimeRange(newTimeRange);
+          }}
+          viewMode={viewMode}
+          onViewModeChange={(newViewMode) => {
+            posthog?.capture("view_mode_changed", { value: newViewMode });
+            setViewMode(newViewMode);
+          }}
+          error={error}
         />
 
-        <PercentileAnalysisChart
-          data={filteredData}
-          selectedFunction={selectedFunction}
-          granularity={granularity}
-        />
-      </div>
-
-      {viewMode === "detailed" && (
-        <DetailedStatisticsTable
-          functions={functions}
-          getCurrentStats={getCurrentStats}
-          getHealthStatus={getHealthStatus}
-        />
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <AverageResponseTimesChart
-          functions={functions}
-          getCurrentStats={getCurrentStats}
-          getHealthStatus={getHealthStatus}
+        <SettingsModal
+          isOpen={showSettings}
+          onClose={() => setShowSettings(false)}
+          currentApiUrl={apiUrl}
+          onSave={handleSaveApiUrl}
+          urlHistory={urlHistory}
+          onRemoveFromHistory={removeFromUrlHistory}
+          truncateFunctionNames={truncateFunctionNames}
+          onTruncateToggle={handleTruncateToggle}
+          minCallThreshold={minCallThreshold}
+          onMinCallThresholdChange={handleMinCallThresholdChange}
         />
 
-        <SystemHealthOverview
+        <StatsCards
           rawData={rawData}
-          functions={functions}
+          functions={functionsAfterThreshold}
+          enabledFunctions={enabledFunctions}
+          onFunctionSelect={(funcName) => {
+            posthog?.capture("function_selected", { function_name: funcName });
+            setSelectedFunction(funcName);
+          }}
+          onToggleFunctionVisibility={toggleFunctionVisibility}
+          getCurrentStats={getCurrentStats}
           getHealthStatus={getHealthStatus}
         />
-      </div>
 
-      <div className="py-8">
-        {/* Links */}
-        <div className="border-t border-slate-700 pt-8">
-          <div className="flex gap-6 text-sm">
-            <a
-              href="https://github.com/JakeRoggenbuck/kronicler"
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              GitHub
-            </a>
-            <a
-              href="https://pypi.org/project/kronicler/"
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              PyPI
-            </a>
-            <a
-              href="https://crates.io/crates/kronicler"
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              Crates.io
-            </a>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <PerformanceTrendsChart
+            data={filteredData}
+            functions={functions}
+            selectedFunction={selectedFunction}
+            granularity={granularity}
+            functionColors={functionColors}
+          />
+
+          <PercentileAnalysisChart
+            data={filteredData}
+            selectedFunction={selectedFunction}
+            granularity={granularity}
+          />
+        </div>
+
+        {viewMode === "detailed" && (
+          <DetailedStatisticsTable
+            functions={functions}
+            getCurrentStats={getCurrentStats}
+            getHealthStatus={getHealthStatus}
+          />
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <AverageResponseTimesChart
+            functions={functions}
+            getCurrentStats={getCurrentStats}
+            getHealthStatus={getHealthStatus}
+          />
+
+          <SystemHealthOverview
+            rawData={rawData}
+            functions={functions}
+            getHealthStatus={getHealthStatus}
+          />
+        </div>
+
+        <div className="py-8">
+          {/* Links */}
+          <div className="border-t border-slate-700 pt-8">
+            <div className="flex gap-6 text-sm">
+              <a
+                href="https://github.com/JakeRoggenbuck/kronicler"
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                GitHub
+              </a>
+              <a
+                href="https://pypi.org/project/kronicler/"
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                PyPI
+              </a>
+              <a
+                href="https://crates.io/crates/kronicler"
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                Crates.io
+              </a>
+            </div>
+            <p className="text-gray-500 text-sm mt-4">MIT License</p>
           </div>
-          <p className="text-gray-500 text-sm mt-4">MIT License</p>
         </div>
       </div>
     </div>
