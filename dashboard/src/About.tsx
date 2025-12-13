@@ -254,7 +254,7 @@ const About = () => {
             </a>
           </div>
           <p className="text-gray-500 text-sm mt-4">
-            Kronicler is early in development&mdash;feedback is welcome.
+            Kronicler is early in development and feedback is welcome!
           </p>
         </section>
       </div>
