@@ -304,6 +304,15 @@ const About = () => {
           <p className="text-gray-500 text-sm mt-4">
             Kronicler is early in development and feedback is welcome!
           </p>
+          <p className="text-gray-500 text-sm mt-4">
+            Jake Roggenbuck ·{" "}
+            <a
+              href="https://jr0.org"
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              jr0.org
+            </a>
+          </p>
         </section>
       </div>
 

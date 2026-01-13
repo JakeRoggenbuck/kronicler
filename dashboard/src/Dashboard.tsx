@@ -579,6 +579,15 @@ const Dashboard = () => {
               Crates.io
             </a>
           </div>
+          <p className="text-gray-500 text-sm mt-4">
+            Jake Roggenbuck ·{" "}
+            <a
+              href="https://jr0.org"
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              jr0.org
+            </a>
+          </p>
           <p className="text-gray-500 text-sm mt-4">MIT License</p>
         </div>
       </div>
