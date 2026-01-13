@@ -24,7 +24,7 @@ const App = () => {
             <div className="flex items-center space-x-6">
               <a
                 href="/about"
-                className="text-gray-200 hover:text-white transition-colors text-sm font-medium"
+                className="text-gray-400 hover:text-white transition-colors text-sm"
               >
                 About
               </a>
@@ -261,6 +261,15 @@ const App = () => {
               Crates.io
             </a>
           </div>
+          <p className="text-gray-500 text-sm mt-4">
+            Jake Roggenbuck ·{" "}
+            <a
+              href="https://jr0.org"
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              jr0.org
+            </a>
+          </p>
           <p className="text-gray-500 text-sm mt-4">MIT License</p>
         </div>
       </div>
