@@ -67,6 +67,7 @@ const Dashboard = () => {
   const [enabledFunctions, setEnabledFunctions] = useState<Set<string>>(
     () => new Set(),
   );
+  const [rawJsonData, setRawJsonData] = useState<any>(null);
 
   const truncateFunctionName = (functionName: string): string => {
     const parts = functionName.split("/").filter((part) => part.length > 0);
@@ -82,6 +83,9 @@ const Dashboard = () => {
       const response = await fetch(urlToFetch);
       if (!response.ok) throw new Error("Failed to fetch data");
       const data = await response.json();
+
+      // Store raw JSON data for download
+      setRawJsonData(data);
 
       const transformed = data
         .map((row: any) => {
@@ -154,9 +158,27 @@ const Dashboard = () => {
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
       setRawData([]);
+      setRawJsonData(null);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDownloadJson = () => {
+    if (!rawJsonData) return;
+
+    const jsonString = JSON.stringify(rawJsonData, null, 2);
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `kronicler-logs-${new Date().toISOString().split("T")[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    posthog?.capture("json_download_clicked");
   };
 
   const addToUrlHistory = (url: string) => {
@@ -450,6 +472,8 @@ const Dashboard = () => {
           posthog?.capture("settings_clicked");
           setShowSettings(!showSettings);
         }}
+        onDownloadJson={handleDownloadJson}
+        hasJsonData={rawJsonData !== null}
         granularity={granularity}
         onGranularityChange={(newGranularity) => {
           posthog?.capture("granularity_changed", { value: newGranularity });
