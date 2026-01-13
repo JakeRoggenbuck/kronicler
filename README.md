@@ -64,6 +64,18 @@ def my_function():
 	pass
 ```
 
+## Python docs
+
+Public API exposed from the Python package:
+
+- `Database`: Rust-backed database handle. Create it with `Database(sync_consume=False)` (or `True` for sync capture), then use `capture(name, args, start, end)`, `fetch(index)`, `fetch_all()`, `logs()`, `average(function_name)`, `get_function_names()`, and `contains_name(name)`. Static helpers: `exists()` and `new_reader(sync_consume=False)`. The `init()` method starts the consumer loop (blocking).
+- `database_init()`: Convenience helper that spawns a background thread and calls `Database.init()` for async capture consumption.
+- `capture`: Decorator that times the wrapped function and records it via the global `DB` instance. Disabled when `KRONICLER_ENABLED` is set to `false` or `0`.
+- `decorator_example`: Simple example decorator that prints start/end messages.
+- `KroniclerEndpointMiddleware`: Starlette/ASGI middleware that captures timings per request path.
+- `KroniclerFunctionMiddleware`: Starlette/ASGI middleware that captures timings per endpoint function name.
+- `KroniclerMiddleware`: Deprecated alias of `KroniclerFunctionMiddleware` that emits a deprecation warning.
+
 ## Architecture
 
 Simplified version of the package and database architecture. The data is passed from the Python decorator called [`capture`](https://github.com/JakeRoggenbuck/kronicler/blob/main/python/kronicler/__init__.py) to the [`database`](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/database.rs)'s [`queue`](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/queue.rs). It then consumes that [`queue`](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/queue.rs) to insert each field into its respective [`column`](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/column.rs). The [`column`](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/column.rs) uses the [`bufferpool`](https://github.com/JakeRoggenbuck/kronicler/blob/main/src/bufferpool.rs) to operate on pages.
