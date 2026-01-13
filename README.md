@@ -1,4 +1,4 @@
-![Kronicler](https://raw.githubusercontent.com/JakeRoggenbuck/kronicler/refs/heads/main/images/Kronicler-logo.svg)
+<img width="1136" height="278" alt="2026-01-13_00-24" src="https://github.com/user-attachments/assets/9f406d08-6e79-4554-a2bd-eb0b112cc56d" />
 
 Automatic performance capture and analytics for production applications in Python using a custom columnar database written in Rust.
 
