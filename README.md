@@ -504,6 +504,23 @@ To temporarily turn off logging, you can set `KRONICLER_ENABLED=false`. The defa
 
 ## Development
 
+#### Dashboard (Bun)
+
+The web dashboard uses Bun for package management and scripts.
+
+```sh
+cd dashboard
+bun install
+bun run dev
+```
+
+Build the dashboard:
+
+```sh
+cd dashboard
+bun run build
+```
+
 #### Building the Python package
 
 ##### 1. Build the package

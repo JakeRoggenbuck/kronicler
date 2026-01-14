@@ -3,9 +3,13 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "packageManager": "bun@latest",
+  "engines": {
+    "bun": ">=1.1.0"
+  },
   "scripts": {
     "dev": "vite --port 3000",
-    "build": "tsc -b && vite build",
+    "build": "bunx tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
